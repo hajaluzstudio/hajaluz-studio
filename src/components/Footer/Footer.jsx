@@ -4,7 +4,7 @@ import { Phone, Mail, MapPin, ArrowUp, MessageSquare } from 'lucide-react';
 import MagneticButton from '../MagneticButton/MagneticButton';
 import './Footer.css';
 
-const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
+const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) => {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -191,6 +191,11 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
           <span className="copyright-text">
             © 2026 Haja Luz Studio. Todos os Direitos Reservados.
           </span>
+          
+          <span className="admin-access-link" onClick={onAdminClick}>
+            🔒 Acesso Restrito
+          </span>
+
           <span className="credits-text">
             Artesania Humana & Potência Neural.
           </span>

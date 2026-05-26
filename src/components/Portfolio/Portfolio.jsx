@@ -1,13 +1,19 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award } from 'lucide-react';
+import { dataService } from '../../services/dataService';
 import './Portfolio.css';
 
-const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory }) => {
+const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdateTrigger = 0 }) => {
   const containerRef = useRef(null);
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [glitchIdx, setGlitchIdx] = useState(null);
+  const [realProjects, setRealProjects] = useState([]);
   const timeoutsRef = useRef({});
+
+  useEffect(() => {
+    setRealProjects(dataService.getProjects());
+  }, [dataUpdateTrigger]);
 
   const allCategories = [
     'Todos',
@@ -23,45 +29,6 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory }) => {
     'Fotografia',
     'Documentário',
     'Produção de Show'
-  ];
-
-  const realProjects = [
-    {
-      title: 'Traço e Tom',
-      category: 'Clipes',
-      secondaryCategory: 'Podcast\'s',
-      image: '/traco_e_tom.png',
-      video: 'https://assets.mixkit.co/videos/preview/mixkit-electronic-music-dj-playing-at-club-41712-large.mp4',
-      icon: Film,
-      isReal: true
-    },
-    {
-      title: 'Destino de Peão',
-      category: 'Documentário',
-      secondaryCategory: 'Entrevistas',
-      image: '/destino_de_peao.png',
-      video: 'https://assets.mixkit.co/videos/preview/mixkit-misty-mountains-and-pine-trees-43224-large.mp4',
-      icon: Compass,
-      isReal: true
-    },
-    {
-      title: 'Piquezin do Sul',
-      category: 'Reels',
-      secondaryCategory: 'Motion Design',
-      image: '/piquezin_do_sul.png',
-      video: 'https://assets.mixkit.co/videos/preview/mixkit-graphic-animation-of-futuristic-lines-and-dots-41617-large.mp4',
-      icon: Sparkles,
-      isReal: true
-    },
-    {
-      title: 'Shark',
-      category: 'Design Gráfico',
-      secondaryCategory: 'Logotipo',
-      image: '/shark.png',
-      video: 'https://assets.mixkit.co/videos/preview/mixkit-abstract-glowing-lines-rotating-in-a-loop-41616-large.mp4',
-      icon: Target,
-      isReal: true
-    }
   ];
 
   const categoryIcons = {
@@ -198,7 +165,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory }) => {
 
         <div className="portfolio-grid">
           {projectsToDisplay.map((proj, idx) => {
-            const Icon = proj.icon;
+            const Icon = proj.icon || categoryIcons[proj.category] || Sparkles;
             const isHovered = hoveredIdx === idx;
             const isGlitching = glitchIdx === idx;
 

@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare } from 'lucide-react';
+import { dataService } from '../../services/dataService';
 import './PortfolioCategoryPage.css';
 
-const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange }) => {
+const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpdateTrigger = 0 }) => {
   const [activeVideo, setActiveVideo] = useState(null);
+  const [realProjects, setRealProjects] = useState([]);
+  const [hoveredProjectIdx, setHoveredProjectIdx] = useState(null);
+
+  useEffect(() => {
+    setRealProjects(dataService.getProjects());
+  }, [category, dataUpdateTrigger]);
 
   // Capitalize category name for display
   const displayCategory = category.charAt(0).toUpperCase() + category.slice(1).replace('-', ' ');
@@ -204,12 +211,38 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange }) => {
     }
   };
 
-  // 3 beautiful "fictive rectangles" for the gallery of placeholders
-  const fictiveItems = [
-    { id: 1, title: `${displayCategory} // Projeto Rascunho #01`, author: 'Agente Bezaleel', spec: 'Direção de Arte & Geometria' },
-    { id: 2, title: `${displayCategory} // Projeto Rascunho #02`, author: 'Agente Neemias', spec: 'Edição Cirúrgica & Timeline' },
-    { id: 3, title: `${displayCategory} // Projeto Rascunho #03`, author: 'Agente Enoque', spec: 'Motion Design & Efeitos Digitais' }
-  ];
+  // Dynamic project filtering
+  const getFilteredProjects = () => {
+    const activeCatLower = category.toLowerCase();
+    if (activeCatLower === 'todos') {
+      return realProjects;
+    }
+    return realProjects.filter(p => 
+      (p.category && p.category.toLowerCase() === activeCatLower) || 
+      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
+    );
+  };
+
+  const matchedProjects = getFilteredProjects();
+
+  // Dynamic list padding: if fewer than 3 projects, pad with beautifully designed fictive cards
+  const getDisplayItems = () => {
+    const list = [...matchedProjects];
+    if (list.length < 3) {
+      const needed = 3 - list.length;
+      const placeholders = [
+        { id: 'f1', title: `${displayCategory} // Projeto Rascunho #01`, author: 'Agente Bezaleel', spec: 'Direção de Arte & Geometria', isFictive: true },
+        { id: 'f2', title: `${displayCategory} // Projeto Rascunho #02`, author: 'Agente Neemias', spec: 'Edição Cirúrgica & Timeline', isFictive: true },
+        { id: 'f3', title: `${displayCategory} // Projeto Rascunho #03`, author: 'Agente Enoque', spec: 'Motion Design & Efeitos Digitais', isFictive: true }
+      ];
+      for (let i = 0; i < needed; i++) {
+        list.push(placeholders[i]);
+      }
+    }
+    return list;
+  };
+
+  const displayItems = getDisplayItems();
 
   return (
     <div className="portfolio-subpage-root">
@@ -354,35 +387,90 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange }) => {
         </div>
 
         <div className="fictive-rectangles-grid">
-          {fictiveItems.map((item, idx) => (
-            <motion.div 
-              key={item.id}
-              className="fictive-rectangle-card glass-panel"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
-            >
-              {/* Geometric pattern background */}
-              <div className="fictive-pattern-bg"></div>
+          {displayItems.map((item, idx) => {
+            const isFictive = item.isFictive;
+            const isHovered = hoveredProjectIdx === idx;
+            const CardIcon = isFictive ? Icon : (categoryIcons[item.category?.toLowerCase()] || Target);
 
-              {/* Status flashing badge */}
-              <div className="fictive-rect-badge">
-                <span>Rascunho // Aguardando Arquivos Reais</span>
-              </div>
+            if (isFictive) {
+              return (
+                <motion.div 
+                  key={item.id}
+                  className="fictive-rectangle-card glass-panel"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
+                >
+                  <div className="fictive-pattern-bg"></div>
+                  <div className="fictive-rect-badge">
+                    <span>Rascunho // Aguardando Arquivos Reais</span>
+                  </div>
+                  <div className="fictive-rect-content">
+                    <CardIcon size={24} className="fictive-rect-icon" />
+                    <h3 className="fictive-rect-title">{item.title}</h3>
+                    <div className="fictive-rect-footer">
+                      <span className="fictive-rect-author">Responsável: {item.author}</span>
+                      <span className="fictive-rect-spec">{item.spec}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            }
 
-              {/* Card specs */}
-              <div className="fictive-rect-content">
-                <Icon size={24} className="fictive-rect-icon" />
-                <h3 className="fictive-rect-title">{item.title}</h3>
-                
-                <div className="fictive-rect-footer">
-                  <span className="fictive-rect-author">Responsável: {item.author}</span>
-                  <span className="fictive-rect-spec">{item.spec}</span>
+            // Real Project Card rendered dynamically inside the subpage grid!
+            return (
+              <motion.div 
+                key={item.title + idx}
+                className="fictive-rectangle-card glass-panel real-project-subcard"
+                style={{ overflow: 'hidden', padding: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
+                onMouseEnter={(e) => {
+                  setHoveredProjectIdx(idx);
+                  const video = e.currentTarget.querySelector('.subcard-video');
+                  if (video) video.play().catch(() => {});
+                }}
+                onMouseLeave={(e) => {
+                  setHoveredProjectIdx(null);
+                  const video = e.currentTarget.querySelector('.subcard-video');
+                  if (video) {
+                    video.pause();
+                    video.currentTime = 0;
+                  }
+                }}
+              >
+                {/* Media Layer */}
+                <div className="subcard-media-wrapper" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, overflow: 'hidden' }}>
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)', transform: isHovered ? 'scale(1.04)' : 'scale(1)' }}
+                  />
+                  <video 
+                    src={item.video} 
+                    loop 
+                    muted 
+                    playsInline 
+                    className="subcard-video"
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: isHovered ? 1 : 0, transition: 'opacity 0.6s ease', zIndex: 2 }}
+                  />
+                  <div className="subcard-overlay" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)', zIndex: 3 }}></div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+
+                <div className="fictive-rect-content" style={{ zIndex: 10, width: '100%', padding: '1.5rem 1.8rem' }}>
+                  <CardIcon size={20} className="fictive-rect-icon" style={{ color: 'var(--color-accent-gold)', marginBottom: '0.4rem' }} />
+                  <h3 className="fictive-rect-title" style={{ fontSize: '1.15rem', color: '#ffffff', letterSpacing: '-0.01em', fontWeight: 500 }}>{item.title}</h3>
+                  <div className="fictive-rect-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.7rem', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                    <span className="fictive-rect-author" style={{ color: 'var(--color-accent-cyan)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>PRODUÇÃO OFICIAL</span>
+                    <span className="fictive-rect-spec" style={{ fontSize: '0.68rem', color: 'var(--color-text-dimmed)' }}>{item.category} {item.secondaryCategory && `// ${item.secondaryCategory}`}</span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Dynamic CTA Footer Section */}

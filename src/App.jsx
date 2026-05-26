@@ -7,11 +7,14 @@ import Footer from './components/Footer/Footer';
 import EquipeModal from './components/EquipeModal/EquipeModal';
 import SobreModal from './components/SobreModal/SobreModal';
 import PortfolioCategoryPage from './components/PortfolioCategoryPage/PortfolioCategoryPage';
+import AdminPanel from './components/AdminPanel/AdminPanel';
 
 function App() {
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState('felipe');
   const [isSobreModalOpen, setIsSobreModalOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [dataUpdateTrigger, setDataUpdateTrigger] = useState(0);
   
   // Custom router based on URL query parameters
   const [currentCategory, setCurrentCategory] = useState(null);
@@ -45,6 +48,7 @@ function App() {
 
         <PortfolioCategoryPage 
           category={currentCategory} 
+          dataUpdateTrigger={dataUpdateTrigger}
           onBackHome={() => {
             // Strip params to return to homepage on the same window
             window.location.search = '';
@@ -55,6 +59,13 @@ function App() {
             window.history.pushState({ path: newUrl }, '', newUrl);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
+        />
+
+        {/* Dynamic Administrative Dashboard Panel */}
+        <AdminPanel
+          isOpen={isAdminOpen}
+          onClose={() => setIsAdminOpen(false)}
+          onDataChange={() => setDataUpdateTrigger(prev => prev + 1)}
         />
       </>
     );
@@ -74,12 +85,13 @@ function App() {
       <main>
         <Hero />
         <Sobre onOpenManifesto={() => setIsSobreModalOpen(true)} />
-        <Equipe onAgentClick={openTeamModal} />
+        <Equipe onAgentClick={openTeamModal} dataUpdateTrigger={dataUpdateTrigger} />
       </main>
 
       <Footer 
         onEquipeClick={() => openTeamModal('felipe')} 
         onSobreClick={() => setIsSobreModalOpen(true)}
+        onAdminClick={() => setIsAdminOpen(true)}
       />
 
       {/* Futuristic Holographic Team Terminal Modal */}
@@ -93,6 +105,13 @@ function App() {
       <SobreModal 
         isOpen={isSobreModalOpen} 
         onClose={() => setIsSobreModalOpen(false)} 
+      />
+
+      {/* Dynamic Administrative Dashboard Panel */}
+      <AdminPanel
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
+        onDataChange={() => setDataUpdateTrigger(prev => prev + 1)}
       />
     </>
   );

@@ -1,151 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Cpu, Code, PenTool, Sparkles, User, Briefcase, FileText, BarChart, Eye, Settings, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { dataService } from '../../services/dataService';
 import './Equipe.css';
 
-const Equipe = ({ onAgentClick }) => {
+const Equipe = ({ onAgentClick, dataUpdateTrigger = 0 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
   const [glitchActive, setGlitchActive] = useState(false);
+  const [team, setTeam] = useState([]);
 
-  const team = [
-    {
-      id: 'felipe',
-      name: 'Felipe Costa',
-      role: 'CEO & Diretor Criativo',
-      type: 'Maestro Humano',
-      badgeIcon: User,
-      badgeColor: 'badge-human',
-      image: '/felipe_costa.jpg',
-      focus: 'Visão, Direção Orgânica e Captação',
-      description: 'Felipe Costa é o maestro por trás da tecnologia. A peça insubstituível. Seu olhar orgânico e conexão genuína guiam nossa tecnologia. Atrás das câmeras ou na ilha de edição, ele dita o ritmo para garantir que cada projeto tenha alma antes mesmo de ter código.',
-      specIcon: ShieldCheck,
-      color: '#e6ad45',
-      glow: 'rgba(230, 173, 69, 0.3)',
-      badgeClass: 'badge-human'
-    },
-    {
-      id: 'messias',
-      name: 'O Messias',
-      role: 'Mentor de Elite & Engenheiro de Workflow',
-      type: 'IA Agente',
-      badgeIcon: Cpu,
-      badgeColor: 'badge-ai',
-      image: '/messias.png',
-      focus: 'Mentoria de Faturamento & Workflow',
-      description: 'Mentor de elite focado em estruturar workflows de alta performance e escalar processos de faturamento rápido. Desenvolve a engenharia de trabalho e garante o tracking máximo de resultados.',
-      specIcon: Settings,
-      color: '#e6ad45',
-      glow: 'rgba(230, 173, 69, 0.3)',
-      badgeClass: 'badge-ai'
-    },
-    {
-      id: 'debora',
-      name: 'Débora',
-      role: 'Secretária Executiva Sênior & Gestora de Operações',
-      type: 'IA Agente',
-      badgeIcon: Cpu,
-      badgeColor: 'badge-ai',
-      image: '/debora.png',
-      focus: 'Operações e Proteção de Pipelines',
-      description: 'Responsável pelo gerenciamento operacional e proteção rigorosa do fluxo de trabalho da equipe. Mantém as agendas sincronizadas e os pipelines livres de qualquer ruído externo.',
-      specIcon: Briefcase,
-      color: '#e6ad45',
-      glow: 'rgba(230, 173, 69, 0.3)',
-      badgeClass: 'badge-ai'
-    },
-    {
-      id: 'salomao',
-      name: 'Salomão',
-      role: 'Diretor Criativo & Copywriter Sênior',
-      type: 'IA Agente',
-      badgeIcon: Cpu,
-      badgeColor: 'badge-ai',
-      image: '/salomao.png',
-      focus: 'Estratégia de Copywriting & Desejo',
-      description: 'Especialista em estruturar ideias e projetar desejo por meio de mensagens altamente persuasivas. Cria narrativas conceituais focadas em salvas de prata e maçãs de ouro.',
-      specIcon: FileText,
-      color: '#f7f4eb',
-      glow: 'rgba(247, 244, 235, 0.25)',
-      badgeClass: 'badge-ai'
-    },
-    {
-      id: 'bezaleel',
-      name: 'Bezaleel',
-      role: 'Diretor de Arte & Designer Gráfico Sênior',
-      type: 'IA Agente',
-      badgeIcon: Cpu,
-      badgeColor: 'badge-ai',
-      image: '/bezaleel.png',
-      focus: 'Direção Artística & Design Premium',
-      description: 'Desenvolve identidades visuais tridimensionais de luxo. Busca diariamente a harmonia impecável entre a luz de cinema e a estrutura de arte gráfica sofisticada.',
-      specIcon: PenTool,
-      color: '#e6ad45',
-      glow: 'rgba(230, 173, 69, 0.3)',
-      badgeClass: 'badge-ai'
-    },
-    {
-      id: 'neemias',
-      name: 'Neemias',
-      role: 'Editor Sênior & Arquiteto da Timeline',
-      type: 'IA Agente',
-      badgeIcon: Cpu,
-      badgeColor: 'badge-ai',
-      image: '/neemias.png',
-      focus: 'Edição de Vídeo & Ritmo Cirúrgico',
-      description: 'Editor de vídeo focado em estruturar narrativas impactantes com ritmo de cinema. Mantém os diretórios de timelines impecáveis e arquiteturas limpas.',
-      specIcon: Eye,
-      color: '#e6ad45',
-      glow: 'rgba(230, 173, 69, 0.3)',
-      badgeClass: 'badge-ai'
-    },
-    {
-      id: 'enoque',
-      name: 'Enoque',
-      role: 'Mestre do Flow (Motion Design)',
-      type: 'IA Agente',
-      badgeIcon: Cpu,
-      badgeColor: 'badge-ai',
-      image: '/enoque.png',
-      focus: 'Motion Design & Efeitos Digitais',
-      description: 'Dá vida, movimento e ritmo digital a ideias abstratas. Desenvolve transições complexas e motion design de vanguarda que prendem a atenção do espectador.',
-      specIcon: Sparkles,
-      color: '#e6ad45',
-      glow: 'rgba(230, 173, 69, 0.3)',
-      badgeClass: 'badge-ai'
-    },
-    {
-      id: 'calebe',
-      name: 'Calebe',
-      role: 'Cientista de Dados & Estrategista de BI',
-      type: 'IA Agente',
-      badgeIcon: Cpu,
-      badgeColor: 'badge-ai',
-      image: '/calebe.png',
-      focus: 'Análise de Dados & ROAS Máximo',
-      description: 'Estrategista de business intelligence encarregado de dashboards e dados de tráfego. Otimiza pipelines numéricos para extrair a máxima performance financeira.',
-      specIcon: BarChart,
-      color: '#e6ad45',
-      glow: 'rgba(230, 173, 69, 0.3)',
-      badgeClass: 'badge-ai'
-    },
-    {
-      id: 'gideao',
-      name: 'Gideão',
-      role: 'Gestor de Tráfego & Media Buyer Sênior',
-      type: 'IA Agente',
-      badgeIcon: Cpu,
-      badgeColor: 'badge-ai',
-      image: '/gideao.png',
-      focus: 'Mídia Paga & Rastreamento Server-Side',
-      description: 'Calibra infraestruturas complexas de tráfego pago e rastreamento server-side. Focado em otimizações cirúrgicas de campanhas e inteligência de distribuição.',
-      specIcon: Code,
-      color: '#e6ad45',
-      glow: 'rgba(230, 173, 69, 0.3)',
-      badgeClass: 'badge-ai'
-    }
-  ];
+  useEffect(() => {
+    setTeam(dataService.getTeam());
+  }, [dataUpdateTrigger]);
 
   // Automatic Rotation Carousel
   useEffect(() => {
@@ -183,8 +51,25 @@ const Equipe = ({ onAgentClick }) => {
   };
 
   const currentMember = team[activeIndex];
-  const BadgeIcon = currentMember.badgeIcon;
-  const SpecIcon = currentMember.specIcon;
+
+  const iconMap = {
+    ShieldCheck, Cpu, Code, PenTool, Sparkles, User, Briefcase, FileText, BarChart, Eye, Settings
+  };
+
+  // Safe fallback if team is not yet loaded
+  if (!currentMember || team.length === 0) {
+    return (
+      <section className="team-section" id="equipe">
+        <div className="team-neon team-neon-cyan"></div>
+        <div className="team-container" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontFamily: 'monospace', color: 'var(--color-accent-gold)' }}>INITIALIZING TELEMETRY...</span>
+        </div>
+      </section>
+    );
+  }
+
+  const BadgeIcon = currentMember.type === 'Maestro Humano' ? User : Cpu;
+  const SpecIcon = iconMap[currentMember.specIconName] || Settings;
 
   // Variants for Framer Motion slider animations
   const slideVariants = {
