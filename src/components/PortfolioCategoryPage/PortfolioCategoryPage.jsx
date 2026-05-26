@@ -15,13 +15,19 @@ const formatViews = (views) => {
   return views;
 };
 
-const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment, category, socialUser, onSocialLoginTrigger, onSocialLogout, onDeleteComment, isAdmin }) => {
+const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment, category, socialUser, onSocialLoginTrigger, onSocialLogout, onDeleteComment, isAdmin, onPlayStateChange }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [newComment, setNewComment] = useState('');
   const [localMuted, setLocalMuted] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const commentInputRef = React.useRef(null);
+
+  useEffect(() => {
+    if (onPlayStateChange) {
+      onPlayStateChange(isPlaying);
+    }
+  }, [isPlaying, onPlayStateChange]);
 
   // Automatic slideshow interval for this specific project
   useEffect(() => {
@@ -460,6 +466,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const [lightboxCommentText, setLightboxCommentText] = useState('');
   const [lightboxCommentAuthor, setLightboxCommentAuthor] = useState('');
   const [isMuted, setIsMuted] = useState(true);
+  const [activeFeaturedIndex, setActiveFeaturedIndex] = useState(0);
+  const [isAnyVideoPlaying, setIsAnyVideoPlaying] = useState(false);
 
   // Social authentication states
   const [socialUser, setSocialUser] = useState(null);
@@ -549,6 +557,15 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
       if (timer) clearInterval(timer);
     };
   }, [lightboxMedia?.currentIndex, lightboxMedia?.type]);
+
+  // Auto rotation interval for multiple featured works in Reels
+  useEffect(() => {
+    if (featuredProjs.length <= 1 || isAnyVideoPlaying) return;
+    const timer = setInterval(() => {
+      setActiveFeaturedIndex((prev) => (prev + 1) % featuredProjs.length);
+    }, 6000); // Elegant 6-second rotation
+    return () => clearInterval(timer);
+  }, [featuredProjs.length, isAnyVideoPlaying]);
 
   useEffect(() => {
     setRealProjects(dataService.getProjects());
@@ -709,6 +726,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   useEffect(() => {
     window.scrollTo(0, 0);
     setShowcaseIndex(0); // Reset showcase slide when category changes!
+    setActiveFeaturedIndex(0);
+    setIsAnyVideoPlaying(false);
   }, [category]);
 
   const categoryIcons = {
@@ -941,24 +960,32 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const customFeatured = getCustomFeaturedProject();
 
   const getCategorizedProjects = () => {
-    if (!customFeatured) {
-      return {
-        featuredProjs: [],
-        gridRealProjs: []
-      };
-    }
-    
     const activeCatLower = category.toLowerCase();
     const activeProjects = realProjects.filter(p => 
       (p.category && p.category.toLowerCase() === activeCatLower) || 
       (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
     );
     
-    const featuredProjs = [customFeatured];
-    const gridRealProjs = activeProjects.filter(p => p.title !== customFeatured.title);
+    if (activeProjects.length === 0) {
+      return {
+        featuredProjs: [],
+        gridRealProjs: []
+      };
+    }
+    
+    // Find all explicitly marked featured projects
+    let featuredProjsList = activeProjects.filter(p => p.featured);
+    
+    // Fallback to first active project if none is marked featured
+    if (featuredProjsList.length === 0 && activeProjects.length > 0) {
+      featuredProjsList = [activeProjects[0]];
+    }
+    
+    const featuredTitles = featuredProjsList.map(p => p.title);
+    const gridRealProjs = activeProjects.filter(p => !featuredTitles.includes(p.title));
     
     return {
-      featuredProjs,
+      featuredProjs: featuredProjsList,
       gridRealProjs
     };
   };
@@ -1254,13 +1281,15 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
           <div className="social-feed-section">
             <div className="separated-projects-list social-feed-list">
               {featuredProjs.length > 0 ? (
-                featuredProjs.map((proj, projIdx) => {
+                (() => {
+                  const proj = featuredProjs[activeFeaturedIndex % featuredProjs.length];
+                  if (!proj) return null;
                   const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
                   const images = hasCarousel ? proj.carouselImages : [proj.image].filter(Boolean);
                   
                   return (
                     <ProjectShowcaseBlock 
-                      key={proj.title + projIdx}
+                      key={proj.title}
                       project={proj}
                       images={images}
                       onImageClick={(src) => setExpandedImage(src)}
@@ -1272,9 +1301,10 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       onSocialLogout={handleSocialLogout}
                       onDeleteComment={handleDeleteComment}
                       isAdmin={localStorage.getItem('haja_luz_admin_logged') === 'true'}
+                      onPlayStateChange={(playing) => setIsAnyVideoPlaying(playing)}
                     />
                   );
-                })
+                })()
               ) : (
                 <div className="no-projects-placeholder glass-panel" style={{ padding: '4rem 3rem', textAlign: 'center', color: 'var(--color-text-dimmed)', border: '1px dashed rgba(230,173,69,0.15)', borderRadius: '12px', maxWidth: '680px', margin: '0 auto' }}>
                   <p style={{ margin: 0, fontFamily: 'Space Grotesk, monospace', fontSize: '0.85rem' }}>

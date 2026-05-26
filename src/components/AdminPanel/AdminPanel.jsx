@@ -329,8 +329,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       isReal: true
     };
 
-    // If this project is marked as featured, unmark any other project in the same category!
-    if (newProj.featured) {
+    // If this project is marked as featured, unmark any other project in the same category (except for Reels, where we allow multiple featured works to rotate!)
+    if (newProj.featured && newProj.category.toLowerCase() !== 'reels') {
       const activeCat = newProj.category.toLowerCase();
       updatedProjects = updatedProjects.map((p, pIdx) => {
         if (editingProjectIdx !== null && pIdx === editingProjectIdx) return p;
