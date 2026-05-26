@@ -1226,10 +1226,10 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                     <div key={item.id} className="logo-grid-tile placeholder-tile">
                       <div className="placeholder-wireframe-svg">
                         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="10" y="10" width="80" height="80" rx="4" stroke="rgba(230,173,69,0.12)" strokeWidth="1" strokeDasharray="4 4"/>
-                          <line x1="10" y1="10" x2="90" y2="90" stroke="rgba(230,173,69,0.06)" strokeWidth="0.5"/>
-                          <line x1="90" y1="10" x2="10" y2="90" stroke="rgba(230,173,69,0.06)" strokeWidth="0.5"/>
-                          <circle cx="50" cy="50" r="25" stroke="rgba(0,206,209,0.08)" strokeWidth="1" strokeDasharray="2 2"/>
+                          <rect x="10" y="10" width="80" height="80" rx="4" stroke="rgba(230,173,69,0.3)" strokeWidth="1" strokeDasharray="4 4"/>
+                          <line x1="10" y1="10" x2="90" y2="90" stroke="rgba(230,173,69,0.18)" strokeWidth="0.5"/>
+                          <line x1="90" y1="10" x2="10" y2="90" stroke="rgba(230,173,69,0.18)" strokeWidth="0.5"/>
+                          <circle cx="50" cy="50" r="25" stroke="rgba(0,206,209,0.25)" strokeWidth="1" strokeDasharray="2 2"/>
                         </svg>
                       </div>
                       <div className="placeholder-tile-text">
@@ -1252,6 +1252,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       ];
                       setLightboxMedia({
                         type: 'event',
+                        isLogo: true,
                         title: item.title,
                         description: item.project?.description || 'Desenho vetorial sob medida com DNA estratégico.',
                         images: [item.src],
@@ -1445,7 +1446,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
             >
               {lightboxMedia.type === 'event' ? (
                 /* EVENT SLIDESHOW AND DETAILS MODE */
-                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: lightboxMedia.video ? '1.1fr 0.9fr' : '1fr', gap: '2rem', width: '100%', padding: '1rem' }}>
+                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: (lightboxMedia.video || lightboxMedia.isLogo) ? '1.1fr 0.9fr' : '1fr', gap: '2rem', width: '100%', padding: '1rem' }}>
                   
                   {/* Left Column: Event Video (or Info block if no video) */}
                   <div className="event-left-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
@@ -1615,7 +1616,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                   {/* Right Column: Carousel Photo Slideshow */}
                   {lightboxMedia.images && lightboxMedia.images.length > 0 && (
                     <div className="event-right-column event-photo-carousel-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', position: 'relative' }}>
-                      <div className="active-slide-frame" style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.8)' }}>
+                      <div className="active-slide-frame" style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', background: lightboxMedia.isLogo ? '#ffffff' : '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.8)' }}>
                         <img 
                           src={lightboxMedia.images[lightboxMedia.currentIndex]} 
                           alt={`Slide ${lightboxMedia.currentIndex + 1}`}
@@ -1677,7 +1678,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                                 border: lightboxMedia.currentIndex === thumbIdx ? '2px solid var(--color-accent-gold)' : '1px solid rgba(255,255,255,0.1)',
                                 opacity: lightboxMedia.currentIndex === thumbIdx ? 1 : 0.4,
                                 transition: 'all 0.3s ease',
-                                flexShrink: 0
+                                flexShrink: 0,
+                                background: lightboxMedia.isLogo ? '#ffffff' : 'transparent'
                               }}
                             >
                               <img src={img} alt="thumb" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -1874,7 +1876,11 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <img src={expandedImage} alt="Foto Ampliada" />
+              <img 
+                src={expandedImage} 
+                alt="Foto Ampliada" 
+                style={{ background: lightboxMedia?.isLogo ? '#ffffff' : 'transparent' }} 
+              />
             </motion.div>
           </motion.div>
         )}
