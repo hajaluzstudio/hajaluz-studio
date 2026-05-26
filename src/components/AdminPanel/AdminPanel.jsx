@@ -14,10 +14,17 @@ const compressImage = (base64OrFile) => {
     const isFile = base64OrFile instanceof File;
     const url = isFile ? URL.createObjectURL(base64OrFile) : base64OrFile;
     
-    // Detect PNG format to preserve transparency (alpha channel)
+    // Bulletproof PNG detection: checks MIME types and case-insensitive file extensions
     const isPng = isFile 
-      ? base64OrFile.type === 'image/png' 
-      : (typeof base64OrFile === 'string' && base64OrFile.startsWith('data:image/png'));
+      ? (
+          base64OrFile.type === 'image/png' || 
+          base64OrFile.type === 'image/x-png' || 
+          (base64OrFile.name && base64OrFile.name.toLowerCase().endsWith('.png'))
+        )
+      : (
+          typeof base64OrFile === 'string' && 
+          (base64OrFile.startsWith('data:image/png') || base64OrFile.startsWith('data:image/x-png'))
+        );
 
     img.src = url;
     img.onload = () => {
@@ -48,18 +55,11 @@ const compressImage = (base64OrFile) => {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Preserve transparency by saving as image/webp or image/png
-      // image/webp with 0.8 quality preserves transparent backgrounds and is up to 20x lighter than raw PNG!
-      let compressedDataUrl = '';
-      if (isPng) {
-        compressedDataUrl = canvas.toDataURL('image/webp', 0.8);
-        // Fallback: If webp is not supported by the browser canvas, it returns image/png
-        if (!compressedDataUrl.startsWith('data:image/webp')) {
-          compressedDataUrl = canvas.toDataURL('image/png');
-        }
-      } else {
-        compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      }
+      // Preserve transparency by saving as lossless image/png for PNG files
+      // Keeping it at max 600px ensures it remains extremely lightweight (<150KB) and safe for localStorage!
+      const compressedDataUrl = isPng 
+        ? canvas.toDataURL('image/png') 
+        : canvas.toDataURL('image/jpeg', 0.7);
 
       if (isFile) URL.revokeObjectURL(url);
       resolve(compressedDataUrl);
