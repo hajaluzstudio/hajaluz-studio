@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, X } from 'lucide-react';
 import { dataService } from '../../services/dataService';
-import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink } from '../../services/youtubeHelper';
+import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId } from '../../services/youtubeHelper';
 import './Portfolio.css';
 
 const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdateTrigger = 0 }) => {
@@ -135,7 +135,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
         type: 'event',
         title: proj.title,
         description: proj.description || '',
-        video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : { type: 'direct', src: isGoogleDriveUrl(proj.video) ? getGoogleDriveDirectLink(proj.video) : proj.video }) : null,
+        video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : isGoogleDriveUrl(proj.video) ? { type: 'drive', src: getGoogleDriveId(proj.video) } : { type: 'direct', src: proj.video }) : null,
         images: proj.carouselImages || [],
         currentIndex: 0
       });
@@ -146,7 +146,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
     if (ytId) {
       setLightboxMedia({ type: 'youtube', src: ytId });
     } else if (isGoogleDriveUrl(proj.video)) {
-      setLightboxMedia({ type: 'direct', src: getGoogleDriveDirectLink(proj.video) });
+      setLightboxMedia({ type: 'drive', src: getGoogleDriveId(proj.video) });
     } else if (proj.video && (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co'))) {
       setLightboxMedia({ type: 'direct', src: proj.video });
     } else {
@@ -229,7 +229,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                 coverImage = getYouTubeThumbnail(proj.video);
               }
             } else if (videoSource && !hasCustomCover) {
-              useVideoCover = true;
+              useVideoCover = !isDrive;
             }
 
             return (
@@ -276,6 +276,14 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                           className={`card-video video-active`}
                           allow="autoplay; encrypted-media"
                           style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
+                          title={proj.title}
+                        />
+                      ) : isDrive ? (
+                        <iframe 
+                          src={`https://drive.google.com/file/d/${getGoogleDriveId(proj.video)}/preview`}
+                          className={`card-video video-active`}
+                          allow="autoplay; encrypted-media"
+                          style={{ border: 'none', pointerEvents: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}
                           title={proj.title}
                         />
                       ) : (
@@ -363,6 +371,14 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                             src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=0&controls=1&modestbranding=1&rel=0`}
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                             allow="autoplay; encrypted-media; picture-in-picture"
+                            allowFullScreen
+                            title="Event Video Player"
+                          />
+                        ) : lightboxMedia.video.type === 'drive' ? (
+                          <iframe 
+                            src={`https://drive.google.com/file/d/${lightboxMedia.video.src}/preview`}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                            allow="autoplay; encrypted-media"
                             allowFullScreen
                             title="Event Video Player"
                           />
@@ -462,6 +478,14 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                       src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&controls=1&modestbranding=1&rel=0`}
                       style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                       allow="autoplay; encrypted-media; picture-in-picture"
+                      allowFullScreen
+                      title="Cinema Player"
+                    />
+                  ) : lightboxMedia.type === 'drive' ? (
+                    <iframe 
+                      src={`https://drive.google.com/file/d/${lightboxMedia.src}/preview`}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                      allow="autoplay; encrypted-media"
                       allowFullScreen
                       title="Cinema Player"
                     />

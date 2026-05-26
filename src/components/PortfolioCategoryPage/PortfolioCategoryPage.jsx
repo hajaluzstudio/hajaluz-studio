@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, Heart, Volume2, VolumeX, Send, X } from 'lucide-react';
 import { dataService } from '../../services/dataService';
-import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink } from '../../services/youtubeHelper';
+import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId } from '../../services/youtubeHelper';
 import './PortfolioCategoryPage.css';
 
 const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment }) => {
@@ -98,6 +98,14 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
                 src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
                 className="social-video-element"
                 allow="autoplay; encrypted-media; picture-in-picture"
+                style={{ border: 'none', width: '100%', height: '100%' }}
+                title={project.title}
+              />
+            ) : isDrive ? (
+              <iframe 
+                src={`https://drive.google.com/file/d/${getGoogleDriveId(project.video)}/preview`}
+                className="social-video-element"
+                allow="autoplay; encrypted-media"
                 style={{ border: 'none', width: '100%', height: '100%' }}
                 title={project.title}
               />
@@ -435,7 +443,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         type: 'event',
         title: proj.title,
         description: proj.description || '',
-        video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : { type: 'direct', src: isGoogleDriveUrl(proj.video) ? getGoogleDriveDirectLink(proj.video) : proj.video }) : null,
+        video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : isGoogleDriveUrl(proj.video) ? { type: 'drive', src: getGoogleDriveId(proj.video) } : { type: 'direct', src: proj.video }) : null,
         images: proj.carouselImages || [],
         currentIndex: 0,
         likes: projectLikes,
@@ -456,7 +464,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     if (ytId) {
       setLightboxMedia({ ...boxMedia, type: 'youtube', src: ytId });
     } else if (isGoogleDriveUrl(proj.video)) {
-      setLightboxMedia({ ...boxMedia, type: 'direct', src: getGoogleDriveDirectLink(proj.video) });
+      setLightboxMedia({ ...boxMedia, type: 'drive', src: getGoogleDriveId(proj.video) });
     } else if (proj.video && (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co'))) {
       setLightboxMedia({ ...boxMedia, type: 'direct', src: proj.video });
     } else {
@@ -1121,6 +1129,14 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                             allowFullScreen
                             title="Event Video Player"
                           />
+                        ) : lightboxMedia.video.type === 'drive' ? (
+                          <iframe 
+                            src={`https://drive.google.com/file/d/${lightboxMedia.video.src}/preview`}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                            allow="autoplay; encrypted-media"
+                            allowFullScreen
+                            title="Event Video Player"
+                          />
                         ) : (
                           <video 
                             src={lightboxMedia.video.src}
@@ -1309,6 +1325,14 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0`}
                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                         allow="autoplay; encrypted-media; picture-in-picture"
+                        allowFullScreen
+                        title="Cinema Player"
+                      />
+                    ) : lightboxMedia.type === 'drive' ? (
+                      <iframe 
+                        src={`https://drive.google.com/file/d/${lightboxMedia.src}/preview`}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                        allow="autoplay; encrypted-media"
                         allowFullScreen
                         title="Cinema Player"
                       />
