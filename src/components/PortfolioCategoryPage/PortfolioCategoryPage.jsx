@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, X } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, Heart, Volume2, VolumeX, Send, X } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink } from '../../services/youtubeHelper';
 import './PortfolioCategoryPage.css';
 
-const ProjectShowcaseBlock = ({ project, images, onImageClick }) => {
+const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [authorName, setAuthorName] = useState('');
+  const [newComment, setNewComment] = useState('');
 
   // Automatic slideshow interval for this specific project
   useEffect(() => {
@@ -26,6 +28,13 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick }) => {
     e.stopPropagation();
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
+
+  const isLiked = !!project.likedByUser;
+  const likesCount = project.likes || (Math.abs(project.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 40 + 15);
+  const commentsList = project.comments || [
+    { id: 1, author: 'Felipe Costa', text: 'Excelente design! Identidade visual de luxo.', date: '12/04/2026' },
+    { id: 2, author: 'Bezaleel', text: 'Conceito geométrico bem estruturado nas margens.', date: '14/04/2026' }
+  ];
 
   return (
     <div className="project-showcase-row glass-panel">
@@ -47,7 +56,7 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick }) => {
           </div>
         )}
 
-        <div className="project-showcase-meta-grid" style={{ marginTop: 'auto' }}>
+        <div className="project-showcase-meta-grid" style={{ marginTop: 'auto', marginBottom: '1.2rem' }}>
           {project.role && (
             <div className="strategy-meta-item" style={{ textAlign: 'left' }}>
               <span className="meta-label">Formato</span>
@@ -60,6 +69,73 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick }) => {
               <span className="meta-val">{project.team}</span>
             </div>
           )}
+        </div>
+
+        {/* Like Button */}
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <button 
+            type="button"
+            onClick={() => onLikeClick && onLikeClick(project.title)}
+            className={`like-button ${isLiked ? 'liked' : ''}`}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: isLiked ? 'rgba(231,76,60,0.1)' : 'rgba(255,255,255,0.02)', border: isLiked ? '1px solid #e74c3c' : '1px solid rgba(255,255,255,0.06)', color: isLiked ? '#e74c3c' : 'var(--color-text-muted)', padding: '0.45rem 1rem', borderRadius: '30px', cursor: 'pointer', transition: 'all 0.3s ease', fontSize: '0.72rem', fontWeight: 600 }}
+          >
+            <Heart size={13} fill={isLiked ? "#e74c3c" : "transparent"} />
+            <span>{likesCount} Curtidas</span>
+          </button>
+        </div>
+
+        {/* Comments Section */}
+        <div className="event-comments-section" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace', display: 'block', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            // Comentários ({commentsList.length})
+          </span>
+          
+          <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '130px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
+            {commentsList.map((c) => (
+              <div key={c.id} className="comment-item glass-panel" style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 'bold', color: 'var(--color-accent-gold)' }}>{c.author}</span>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--color-text-dimmed)' }}>{c.date}</span>
+                </div>
+                <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: '1.4', fontWeight: 300 }}>{c.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <form 
+            onSubmit={(e) => { 
+              e.preventDefault(); 
+              onAddComment && onAddComment(project.title, authorName, newComment); 
+              setNewComment(''); 
+              setAuthorName(''); 
+            }} 
+            style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem' }}>
+              <input 
+                type="text" 
+                placeholder="Seu Nome" 
+                value={authorName} 
+                onChange={(e) => setAuthorName(e.target.value)}
+                style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
+              />
+              <input 
+                type="text" 
+                placeholder="Escreva um comentário..." 
+                value={newComment} 
+                onChange={(e) => setNewComment(e.target.value)}
+                style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
+                required
+              />
+            </div>
+            <button 
+              type="submit" 
+              style={{ alignSelf: 'flex-end', background: 'rgba(230,173,69,0.1)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', padding: '0.35rem 1rem', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+            >
+              <Send size={10} />
+              <span>Enviar</span>
+            </button>
+          </form>
         </div>
       </div>
 
@@ -135,6 +211,15 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const [hoveredProjectIdx, setHoveredProjectIdx] = useState(null);
   const [showcaseIndex, setShowcaseIndex] = useState(0);
   const [expandedImage, setExpandedImage] = useState(null);
+  const [isFeaturedMuted, setIsFeaturedMuted] = useState(true);
+  const [lightboxCommentText, setLightboxCommentText] = useState('');
+  const [lightboxCommentAuthor, setLightboxCommentAuthor] = useState('');
+
+  const [fictiveSettings, setFictiveSettings] = useState({
+    pretitle: 'Espaços de Co-Criação',
+    title: 'Retângulos Fictícios (Rascunhos)',
+    description: 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
+  });
 
   // Auto slide interval for the Event Photo Carousel in Lightbox
   useEffect(() => {
@@ -151,11 +236,82 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   useEffect(() => {
     setRealProjects(dataService.getProjects());
+    setFictiveSettings(dataService.getFictiveSettings());
   }, [category, dataUpdateTrigger]);
+
+  const handleLike = (projectTitle) => {
+    const allProjs = dataService.getProjects();
+    const updated = allProjs.map(p => {
+      if (p.title === projectTitle) {
+        const currentLikes = p.likes || 0;
+        const likedByUser = !!p.likedByUser;
+        return {
+          ...p,
+          likes: likedByUser ? Math.max(0, currentLikes - 1) : currentLikes + 1,
+          likedByUser: !likedByUser
+        };
+      }
+      return p;
+    });
+    dataService.saveProjects(updated);
+    setRealProjects(updated);
+    
+    // Update active lightboxMedia if it corresponds to the liked project!
+    if (lightboxMedia && lightboxMedia.title === projectTitle) {
+      setLightboxMedia(prev => ({
+        ...prev,
+        likes: !prev.likedByUser ? (prev.likes || 0) + 1 : Math.max(0, (prev.likes || 0) - 1),
+        likedByUser: !prev.likedByUser
+      }));
+    }
+  };
+
+  const handleAddComment = (projectTitle, author, text) => {
+    if (!text.trim()) return;
+    const allProjs = dataService.getProjects();
+    const updated = allProjs.map(p => {
+      if (p.title === projectTitle) {
+        const currentComments = p.comments || [];
+        const newC = {
+          id: Date.now(),
+          author: author.trim() || 'Visitante Anônimo',
+          text: text.trim(),
+          date: new Date().toLocaleDateString('pt-BR')
+        };
+        return {
+          ...p,
+          comments: [...currentComments, newC]
+        };
+      }
+      return p;
+    });
+    dataService.saveProjects(updated);
+    setRealProjects(updated);
+
+    // Update active lightboxMedia comments immediately!
+    if (lightboxMedia && lightboxMedia.title === projectTitle) {
+      const currentComments = lightboxMedia.comments || [];
+      const newC = {
+        id: Date.now(),
+        author: author.trim() || 'Visitante Anônimo',
+        text: text.trim(),
+        date: new Date().toLocaleDateString('pt-BR')
+      };
+      setLightboxMedia(prev => ({
+        ...prev,
+        comments: [...currentComments, newC]
+      }));
+    }
+  };
 
   const handleCardClick = (proj) => {
     const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
-    
+    const projectLikes = proj.likes || (Math.abs(proj.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 40 + 15);
+    const projectComments = proj.comments || [
+      { id: 1, author: 'Felipe Costa', text: 'Esse projeto foi desafiador e o resultado superou todas as expectativas. Orgulho da equipe.', date: '12/04/2026' },
+      { id: 2, author: 'Salomão', text: 'A narrativa construída e os ganchos neurais aplicados geraram um desejo absoluto na marca.', date: '13/04/2026' }
+    ];
+
     if (proj.category === 'Aniversários' || hasCarousel) {
       setLightboxMedia({
         type: 'event',
@@ -163,18 +319,28 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         description: proj.description || '',
         video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : { type: 'direct', src: isGoogleDriveUrl(proj.video) ? getGoogleDriveDirectLink(proj.video) : proj.video }) : null,
         images: proj.carouselImages || [],
-        currentIndex: 0
+        currentIndex: 0,
+        likes: projectLikes,
+        likedByUser: !!proj.likedByUser,
+        comments: projectComments
       });
       return;
     }
 
     const ytId = getYouTubeId(proj.video);
+    const boxMedia = {
+      title: proj.title,
+      likes: projectLikes,
+      likedByUser: !!proj.likedByUser,
+      comments: projectComments
+    };
+
     if (ytId) {
-      setLightboxMedia({ type: 'youtube', src: ytId });
+      setLightboxMedia({ ...boxMedia, type: 'youtube', src: ytId });
     } else if (isGoogleDriveUrl(proj.video)) {
-      setLightboxMedia({ type: 'direct', src: getGoogleDriveDirectLink(proj.video) });
+      setLightboxMedia({ ...boxMedia, type: 'direct', src: getGoogleDriveDirectLink(proj.video) });
     } else if (proj.video && (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co'))) {
-      setLightboxMedia({ type: 'direct', src: proj.video });
+      setLightboxMedia({ ...boxMedia, type: 'direct', src: proj.video });
     } else {
       window.open(proj.video || proj.image, '_blank');
     }
@@ -749,7 +915,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
               >
-                <div className="featured-video-wrapper glass-panel">
+                <div className="featured-video-wrapper glass-panel" style={{ position: 'relative' }}>
                   {featuredData.isYt ? (
                     <iframe 
                       src={`https://www.youtube.com/embed/${featuredData.ytId}?autoplay=1&mute=0&controls=1&loop=1&playlist=${featuredData.ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
@@ -764,12 +930,26 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       controls
                       autoPlay
                       loop
+                      muted={isFeaturedMuted}
                       playsInline
                       className="featured-video-element"
                     />
                   )}
                   <div className="video-player-glow-border"></div>
                   <div className="video-player-scanline"></div>
+                  
+                  {/* Floating Mute Toggle for Direct HTML5 Video */}
+                  {!featuredData.isYt && (
+                    <button 
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setIsFeaturedMuted(!isFeaturedMuted); }}
+                      style={{ position: 'absolute', bottom: '1rem', right: '1rem', zIndex: 20, background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease' }}
+                      title={isFeaturedMuted ? "Ativar Áudio" : "Silenciar Áudio"}
+                      className="featured-video-mute-btn"
+                    >
+                      {isFeaturedMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+                    </button>
+                  )}
                 </div>
               </motion.div>
 
@@ -818,11 +998,9 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
             {/* SECTION 2: Fictive Rectangles (Rascunhos / Aguardando real files) */}
             <div className="subpage-block-heading-wrapper" style={{ marginTop: '7rem' }}>
-              <span className="block-pretitle">Espaços de Co-Criação</span>
-              <h2 className="block-title">Retângulos Fictícios (Rascunhos)</h2>
-              <p className="block-desc">
-                Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.
-              </p>
+              <span className="block-pretitle">{fictiveSettings.pretitle}</span>
+              <h2 className="block-title">{fictiveSettings.title}</h2>
+              <p className="block-desc">{fictiveSettings.description}</p>
             </div>
 
             <div className={`fictive-rectangles-grid ${category.toLowerCase() === 'reels' ? 'reels-grid' : ''}`}>
@@ -1029,20 +1207,96 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                             autoPlay
                             loop
                             playsInline
+                            muted={isMuted}
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
                           />
                         )}
+                        
+                        {/* Audio Toggle */}
+                        <button 
+                          onClick={() => setIsMuted(!isMuted)}
+                          style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.4rem', borderRadius: '50%', cursor: 'pointer', zIndex: 5 }}
+                        >
+                          {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                        </button>
                       </div>
                     )}
 
-                    {/* Event Metadata (Title and Description) */}
-                    <div className="event-info-block" style={{ textAlign: 'left' }}>
-                      <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#fff', marginBottom: '0.6rem', letterSpacing: '-0.01em', fontWeight: 600 }}>
-                        {lightboxMedia.title}
-                      </h3>
-                      <p className="event-lightbox-desc" style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: '1.6', fontWeight: 300 }}>
+                    {/* Event Metadata (Title, Description, Like, Comments) */}
+                    <div className="event-info-block" style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                        <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#fff', margin: 0, letterSpacing: '-0.01em', fontWeight: 600 }}>
+                          {lightboxMedia.title}
+                        </h3>
+                        
+                        {/* Like Button */}
+                        <button 
+                          onClick={() => handleLike(lightboxMedia.title)}
+                          className={`like-button ${lightboxMedia.likedByUser ? 'liked' : ''}`}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: lightboxMedia.likedByUser ? 'rgba(231,76,60,0.1)' : 'rgba(255,255,255,0.02)', border: lightboxMedia.likedByUser ? '1px solid #e74c3c' : '1px solid rgba(255,255,255,0.06)', color: lightboxMedia.likedByUser ? '#e74c3c' : 'var(--color-text-muted)', padding: '0.45rem 1rem', borderRadius: '30px', cursor: 'pointer', transition: 'all 0.3s ease', fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}
+                        >
+                          <Heart size={13} fill={lightboxMedia.likedByUser ? "#e74c3c" : "transparent"} />
+                          <span>{lightboxMedia.likes || 0} Curtidas</span>
+                        </button>
+                      </div>
+
+                      <p className="event-lightbox-desc" style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: '1.6', fontWeight: 300, margin: 0 }}>
                         {lightboxMedia.description}
                       </p>
+
+                      {/* Comments section */}
+                      <div className="event-comments-section" style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace', display: 'block', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          // Comentários ({lightboxMedia.comments?.length || 0})
+                        </span>
+                        
+                        <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '140px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
+                          {(lightboxMedia.comments || []).map((c) => (
+                            <div key={c.id} className="comment-item glass-panel" style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 'bold', color: 'var(--color-accent-gold)' }}>{c.author}</span>
+                                <span style={{ fontSize: '0.6rem', color: 'var(--color-text-dimmed)' }}>{c.date}</span>
+                              </div>
+                              <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: '1.4', fontWeight: 300 }}>{c.text}</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        <form 
+                          onSubmit={(e) => { 
+                            e.preventDefault(); 
+                            handleAddComment(lightboxMedia.title, lightboxCommentAuthor, lightboxCommentText); 
+                            setLightboxCommentText(''); 
+                            setLightboxCommentAuthor(''); 
+                          }} 
+                          style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+                        >
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem' }}>
+                            <input 
+                              type="text" 
+                              placeholder="Seu Nome" 
+                              value={lightboxCommentAuthor} 
+                              onChange={(e) => setLightboxCommentAuthor(e.target.value)}
+                              style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
+                            />
+                            <input 
+                              type="text" 
+                              placeholder="Escreva um comentário..." 
+                              value={lightboxCommentText} 
+                              onChange={(e) => setLightboxCommentText(e.target.value)}
+                              style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
+                              required
+                            />
+                          </div>
+                          <button 
+                            type="submit" 
+                            style={{ alignSelf: 'flex-end', background: 'rgba(230,173,69,0.1)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', padding: '0.35rem 1rem', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                          >
+                            <Send size={10} />
+                            <span>Enviar Comentário</span>
+                          </button>
+                        </form>
+                      </div>
                     </div>
                   </div>
 
@@ -1124,26 +1378,108 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
                 </div>
               ) : (
-                /* REGULAR VIDEO SINGLE PLAYER MODE */
-                <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
-                  {lightboxMedia.type === 'youtube' ? (
-                    <iframe 
-                      src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0`}
-                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                      allow="autoplay; encrypted-media; picture-in-picture"
-                      allowFullScreen
-                      title="Cinema Player"
-                    />
-                  ) : (
-                    <video 
-                      src={lightboxMedia.src}
-                      controls
-                      autoPlay
-                      loop
-                      playsInline
-                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
-                    />
-                  )}
+                /* REGULAR VIDEO SINGLE PLAYER MODE (SPLIT CINEMA INTERACTIVE) */
+                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '2rem', width: '100%', padding: '1rem' }}>
+                  
+                  {/* Left Column: Video Frame */}
+                  <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
+                    {lightboxMedia.type === 'youtube' ? (
+                      <iframe 
+                        src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0`}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                        allow="autoplay; encrypted-media; picture-in-picture"
+                        allowFullScreen
+                        title="Cinema Player"
+                      />
+                    ) : (
+                      <video 
+                        src={lightboxMedia.src}
+                        controls
+                        autoPlay
+                        loop
+                        playsInline
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Right Column: Title, Description, Likes, Comments */}
+                  <div className="event-info-block" style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                      <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: '#fff', margin: 0, letterSpacing: '-0.01em', fontWeight: 600 }}>
+                        {lightboxMedia.title}
+                      </h3>
+                      
+                      {/* Like Button */}
+                      <button 
+                        onClick={() => handleLike(lightboxMedia.title)}
+                        className={`like-button ${lightboxMedia.likedByUser ? 'liked' : ''}`}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: lightboxMedia.likedByUser ? 'rgba(231,76,60,0.1)' : 'rgba(255,255,255,0.02)', border: lightboxMedia.likedByUser ? '1px solid #e74c3c' : '1px solid rgba(255,255,255,0.06)', color: lightboxMedia.likedByUser ? '#e74c3c' : 'var(--color-text-muted)', padding: '0.45rem 1rem', borderRadius: '30px', cursor: 'pointer', transition: 'all 0.3s ease', fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}
+                      >
+                        <Heart size={13} fill={lightboxMedia.likedByUser ? "#e74c3c" : "transparent"} />
+                        <span>{lightboxMedia.likes || 0} Curtidas</span>
+                      </button>
+                    </div>
+
+                    <p className="event-lightbox-desc" style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--color-text-muted)', lineHeight: '1.5', fontWeight: 300, margin: 0 }}>
+                      {realProjects.find(p => p.title === lightboxMedia.title)?.description || 'Sinopse exclusiva em andamento pela Haja Luz Studio.'}
+                    </p>
+
+                    {/* Comments section */}
+                    <div className="event-comments-section" style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace', display: 'block', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        // Comentários ({lightboxMedia.comments?.length || 0})
+                      </span>
+                      
+                      <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '140px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
+                        {(lightboxMedia.comments || []).map((c) => (
+                          <div key={c.id} className="comment-item glass-panel" style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontWeight: 'bold', color: 'var(--color-accent-gold)' }}>{c.author}</span>
+                              <span style={{ fontSize: '0.6rem', color: 'var(--color-text-dimmed)' }}>{c.date}</span>
+                            </div>
+                            <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: '1.4', fontWeight: 300 }}>{c.text}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <form 
+                        onSubmit={(e) => { 
+                          e.preventDefault(); 
+                          handleAddComment(lightboxMedia.title, lightboxCommentAuthor, lightboxCommentText); 
+                          setLightboxCommentText(''); 
+                          setLightboxCommentAuthor(''); 
+                        }} 
+                        style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+                      >
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem' }}>
+                          <input 
+                            type="text" 
+                            placeholder="Seu Nome" 
+                            value={lightboxCommentAuthor} 
+                            onChange={(e) => setLightboxCommentAuthor(e.target.value)}
+                            style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
+                          />
+                          <input 
+                            type="text" 
+                            placeholder="Escreva um comentário..." 
+                            value={lightboxCommentText} 
+                            onChange={(e) => setLightboxCommentText(e.target.value)}
+                            style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
+                            required
+                          />
+                        </div>
+                        <button 
+                          type="submit" 
+                          style={{ alignSelf: 'flex-end', background: 'rgba(230,173,69,0.1)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', padding: '0.35rem 1rem', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                        >
+                          <Send size={10} />
+                          <span>Enviar Comentário</span>
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+
                 </div>
               )}
             </motion.div>

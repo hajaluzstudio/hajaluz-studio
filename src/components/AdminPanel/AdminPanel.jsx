@@ -183,6 +183,13 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     specIconName: 'Settings'
   });
 
+  // 3.3 Textos das subpáginas (Rascunhos)
+  const [fictiveSettings, setFictiveSettings] = useState({
+    pretitle: 'Espaços de Co-Criação',
+    title: 'Retângulos Fictícios (Rascunhos)',
+    description: 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
+  });
+
   const allCategories = [
     'Reels', 'Entrevistas', 'Podcast\'s', 'Clipes', 'Aniversários', 'Sites',
     'Design Gráfico', 'Motion Design', 'Logotipo', 'Fotografia', 'Documentário', 'Produção de Show'
@@ -197,10 +204,18 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     if (isOpen) {
       setProjects(dataService.getProjects());
       setTeam(dataService.getTeam());
+      setFictiveSettings(dataService.getFictiveSettings());
       // Mantém login ativo durante a sessão aberta no modal
       setAuthError(false);
     }
   }, [isOpen]);
+
+  const handleSaveFictiveSettings = (e) => {
+    e.preventDefault();
+    dataService.saveFictiveSettings(fictiveSettings);
+    onDataChange && onDataChange();
+    showNotification('Configurações de Rascunhos Salvas!');
+  };
 
   const showNotification = (msg) => {
     setSuccessMessage(msg);
@@ -987,9 +1002,67 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
               {/* TAB 3: SYSTEM RESET */}
               {activeTab === 'sistema' && (
-                <div className="workspace-tab-content system-reset-tab">
-                  <div className="reset-warning-box">
-                    <ShieldAlert size={64} className="reset-alert-icon" />
+                <div className="workspace-tab-content system-reset-tab" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', overflowY: 'auto', maxHeight: '72vh', paddingBottom: '2rem' }}>
+                  
+                  {/* Fictive Rectangles Settings */}
+                  <div className="system-settings-section glass-panel" style={{ padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(230,173,69,0.12)', borderRadius: '12px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
+                    <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', color: 'var(--color-accent-gold)', fontSize: '0.95rem', borderBottom: '1px solid rgba(230,173,69,0.15)', paddingBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                      ⚙️ Textos das Subpáginas (Rascunhos)
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                      Personalize o título e a descrição explicativa que aparecem na seção de retângulos fictícios/rascunhos de co-criação de todas as subpáginas de categorias.
+                    </p>
+                    
+                    <form onSubmit={handleSaveFictiveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pré-Título (Ex: Espaços de Co-Criação)</label>
+                        <input 
+                          type="text" 
+                          value={fictiveSettings.pretitle || ''} 
+                          onChange={(e) => setFictiveSettings({ ...fictiveSettings, pretitle: e.target.value })}
+                          placeholder="Ex: Espaços de Co-Criação"
+                          required
+                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff' }}
+                        />
+                      </div>
+
+                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Título Principal</label>
+                        <input 
+                          type="text" 
+                          value={fictiveSettings.title || ''} 
+                          onChange={(e) => setFictiveSettings({ ...fictiveSettings, title: e.target.value })}
+                          placeholder="Ex: Retângulos Fictícios (Rascunhos)"
+                          required
+                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff' }}
+                        />
+                      </div>
+
+                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Descrição Explicativa</label>
+                        <textarea 
+                          rows={3} 
+                          value={fictiveSettings.description || ''} 
+                          onChange={(e) => setFictiveSettings({ ...fictiveSettings, description: e.target.value })}
+                          placeholder="Ex: Abaixo estão posicionados os retângulos de layout fictícios..."
+                          required
+                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff', outline: 'none', resize: 'vertical' }}
+                        />
+                      </div>
+
+                      <button 
+                        type="submit" 
+                        className="form-save-btn" 
+                        style={{ alignSelf: 'flex-start', padding: '0.6rem 1.4rem', fontSize: '0.75rem', marginTop: '0.4rem' }}
+                      >
+                        Salvar Ajustes Globais
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Factory Reset */}
+                  <div className="reset-warning-box" style={{ marginTop: 0, width: '100%', maxWidth: '600px' }}>
+                    <ShieldAlert size={48} className="reset-alert-icon" style={{ marginBottom: '1rem' }} />
                     <h3>Área Segura e Restauração</h3>
                     <p>Esta seção realiza comandos críticos do ecossistema. Em caso de perda de controle dos dados salvos no navegador, ou se desejar reverter todas as alterações personalizadas de volta para as originais cinematográficas da Haja Luz Studio, clique abaixo.</p>
                     

@@ -180,10 +180,17 @@ const DEFAULT_TEAM = [
   }
 ];
 
+const DEFAULT_FICTIVE_SETTINGS = {
+  pretitle: 'Espaços de Co-Criação',
+  title: 'Retângulos Fictícios (Rascunhos)',
+  description: 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
+};
+
 // Chaves do LocalStorage
 const KEYS = {
   PROJECTS: 'hajaluz_portfolio_projects',
-  TEAM: 'hajaluz_team_members'
+  TEAM: 'hajaluz_team_members',
+  FICTIVE_SETTINGS: 'hajaluz_fictive_settings'
 };
 
 export const dataService = {
@@ -240,11 +247,37 @@ export const dataService = {
     }
   },
 
+  // --- CONFIGURAÇÕES DE RASCUNHO (TEXTOS GLOBAIS) ---
+  getFictiveSettings: () => {
+    try {
+      const stored = localStorage.getItem(KEYS.FICTIVE_SETTINGS);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(DEFAULT_FICTIVE_SETTINGS));
+      return DEFAULT_FICTIVE_SETTINGS;
+    } catch (e) {
+      console.error("Erro ao carregar fictive settings:", e);
+      return DEFAULT_FICTIVE_SETTINGS;
+    }
+  },
+
+  saveFictiveSettings: (settings) => {
+    try {
+      localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(settings));
+      return true;
+    } catch (e) {
+      console.error("Erro ao salvar fictive settings:", e);
+      return false;
+    }
+  },
+
   // --- RESTAURAR PADRÕES DE FÁBRICA ---
   resetToDefaults: () => {
     try {
       localStorage.setItem(KEYS.PROJECTS, JSON.stringify(DEFAULT_PROJECTS));
       localStorage.setItem(KEYS.TEAM, JSON.stringify(DEFAULT_TEAM));
+      localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(DEFAULT_FICTIVE_SETTINGS));
       return true;
     } catch (e) {
       console.error("Erro ao restaurar padrões no localStorage:", e);
