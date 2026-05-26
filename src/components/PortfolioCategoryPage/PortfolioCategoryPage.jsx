@@ -469,6 +469,39 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const [activeFeaturedIndex, setActiveFeaturedIndex] = useState(0);
   const [isAnyVideoPlaying, setIsAnyVideoPlaying] = useState(false);
 
+  const getCategorizedProjects = () => {
+    const activeCatLower = category.toLowerCase();
+    const activeProjects = realProjects.filter(p => 
+      (p.category && p.category.toLowerCase() === activeCatLower) || 
+      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
+    );
+    
+    if (activeProjects.length === 0) {
+      return {
+        featuredProjs: [],
+        gridRealProjs: []
+      };
+    }
+    
+    // Find all explicitly marked featured projects
+    let featuredProjsList = activeProjects.filter(p => p.featured);
+    
+    // Fallback to first active project if none is marked featured
+    if (featuredProjsList.length === 0 && activeProjects.length > 0) {
+      featuredProjsList = [activeProjects[0]];
+    }
+    
+    const featuredTitles = featuredProjsList.map(p => p.title);
+    const gridRealProjs = activeProjects.filter(p => !featuredTitles.includes(p.title));
+    
+    return {
+      featuredProjs: featuredProjsList,
+      gridRealProjs
+    };
+  };
+
+  const { featuredProjs, gridRealProjs } = getCategorizedProjects();
+
   // Social authentication states
   const [socialUser, setSocialUser] = useState(null);
   const [activeAuthPlatform, setActiveAuthPlatform] = useState(null);
@@ -959,38 +992,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   const customFeatured = getCustomFeaturedProject();
 
-  const getCategorizedProjects = () => {
-    const activeCatLower = category.toLowerCase();
-    const activeProjects = realProjects.filter(p => 
-      (p.category && p.category.toLowerCase() === activeCatLower) || 
-      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
-    );
-    
-    if (activeProjects.length === 0) {
-      return {
-        featuredProjs: [],
-        gridRealProjs: []
-      };
-    }
-    
-    // Find all explicitly marked featured projects
-    let featuredProjsList = activeProjects.filter(p => p.featured);
-    
-    // Fallback to first active project if none is marked featured
-    if (featuredProjsList.length === 0 && activeProjects.length > 0) {
-      featuredProjsList = [activeProjects[0]];
-    }
-    
-    const featuredTitles = featuredProjsList.map(p => p.title);
-    const gridRealProjs = activeProjects.filter(p => !featuredTitles.includes(p.title));
-    
-    return {
-      featuredProjs: featuredProjsList,
-      gridRealProjs
-    };
-  };
-
-  const { featuredProjs, gridRealProjs } = getCategorizedProjects();
+  // getCategorizedProjects is now defined and called at the top of the component to prevent TDZ ReferenceError.
 
   const getFeaturedData = () => {
     if (customFeatured) {
