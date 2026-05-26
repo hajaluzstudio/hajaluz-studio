@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Plus, Trash2, Edit2, RotateCcw, User, Cpu, Film, Compass, Target, Sparkles, Monitor, Mic, Play, Award, Paintbrush, Type, Camera, FilmIcon, ShieldAlert, Check, Save, LogOut } from 'lucide-react';
 import { dataService } from '../../services/dataService';
+import { getYouTubeId } from '../../services/youtubeHelper';
 import './AdminPanel.css';
 
 const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
@@ -89,8 +90,17 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   // 6. Ações do Portfólio
   const handleAddOrEditProject = (e) => {
     e.preventDefault();
-    if (!projectForm.title || !projectForm.image || !projectForm.video) {
-      alert("Por favor, preencha o Título, Imagem e Vídeo.");
+    
+    const ytId = getYouTubeId(projectForm.video);
+    const isYt = !!ytId;
+
+    if (!projectForm.title || !projectForm.video) {
+      alert("Por favor, preencha o Título e o Vídeo.");
+      return;
+    }
+
+    if (!isYt && !projectForm.image) {
+      alert("Para vídeos que não são do YouTube, por favor defina ou carregue uma imagem de capa.");
       return;
     }
 
@@ -114,6 +124,31 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     dataService.saveProjects(updatedProjects);
     onDataChange && onDataChange();
     resetProjectForm();
+  };
+
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProjectForm(prev => ({ ...prev, image: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVideoFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 4.5 * 1024 * 1024) {
+        alert("ATENÇÃO: O arquivo de vídeo excede o limite recomendado (4.5MB). O salvamento no navegador (localStorage) pode falhar devido aos limites de armazenamento do cache local. Recomendamos usar links do YouTube ou Google Drive!");
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProjectForm(prev => ({ ...prev, video: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const startEditProject = (idx) => {
@@ -372,27 +407,50 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </div>
 
                         <div className="form-row">
-                          <label>URL da Capa (Caminho Local ou Web) *</label>
-                          <input 
-                            type="text" 
-                            value={projectForm.image}
-                            onChange={(e) => setProjectForm({ ...projectForm, image: e.target.value })}
-                            placeholder="Ex: /traco_e_tom.png ou link da imagem..."
-                            required
-                          />
-                          <span className="input-hint">Nota: Capas padrões estão na pasta public (/traco_e_tom.png, /destino_de_peao.png, etc.)</span>
+                          <label>Capa do Projeto (Imagem)</label>
+                          <div className="media-input-group">
+                            <input 
+                              type="text" 
+                              value={projectForm.image}
+                              onChange={(e) => setProjectForm({ ...projectForm, image: e.target.value })}
+                              placeholder="Ex: /traco_e_tom.png, link web ou Base64..."
+                              style={{ flex: 1 }}
+                            />
+                            <label className="file-upload-label glass-panel">
+                              📁 Carregar PC
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={handleImageFileChange} 
+                                style={{ display: 'none' }} 
+                              />
+                            </label>
+                          </div>
+                          <span className="input-hint">Opcional para links do YouTube (o sistema busca a capa automaticamente). Para outros formatos, insira um link ou envie do seu PC.</span>
                         </div>
 
                         <div className="form-row">
-                          <label>URL do Vídeo Loop (MP4 de Cinema) *</label>
-                          <input 
-                            type="text" 
-                            value={projectForm.video}
-                            onChange={(e) => setProjectForm({ ...projectForm, video: e.target.value })}
-                            placeholder="Ex: link do vídeo em mp4..."
-                            required
-                          />
-                          <span className="input-hint">Use links de CDN rápidos (como Mixkit ou Vimeo MP4 links diretos)</span>
+                          <label>Vídeo do Projeto (YouTube, Drive ou PC) *</label>
+                          <div className="media-input-group">
+                            <input 
+                              type="text" 
+                              value={projectForm.video}
+                              onChange={(e) => setProjectForm({ ...projectForm, video: e.target.value })}
+                              placeholder="Cole o link do YouTube, Google Drive ou link MP4..."
+                              required
+                              style={{ flex: 1 }}
+                            />
+                            <label className="file-upload-label glass-panel">
+                              📁 Carregar PC
+                              <input 
+                                type="file" 
+                                accept="video/*" 
+                                onChange={handleVideoFileChange} 
+                                style={{ display: 'none' }} 
+                              />
+                            </label>
+                          </div>
+                          <span className="input-hint">Suporta links do YouTube, Google Drive (links de compartilhamento padrão), CDN MP4 direto ou arquivos do PC (&lt; 4.5MB).</span>
                         </div>
 
                         <div className="form-buttons-row">

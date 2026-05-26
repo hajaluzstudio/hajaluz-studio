@@ -40,3 +40,39 @@ export const getYouTubeThumbnail = (url) => {
   // Usamos maxresdefault.jpg e caso falhe na renderização do HTML, o navegador exibe o alt ou o CSS cuida.
   return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 };
+
+/**
+ * Extrai o ID único de um arquivo do Google Drive.
+ * @param {string} url - A URL do arquivo do Google Drive
+ * @returns {string|null} - O ID do arquivo ou null se inválido
+ */
+export const getGoogleDriveId = (url) => {
+  if (!url) return null;
+  const reg1 = /\/d\/([a-zA-Z0-9_-]{25,})/;
+  const reg2 = /[?&]id=([a-zA-Z0-9_-]{25,})/;
+  const match1 = url.match(reg1);
+  if (match1) return match1[1];
+  const match2 = url.match(reg2);
+  if (match2) return match2[1];
+  return null;
+};
+
+/**
+ * Retorna se uma dada URL é um link do Google Drive.
+ * @param {string} url - A URL a ser testada
+ * @returns {boolean}
+ */
+export const isGoogleDriveUrl = (url) => {
+  if (!url) return false;
+  return getGoogleDriveId(url) !== null;
+};
+
+/**
+ * Converte um link de compartilhamento do Google Drive em um link de streaming direto de vídeo.
+ * @param {string} url - A URL original do Google Drive
+ * @returns {string} - A URL direta de download/stream
+ */
+export const getGoogleDriveDirectLink = (url) => {
+  const id = getGoogleDriveId(url);
+  return id ? `https://drive.google.com/uc?export=download&id=${id}` : url;
+};

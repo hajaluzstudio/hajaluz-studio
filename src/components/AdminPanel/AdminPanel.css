@@ -733,3 +733,34 @@
     padding: 1.5rem;
   }
 }
+
+/* Media input group with PC uploads */
+.media-input-group {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  width: 100%;
+}
+
+.file-upload-label {
+  background: rgba(230, 173, 69, 0.08) !important;
+  border: 1px solid rgba(230, 173, 69, 0.25) !important;
+  color: var(--color-accent-gold) !important;
+  padding: 0.72rem 1.2rem;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-upload-label:hover {
+  background: rgba(230, 173, 69, 0.15) !important;
+  border-color: var(--color-accent-gold) !important;
+  box-shadow: 0 0 15px rgba(230, 173, 69, 0.15);
+}

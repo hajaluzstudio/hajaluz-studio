@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, X } from 'lucide-react';
 import { dataService } from '../../services/dataService';
-import { getYouTubeId, getYouTubeThumbnail } from '../../services/youtubeHelper';
+import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink } from '../../services/youtubeHelper';
 import './PortfolioCategoryPage.css';
 
 const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpdateTrigger = 0 }) => {
-  const [lightboxVideoId, setLightboxVideoId] = useState(null);
+  const [lightboxMedia, setLightboxMedia] = useState(null);
   const [realProjects, setRealProjects] = useState([]);
   const [hoveredProjectIdx, setHoveredProjectIdx] = useState(null);
 
@@ -17,7 +17,11 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const handleCardClick = (proj) => {
     const ytId = getYouTubeId(proj.video);
     if (ytId) {
-      setLightboxVideoId(ytId);
+      setLightboxMedia({ type: 'youtube', src: ytId });
+    } else if (isGoogleDriveUrl(proj.video)) {
+      setLightboxMedia({ type: 'direct', src: getGoogleDriveDirectLink(proj.video) });
+    } else if (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co')) {
+      setLightboxMedia({ type: 'direct', src: proj.video });
     } else {
       window.open(proj.video, '_blank');
     }
@@ -396,17 +400,18 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
           </p>
         </div>
 
-        <div className="fictive-rectangles-grid">
+        <div className={`fictive-rectangles-grid ${category.toLowerCase() === 'reels' ? 'reels-grid' : ''}`}>
           {displayItems.map((item, idx) => {
             const isFictive = item.isFictive;
             const isHovered = hoveredProjectIdx === idx;
             const CardIcon = isFictive ? Icon : (categoryIcons[item.category?.toLowerCase()] || Target);
+            const isReels = category.toLowerCase() === 'reels';
 
             if (isFictive) {
               return (
                 <motion.div 
                   key={item.id}
-                  className="fictive-rectangle-card glass-panel"
+                  className={`fictive-rectangle-card glass-panel ${isReels ? 'reels-vertical' : ''}`}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
@@ -431,14 +436,17 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
             // Real Project Card rendered dynamically inside the subpage grid!
             const ytId = getYouTubeId(item.video);
             const isYt = !!ytId;
+            const isDrive = isGoogleDriveUrl(item.video);
             const coverImage = isYt && (!item.image || item.image.startsWith('/logo') || item.image === '' || item.image === '/favicon.svg') 
               ? getYouTubeThumbnail(item.video) 
               : item.image;
 
+            const videoSource = isDrive ? getGoogleDriveDirectLink(item.video) : item.video;
+
             return (
               <motion.div 
                 key={item.title + idx}
-                className="fictive-rectangle-card glass-panel real-project-subcard"
+                className={`fictive-rectangle-card glass-panel real-project-subcard ${isReels ? 'reels-vertical' : ''}`}
                 style={{ overflow: 'hidden', padding: 0, cursor: 'pointer' }}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -478,7 +486,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       />
                     ) : (
                       <video 
-                        src={item.video} 
+                        src={videoSource} 
                         loop 
                         muted 
                         playsInline 
@@ -528,15 +536,15 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
       {/* Cinematic Lightbox Video Player Modal */}
       <AnimatePresence>
-        {lightboxVideoId && (
+        {lightboxMedia && (
           <motion.div 
             className="lightbox-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setLightboxVideoId(null)}
+            onClick={() => setLightboxMedia(null)}
           >
-            <button className="lightbox-close-btn" onClick={() => setLightboxVideoId(null)} aria-label="Fechar cinema">
+            <button className="lightbox-close-btn" onClick={() => setLightboxMedia(null)} aria-label="Fechar cinema">
               <X size={24} />
             </button>
             
@@ -550,13 +558,23 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               style={{ maxWidth: '980px', width: '100%' }}
             >
               <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
-                <iframe 
-                  src={`https://www.youtube.com/embed/${lightboxVideoId}?autoplay=1&controls=1&modestbranding=1&rel=0`}
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  allowFullScreen
-                  title="Cinema Player"
-                />
+                {lightboxMedia.type === 'youtube' ? (
+                  <iframe 
+                    src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&controls=1&modestbranding=1&rel=0`}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                    title="Cinema Player"
+                  />
+                ) : (
+                  <video 
+                    src={lightboxMedia.src}
+                    controls
+                    autoPlay
+                    playsInline
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
+                  />
+                )}
               </div>
             </motion.div>
           </motion.div>

@@ -751,3 +751,35 @@
 .real-project-subcard {
   cursor: pointer;
 }
+
+/* Reels vertical card aspect ratio for subpages */
+.fictive-rectangle-card.reels-vertical {
+  aspect-ratio: 1 / 1.5 !important;
+}
+
+/* Responsive mobile 2-column grid override for Reels category page */
+@media (max-width: 768px) {
+  .fictive-rectangles-grid.reels-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem !important;
+  }
+  
+  .fictive-rectangles-grid.reels-grid .fictive-rect-content {
+    padding: 0.8rem 1rem !important;
+  }
+  
+  .fictive-rectangles-grid.reels-grid .fictive-rect-title {
+    font-size: 0.95rem !important;
+  }
+  
+  .fictive-rectangles-grid.reels-grid .fictive-rect-spec {
+    font-size: 0.6rem !important;
+  }
+  
+  .fictive-rectangles-grid.reels-grid .fictive-rect-badge {
+    top: 0.8rem !important;
+    left: 0.8rem !important;
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.5rem !important;
+  }
+}
