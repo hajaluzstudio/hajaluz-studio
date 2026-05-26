@@ -13,6 +13,12 @@ const compressImage = (base64OrFile) => {
     const img = new Image();
     const isFile = base64OrFile instanceof File;
     const url = isFile ? URL.createObjectURL(base64OrFile) : base64OrFile;
+    
+    // Detect PNG format to preserve transparency (alpha channel)
+    const isPng = isFile 
+      ? base64OrFile.type === 'image/png' 
+      : (typeof base64OrFile === 'string' && base64OrFile.startsWith('data:image/png'));
+
     img.src = url;
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -34,8 +40,16 @@ const compressImage = (base64OrFile) => {
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
+      
+      // Clear canvas with transparent pixels (important for PNG transparency)
+      ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      
+      // Preserve transparency by saving as image/png for PNG files
+      const compressedDataUrl = isPng 
+        ? canvas.toDataURL('image/png') 
+        : canvas.toDataURL('image/jpeg', 0.7);
+
       if (isFile) URL.revokeObjectURL(url);
       resolve(compressedDataUrl);
     };
