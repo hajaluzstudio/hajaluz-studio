@@ -5,6 +5,16 @@ import { dataService } from '../../services/dataService';
 import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId } from '../../services/youtubeHelper';
 import './PortfolioCategoryPage.css';
 
+const formatViews = (views) => {
+  if (!views) return '';
+  const rawNumStr = String(views).replace(/[\s.,]/g, '');
+  if (/^\d+$/.test(rawNumStr)) {
+    const num = parseInt(rawNumStr, 10);
+    return num.toLocaleString('pt-BR');
+  }
+  return views;
+};
+
 const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment, category, socialUser, onSocialLoginTrigger, onSocialLogout, onDeleteComment, isAdmin }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [newComment, setNewComment] = useState('');
@@ -253,9 +263,25 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
             )}
           </span>
           {project.views && (
-            <span className="social-views-count" style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', fontWeight: 500, letterSpacing: '0.02em' }}>
-              {project.views} visualizações
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.2rem' }}>
+              <span className="social-views-count" style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', fontWeight: 500, letterSpacing: '0.02em', margin: 0 }}>
+                {formatViews(project.views)} visualizações
+              </span>
+              {project.originalUrl && (
+                <a 
+                  href={project.originalUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  style={{ fontSize: '0.62rem', color: 'var(--color-accent-gold)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', textDecoration: 'none', borderBottom: '1px dashed rgba(230, 173, 69, 0.4)', paddingBottom: '1px', opacity: 0.85, transition: 'all 0.3s ease' }}
+                  onMouseEnter={(e) => e.target.style.opacity = '1'}
+                  onMouseLeave={(e) => e.target.style.opacity = '0.85'}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ExternalLink size={8} />
+                  <span>Conferir Original</span>
+                </a>
+              )}
+            </div>
           )}
         </div>
 
@@ -470,13 +496,19 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   const handleDeleteComment = (projectTitle, commentId) => {
     if (!window.confirm("Deseja realmente excluir este comentário?")) return;
+    
+    const defaultFallback = [
+      { id: 1, author: 'Felipe Costa', text: 'Excelente design! Identidade visual de luxo.', date: '12/04/2026' },
+      { id: 2, author: 'Bezaleel', text: 'Conceito geométrico bem estruturado nas margens.', date: '14/04/2026' }
+    ];
+
     const allProjs = dataService.getProjects();
     const updated = allProjs.map(p => {
       if (p.title === projectTitle) {
-        const currentComments = p.comments || [];
+        const currentComments = p.comments !== undefined && p.comments !== null ? p.comments : defaultFallback;
         return {
           ...p,
-          comments: currentComments.filter(c => c.id !== commentId)
+          comments: currentComments.filter(c => String(c.id) !== String(commentId))
         };
       }
       return p;
@@ -486,10 +518,10 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
     // Update active lightboxMedia comments immediately if matches!
     if (lightboxMedia && lightboxMedia.title === projectTitle) {
-      const currentComments = lightboxMedia.comments || [];
+      const currentComments = lightboxMedia.comments !== undefined && lightboxMedia.comments !== null ? lightboxMedia.comments : defaultFallback;
       setLightboxMedia(prev => ({
         ...prev,
-        comments: currentComments.filter(c => c.id !== commentId)
+        comments: currentComments.filter(c => String(c.id) !== String(commentId))
       }));
     }
   };
@@ -548,7 +580,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     if (lightboxMedia && lightboxMedia.title === projectTitle) {
       setLightboxMedia(prev => ({
         ...prev,
-        likes: !prev.likedByUser ? (prev.likes || 0) + 1 : Math.max(0, (prev.likes || 0) - 1),
+        likes: !prev.likedByUser ? (prev.likes || 0) + 1 : Math.max(0, (prev.likedByUser || 0) - 1),
         likedByUser: !prev.likedByUser
       }));
     }
@@ -556,10 +588,16 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   const handleAddComment = (projectTitle, author, text) => {
     if (!text.trim()) return;
+    
+    const defaultFallback = [
+      { id: 1, author: 'Felipe Costa', text: 'Excelente design! Identidade visual de luxo.', date: '12/04/2026' },
+      { id: 2, author: 'Bezaleel', text: 'Conceito geométrico bem estruturado nas margens.', date: '14/04/2026' }
+    ];
+
     const allProjs = dataService.getProjects();
     const updated = allProjs.map(p => {
       if (p.title === projectTitle) {
-        const currentComments = p.comments || [];
+        const currentComments = p.comments !== undefined && p.comments !== null ? p.comments : defaultFallback;
         const newC = {
           id: Date.now(),
           author: author.trim() || 'Visitante Anônimo',
@@ -578,7 +616,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
     // Update active lightboxMedia comments immediately!
     if (lightboxMedia && lightboxMedia.title === projectTitle) {
-      const currentComments = lightboxMedia.comments || [];
+      const currentComments = lightboxMedia.comments !== undefined && lightboxMedia.comments !== null ? lightboxMedia.comments : defaultFallback;
       const newC = {
         id: Date.now(),
         author: author.trim() || 'Visitante Anônimo',
@@ -611,7 +649,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         likes: projectLikes,
         likedByUser: !!proj.likedByUser,
         comments: projectComments,
-        views: proj.views || ''
+        views: proj.views || '',
+        originalUrl: proj.originalUrl || ''
       });
       return;
     }
@@ -622,7 +661,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
       likes: projectLikes,
       likedByUser: !!proj.likedByUser,
       comments: projectComments,
-      views: proj.views || ''
+      views: proj.views || '',
+      originalUrl: proj.originalUrl || ''
     };
 
     if (ytId) {
@@ -1141,7 +1181,9 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         currentIndex: 0,
                         likes: projLikes,
                         likedByUser: !!item.project?.likedByUser,
-                        comments: projComments
+                        comments: projComments,
+                        views: item.project?.views || '',
+                        originalUrl: item.project?.originalUrl || ''
                       });
                     }}
                   >
@@ -1337,9 +1379,22 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                             {lightboxMedia.title}
                           </h3>
                           {lightboxMedia.views && (
-                            <span style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', marginTop: '0.2rem', fontWeight: 500 }}>
-                              {lightboxMedia.views} visualizações
-                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                              <span style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', marginTop: '0.2rem', fontWeight: 500, lineHeight: 1 }}>
+                                {formatViews(lightboxMedia.views)} visualizações
+                              </span>
+                              {lightboxMedia.originalUrl && (
+                                <a 
+                                  href={lightboxMedia.originalUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  style={{ fontSize: '0.62rem', color: 'var(--color-accent-gold)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', textDecoration: 'none', width: 'fit-content', borderBottom: '1px dashed rgba(230,173,69,0.4)', paddingBottom: '1px', marginTop: '0.1rem' }}
+                                >
+                                  <ExternalLink size={8} />
+                                  <span>Conferir Original</span>
+                                </a>
+                              )}
+                            </div>
                           )}
                         </div>
                         
@@ -1558,9 +1613,22 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                           {lightboxMedia.title}
                         </h3>
                         {lightboxMedia.views && (
-                          <span style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', marginTop: '0.2rem', fontWeight: 500 }}>
-                            {lightboxMedia.views} visualizações
-                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', marginTop: '0.2rem', fontWeight: 500, lineHeight: 1 }}>
+                              {formatViews(lightboxMedia.views)} visualizações
+                            </span>
+                            {lightboxMedia.originalUrl && (
+                              <a 
+                                href={lightboxMedia.originalUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                style={{ fontSize: '0.62rem', color: 'var(--color-accent-gold)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', textDecoration: 'none', width: 'fit-content', borderBottom: '1px dashed rgba(230,173,69,0.4)', paddingBottom: '1px', marginTop: '0.1rem' }}
+                              >
+                                <ExternalLink size={8} />
+                                <span>Conferir Original</span>
+                              </a>
+                            )}
+                          </div>
                         )}
                       </div>
                       

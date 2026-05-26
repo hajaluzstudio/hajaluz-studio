@@ -169,7 +169,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     role: '',
     team: '',
     strategy: '',
-    views: ''
+    views: '',
+    originalUrl: ''
   });
 
   // 3.2 Equipe
@@ -436,7 +437,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       role: proj.role || '',
       team: proj.team || '',
       strategy: proj.strategy || '',
-      views: proj.views || ''
+      views: proj.views || '',
+      originalUrl: proj.originalUrl || ''
     });
   };
 
@@ -465,7 +467,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       role: '',
       team: '',
       strategy: '',
-      views: ''
+      views: '',
+      originalUrl: ''
     });
   };
 
@@ -720,6 +723,17 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             placeholder="Ex: 15K, 2.4M, 153.400..."
                           />
                           <span className="input-hint">Opcional. Adiciona uma contagem elegante de visualizações ao card do post e no Cinema Player.</span>
+                        </div>
+
+                        <div className="form-row">
+                          <label>Link do Vídeo Original (Para Comprovar Visualizações)</label>
+                          <input 
+                            type="text" 
+                            value={projectForm.originalUrl || ''}
+                            onChange={(e) => setProjectForm({ ...projectForm, originalUrl: e.target.value })}
+                            placeholder="Cole o link original do Instagram Reels, YouTube ou TikTok..."
+                          />
+                          <span className="input-hint">Opcional. Adiciona um botão clicável "Conferir Vídeo Original" para os visitantes comprovarem as métricas sociais reais.</span>
                         </div>
 
                         <div className="form-row">
