@@ -273,7 +273,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                     {isHovered && (
                       isYt ? (
                         <iframe 
-                          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
+                          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&vq=hd1080`}
                           className={`card-video video-active`}
                           allow="autoplay; encrypted-media"
                           style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
@@ -411,7 +411,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                       <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
                         {lightboxMedia.video.type === 'youtube' ? (
                           <iframe 
-                            src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=0&controls=1&modestbranding=1&rel=0`}
+                            src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=1&loop=1&playlist=${lightboxMedia.video.src}&controls=1&modestbranding=1&rel=0&vq=hd1080`}
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                             allow="autoplay; encrypted-media; picture-in-picture"
                             allowFullScreen
@@ -523,7 +523,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                 <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
                   {lightboxMedia.type === 'youtube' ? (
                     <iframe 
-                      src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&controls=1&modestbranding=1&rel=0`}
+                      src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0&vq=hd1080`}
                       style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                       allow="autoplay; encrypted-media; picture-in-picture"
                       allowFullScreen

@@ -103,13 +103,25 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
       </div>
 
       {/* 2. Media Section (Destaque Principal) */}
-      <div className={`social-card-media ${isReels ? 'reels-vertical' : ''}`}>
+      <div 
+        className={`social-card-media ${isReels ? 'reels-vertical' : ''}`}
+        onMouseEnter={() => {
+          if (isReels) {
+            setIsPlaying(true);
+          }
+        }}
+        onMouseLeave={() => {
+          if (isReels) {
+            setIsPlaying(false);
+          }
+        }}
+      >
         {hasVideo ? (
           hasCustomCover && !isPlaying ? (
             <div 
               className="social-video-cover-wrap" 
               onClick={() => { setIsPlaying(true); setLocalMuted(false); }}
-              title="Clique para reproduzir o vídeo"
+              title={isReels ? "Passe o mouse para reproduzir o vídeo" : "Clique para reproduzir o vídeo"}
             >
               <img 
                 src={project.image} 
@@ -120,14 +132,14 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
                 <div className="social-play-button-glow">
                   <Play size={28} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" style={{ marginLeft: '3px' }} />
                 </div>
-                <span className="social-play-label">Assistir Produção</span>
+                <span className="social-play-label">{isReels ? "Hover para Assistir" : "Assistir Produção"}</span>
               </div>
             </div>
           ) : (
             <div className="social-video-frame">
               {isYt ? (
                 <iframe 
-                  src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&loop=1&playlist=${ytId}&controls=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
+                  src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&loop=1&playlist=${ytId}&controls=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&vq=hd1080`}
                   className="social-video-element"
                   allow="autoplay; encrypted-media; picture-in-picture"
                   style={{ border: 'none', width: '100%', height: '100%' }}
@@ -1410,7 +1422,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
                         {lightboxMedia.video.type === 'youtube' ? (
                           <iframe 
-                            src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=1&loop=1&playlist=${lightboxMedia.video.src}&controls=1&modestbranding=1&rel=0`}
+                            src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=1&loop=1&playlist=${lightboxMedia.video.src}&controls=1&modestbranding=1&rel=0&vq=hd1080`}
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                             allow="autoplay; encrypted-media; picture-in-picture"
                             allowFullScreen
@@ -1654,7 +1666,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                   <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
                     {lightboxMedia.type === 'youtube' ? (
                       <iframe 
-                        src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0`}
+                        src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0&vq=hd1080`}
                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                         allow="autoplay; encrypted-media; picture-in-picture"
                         allowFullScreen
