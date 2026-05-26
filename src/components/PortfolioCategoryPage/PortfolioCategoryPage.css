@@ -754,7 +754,7 @@
 
 /* Reels vertical card aspect ratio for subpages */
 .fictive-rectangle-card.reels-vertical {
-  aspect-ratio: 1 / 1.5 !important;
+  aspect-ratio: 9 / 16 !important;
 }
 
 /* Responsive mobile 2-column grid override for Reels category page */
@@ -2062,4 +2062,473 @@
   .social-card-media {
     aspect-ratio: 1.2 / 1;
   }
+}
+
+/* Reels actual vertical feed cards styling */
+.social-post-card.reels-vertical {
+  max-width: 440px !important;
+  margin: 0 auto 3rem auto;
+}
+
+.social-card-media.reels-vertical {
+  aspect-ratio: 9 / 16 !important;
+  width: 100% !important;
+  height: auto !important;
+  background-color: #000000 !important;
+}
+
+@media (max-width: 480px) {
+  .social-post-card.reels-vertical {
+    max-width: 100% !important;
+    margin: 0 0 2rem 0;
+  }
+}
+
+/* ==========================================================================
+   HAJA LUZ STUDIO // SOCIAL SIGN-IN, MODERATION & PREMIUM MEDIA INTERACTION
+   ========================================================================== */
+
+/* 1. Cover Image Swap with Play Button Overlay */
+.social-video-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #030303;
+}
+
+.social-video-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+}
+
+.social-video-cover-wrap:hover .social-video-cover-img {
+  transform: scale(1.03);
+  filter: brightness(0.75) contrast(1.05);
+}
+
+.social-video-play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  background: rgba(18, 6, 5, 0.45);
+  transition: background 0.4s ease;
+  z-index: 10;
+}
+
+.social-video-cover-wrap:hover .social-video-play-overlay {
+  background: rgba(18, 6, 5, 0.55);
+}
+
+.social-play-button-glow {
+  width: 68px;
+  height: 68px;
+  background: rgba(28, 10, 9, 0.8);
+  border: 2px solid var(--color-accent-gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 25px rgba(230, 173, 69, 0.3), inset 0 0 10px rgba(230, 173, 69, 0.2);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.social-video-cover-wrap:hover .social-play-button-glow {
+  transform: scale(1.12);
+  background: rgba(230, 173, 69, 0.15);
+  box-shadow: 0 0 40px rgba(230, 173, 69, 0.65), inset 0 0 15px rgba(230, 173, 69, 0.3);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.social-play-label {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 10px rgba(230, 173, 69, 0.3);
+  transition: all 0.4s ease;
+}
+
+.social-video-cover-wrap:hover .social-play-label {
+  color: var(--color-accent-gold);
+  text-shadow: 0 0 15px rgba(230, 173, 69, 0.5);
+  letter-spacing: 0.18em;
+}
+
+/* Force perfect cover fit in Reels layout to eliminate black bars */
+.social-post-card.reels-vertical .social-video-element,
+.social-post-card.reels-vertical .social-contain-image,
+.social-post-card.reels-vertical .social-video-cover-img {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 2. Social Login comments grid */
+.social-comment-login-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1.2rem;
+  background: rgba(28, 10, 9, 0.35);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  align-items: center;
+}
+
+.social-login-grid-lbl {
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.social-login-grid-buttons {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.social-grid-login-btn {
+  flex: 1;
+  max-width: 130px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.8rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.social-grid-login-btn.login-google {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+}
+
+.social-grid-login-btn.login-google:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.08);
+}
+
+.social-grid-login-btn.login-instagram {
+  background: rgba(228, 64, 95, 0.05);
+  border: 1px solid rgba(228, 64, 95, 0.25);
+  color: #e4405f;
+}
+
+.social-grid-login-btn.login-instagram:hover {
+  background: rgba(228, 64, 95, 0.18);
+  border-color: #e4405f;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(228, 64, 95, 0.2);
+}
+
+.social-grid-login-btn.login-facebook {
+  background: rgba(24, 119, 242, 0.05);
+  border: 1px solid rgba(24, 119, 242, 0.25);
+  color: #1877f2;
+}
+
+.social-grid-login-btn.login-facebook:hover {
+  background: rgba(24, 119, 242, 0.18);
+  border-color: #1877f2;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(24, 119, 242, 0.2);
+}
+
+/* Authenticated badge and comment container */
+.social-comment-inputs-wrap.authenticated {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.social-comment-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.platform-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.platform-status-dot.google {
+  background-color: #e6ad45;
+  color: #e6ad45;
+}
+
+.platform-status-dot.instagram {
+  background-color: #e4405f;
+  color: #e4405f;
+}
+
+.platform-status-dot.facebook {
+  background-color: #1877f2;
+  color: #1877f2;
+}
+
+.social-user-logout-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent-gold);
+  cursor: pointer;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0;
+  margin-left: 0.4rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 0.4rem;
+  text-transform: uppercase;
+}
+
+.social-user-logout-btn:hover {
+  color: #ffffff;
+}
+
+/* Comment Moderation Delete Button */
+.social-comment-delete-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-dimmed);
+  cursor: pointer;
+  padding: 0.15rem;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.4;
+}
+
+.social-comment-line:hover .social-comment-delete-btn {
+  opacity: 1;
+}
+
+.social-comment-delete-btn:hover {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+/* 3. Interactive Mock Social Auth Popups */
+.social-auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(3, 3, 3, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100000;
+  padding: 1.5rem;
+}
+
+.social-auth-modal-box {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(24, 8, 7, 0.9) !important;
+  border: 1.5px solid rgba(230, 173, 69, 0.2) !important;
+  border-radius: 16px;
+  padding: 2.5rem;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(230, 173, 69, 0.08);
+}
+
+.auth-brand-google { border-color: rgba(255, 255, 255, 0.15) !important; }
+.auth-brand-instagram { border-color: rgba(228, 64, 95, 0.3) !important; }
+.auth-brand-facebook { border-color: rgba(24, 119, 242, 0.3) !important; }
+
+.auth-modal-close-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--color-text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.auth-brand-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-platform-icon {
+  margin: 0 auto 1.2rem auto;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.auth-platform-icon.google { color: var(--color-accent-gold); }
+.auth-platform-icon.instagram { color: #e4405f; }
+.auth-platform-icon.facebook { color: #1877f2; }
+
+.auth-brand-header h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: #ffffff;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.auth-brand-header p {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 300;
+}
+
+.auth-form-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.auth-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.auth-input-group label {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.65rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  color: var(--color-accent-gold);
+  text-transform: uppercase;
+}
+
+.auth-username-input {
+  background: #080808;
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: #ffffff;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.auth-username-input:focus {
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 12px rgba(230, 173, 69, 0.15);
+  background: #0d0d0d;
+}
+
+.auth-modal-submit-btn {
+  background: var(--color-accent-gold);
+  border: none;
+  color: #000000;
+  padding: 0.85rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-modal-submit-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.auth-secure-notice {
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  color: var(--color-text-dimmed);
+  letter-spacing: 0.02em;
+}
+
+/* Spinner and Authentication animations */
+.auth-loading-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+  gap: 1rem;
+}
+
+.auth-spinner-glow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 10px var(--color-accent-gold));
+}
+
+.auth-loading-text {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.auth-loading-sub {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.62rem;
+  color: var(--color-accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }

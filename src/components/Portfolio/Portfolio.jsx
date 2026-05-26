@@ -137,18 +137,19 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
         description: proj.description || '',
         video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : isGoogleDriveUrl(proj.video) ? { type: 'drive', src: getGoogleDriveId(proj.video) } : { type: 'direct', src: proj.video }) : null,
         images: proj.carouselImages || [],
-        currentIndex: 0
+        currentIndex: 0,
+        views: proj.views || ''
       });
       return;
     }
 
     const ytId = getYouTubeId(proj.video);
     if (ytId) {
-      setLightboxMedia({ type: 'youtube', src: ytId });
+      setLightboxMedia({ type: 'youtube', src: ytId, title: proj.title, views: proj.views || '' });
     } else if (isGoogleDriveUrl(proj.video)) {
-      setLightboxMedia({ type: 'drive', src: getGoogleDriveId(proj.video) });
+      setLightboxMedia({ type: 'drive', src: getGoogleDriveId(proj.video), title: proj.title, views: proj.views || '' });
     } else if (proj.video && (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co'))) {
-      setLightboxMedia({ type: 'direct', src: proj.video });
+      setLightboxMedia({ type: 'direct', src: proj.video, title: proj.title, views: proj.views || '' });
     } else {
       window.open(proj.video || proj.image, '_blank');
     }
@@ -217,7 +218,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
             const ytId = getYouTubeId(proj.video);
             const isYt = !!ytId;
             const isDrive = isGoogleDriveUrl(proj.video);
-            const hasCustomCover = proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.svg';
+            const hasCustomCover = proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.png';
             const videoSource = isDrive ? getGoogleDriveDirectLink(proj.video) : proj.video;
             const isReels = proj.category === 'Reels' || proj.secondaryCategory === 'Reels';
 
@@ -257,7 +258,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                       />
                     ) : (
                       <img 
-                        src={coverImage || '/favicon.svg'} 
+                        src={coverImage || '/favicon.png'} 
                         alt={proj.title} 
                         className={`card-image ${isHovered ? 'image-fade' : ''}`} 
                         onError={(e) => {
@@ -279,13 +280,55 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                           title={proj.title}
                         />
                       ) : isDrive ? (
-                        <iframe 
-                          src={`https://drive.google.com/file/d/${getGoogleDriveId(proj.video)}/preview`}
-                          className={`card-video video-active`}
-                          allow="autoplay; encrypted-media"
-                          style={{ border: 'none', pointerEvents: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}
-                          title={proj.title}
-                        />
+                        <div 
+                          className="card-video video-active drive-hover-placeholder" 
+                          style={{ 
+                            position: 'absolute', 
+                            top: 0, 
+                            left: 0, 
+                            width: '100%', 
+                            height: '100%', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            background: 'rgba(5, 3, 2, 0.78)', 
+                            border: '1.5px solid rgba(230, 173, 69, 0.35)', 
+                            gap: '0.8rem', 
+                            zIndex: 2,
+                            backdropFilter: 'blur(3px)'
+                          }}
+                        >
+                          <div 
+                            style={{ 
+                              width: '46px', 
+                              height: '46px', 
+                              borderRadius: '50%', 
+                              background: 'rgba(230, 173, 69, 0.12)', 
+                              border: '1.5px solid var(--color-accent-gold)', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center', 
+                              color: 'var(--color-accent-gold)', 
+                              boxShadow: '0 0 18px rgba(230, 173, 69, 0.35)',
+                              animation: 'pulse-star 2s infinite ease-in-out'
+                            }}
+                          >
+                            <Play size={18} fill="var(--color-accent-gold)" style={{ marginLeft: '2px' }} />
+                          </div>
+                          <span 
+                            style={{ 
+                              fontSize: '0.6rem', 
+                              fontFamily: 'Space Grotesk, monospace', 
+                              color: 'var(--color-accent-gold)', 
+                              textTransform: 'uppercase', 
+                              letterSpacing: '0.1em',
+                              fontWeight: 600
+                            }}
+                          >
+                            Abrir no Cinema
+                          </span>
+                        </div>
                       ) : (
                         <video 
                           src={videoSource} 
@@ -395,10 +438,15 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
 
                     {/* Event Metadata (Title and Description) */}
                     <div className="event-info-block" style={{ textAlign: 'left' }}>
-                      <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#fff', marginBottom: '0.6rem', letterSpacing: '-0.01em', fontWeight: 600 }}>
+                      <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#fff', marginBottom: '0.2rem', letterSpacing: '-0.01em', fontWeight: 600 }}>
                         {lightboxMedia.title}
                       </h3>
-                      <p className="event-lightbox-desc" style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: '1.6', fontWeight: 300 }}>
+                      {lightboxMedia.views && (
+                        <span style={{ fontSize: '0.78rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', display: 'block', marginBottom: '0.8rem', fontWeight: 500 }}>
+                          {lightboxMedia.views} visualizações
+                        </span>
+                      )}
+                      <p className="event-lightbox-desc" style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: '1.6', fontWeight: 300, marginTop: 0 }}>
                         {lightboxMedia.description}
                       </p>
                     </div>

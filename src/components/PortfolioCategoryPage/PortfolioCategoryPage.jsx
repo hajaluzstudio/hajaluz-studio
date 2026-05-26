@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, Heart, Volume2, VolumeX, Send, X } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, Heart, Volume2, VolumeX, Send, X, Trash2, Loader2 } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId } from '../../services/youtubeHelper';
 import './PortfolioCategoryPage.css';
 
-const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment }) => {
+const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment, category, socialUser, onSocialLoginTrigger, onSocialLogout, onDeleteComment, isAdmin }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [authorName, setAuthorName] = useState('');
   const [newComment, setNewComment] = useState('');
   const [localMuted, setLocalMuted] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const commentInputRef = React.useRef(null);
 
   // Automatic slideshow interval for this specific project
@@ -57,6 +57,7 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
   const isDrive = project.video ? isGoogleDriveUrl(project.video) : false;
   const videoSource = isDrive ? getGoogleDriveDirectLink(project.video) : project.video;
   const hasVideo = !!project.video;
+  const isReels = (category?.toLowerCase() === 'reels') || (project.category?.toLowerCase() === 'reels') || (project.secondaryCategory?.toLowerCase() === 'reels');
 
   const handleWhatsAppBriefing = (e) => {
     e.stopPropagation();
@@ -68,8 +69,10 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
   const shouldTruncate = descText.length > 150;
   const displayText = isExpanded ? descText : (shouldTruncate ? `${descText.slice(0, 140)}...` : descText);
 
+  const hasCustomCover = project.image && !project.image.startsWith('/logo') && project.image !== '' && project.image !== '/favicon.png';
+
   return (
-    <div className={`social-post-card glass-panel ${project.featured ? 'featured-glow-card' : ''}`}>
+    <div className={`social-post-card glass-panel ${project.featured ? 'featured-glow-card' : ''} ${isReels ? 'reels-vertical' : ''}`}>
       {/* 1. Header (Instagram Style) */}
       <div className="social-card-header">
         <div className="social-header-profile">
@@ -90,46 +93,66 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
       </div>
 
       {/* 2. Media Section (Destaque Principal) */}
-      <div className="social-card-media">
+      <div className={`social-card-media ${isReels ? 'reels-vertical' : ''}`}>
         {hasVideo ? (
-          <div className="social-video-frame">
-            {isYt ? (
-              <iframe 
-                src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
-                className="social-video-element"
-                allow="autoplay; encrypted-media; picture-in-picture"
-                style={{ border: 'none', width: '100%', height: '100%' }}
-                title={project.title}
+          hasCustomCover && !isPlaying ? (
+            <div 
+              className="social-video-cover-wrap" 
+              onClick={() => { setIsPlaying(true); setLocalMuted(false); }}
+              title="Clique para reproduzir o vídeo"
+            >
+              <img 
+                src={project.image} 
+                alt={project.title} 
+                className="social-video-cover-img"
               />
-            ) : isDrive ? (
-              <iframe 
-                src={`https://drive.google.com/file/d/${getGoogleDriveId(project.video)}/preview`}
-                className="social-video-element"
-                allow="autoplay; encrypted-media"
-                style={{ border: 'none', width: '100%', height: '100%' }}
-                title={project.title}
-              />
-            ) : (
-              <>
-                <video 
-                  src={videoSource}
-                  loop
-                  autoPlay
-                  muted={localMuted}
-                  playsInline
+              <div className="social-video-play-overlay">
+                <div className="social-play-button-glow">
+                  <Play size={28} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" style={{ marginLeft: '3px' }} />
+                </div>
+                <span className="social-play-label">Assistir Produção</span>
+              </div>
+            </div>
+          ) : (
+            <div className="social-video-frame">
+              {isYt ? (
+                <iframe 
+                  src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&loop=1&playlist=${ytId}&controls=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
                   className="social-video-element"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  style={{ border: 'none', width: '100%', height: '100%' }}
+                  title={project.title}
                 />
-                <button 
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setLocalMuted(!localMuted); }}
-                  className="social-video-mute-btn"
-                  title={localMuted ? "Ativar Áudio" : "Silenciar Áudio"}
-                >
-                  {localMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                </button>
-              </>
-            )}
-          </div>
+              ) : isDrive ? (
+                <iframe 
+                  src={`https://drive.google.com/file/d/${getGoogleDriveId(project.video)}/preview`}
+                  className="social-video-element"
+                  allow="autoplay; encrypted-media"
+                  style={{ border: 'none', width: '100%', height: '100%' }}
+                  title={project.title}
+                />
+              ) : (
+                <>
+                  <video 
+                    src={videoSource}
+                    loop
+                    autoPlay
+                    muted={localMuted}
+                    playsInline
+                    className="social-video-element"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={(e) => { e.stopPropagation(); setLocalMuted(!localMuted); }}
+                    className="social-video-mute-btn"
+                    title={localMuted ? "Ativar Áudio" : "Silenciar Áudio"}
+                  >
+                    {localMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                  </button>
+                </>
+              )}
+            </div>
+          )
         ) : images.length > 0 ? (
           <div className="social-image-carousel">
             <div className="social-active-image-wrapper">
@@ -189,7 +212,7 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
       <div className="social-actions-bar">
         <div className="social-actions-left">
           <button 
-            type="button"
+            type="button" 
             onClick={(e) => { e.stopPropagation(); onLikeClick && onLikeClick(project.title); }}
             className={`social-action-btn like-btn ${isLiked ? 'liked' : ''}`}
             title="Curtir"
@@ -198,7 +221,7 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
           </button>
           
           <button 
-            type="button"
+            type="button" 
             onClick={handleActionComment}
             className="social-action-btn comment-btn"
             title="Comentar"
@@ -208,7 +231,7 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
         </div>
 
         <button 
-          type="button"
+          type="button" 
           onClick={handleWhatsAppBriefing}
           className="social-action-btn share-btn"
           title="Solicitar Briefing"
@@ -220,14 +243,21 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
 
       {/* 4. Likes & Legend Details */}
       <div className="social-card-details">
-        {/* Likes count */}
-        <span className="social-likes-count">
-          {isLiked ? (
-            <>Curtido por <strong>você</strong> e <strong>{likesCount - 1} outras pessoas</strong></>
-          ) : (
-            <><strong>{likesCount} curtidas</strong></>
+        {/* Likes & Views Metrics Row */}
+        <div className="social-metrics-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <span className="social-likes-count" style={{ margin: 0 }}>
+            {isLiked ? (
+              <>Curtido por <strong>você</strong> e <strong>{likesCount - 1} outras pessoas</strong></>
+            ) : (
+              <><strong>{likesCount} curtidas</strong></>
+            )}
+          </span>
+          {project.views && (
+            <span className="social-views-count" style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', fontWeight: 500, letterSpacing: '0.02em' }}>
+              {project.views} visualizações
+            </span>
           )}
-        </span>
+        </div>
 
         {/* Caption */}
         <div className="social-caption-box">
@@ -278,54 +308,107 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
         </span>
         
         <div className="social-comments-scrollable">
-          {commentsList.map((c) => (
-            <div key={c.id} className="social-comment-line">
-              <div className="social-comment-line-content">
-                <span className="social-comment-author"><strong>{c.author}</strong></span>
-                <span className="social-comment-text">{c.text}</span>
+          {commentsList.map((c) => {
+            const isAuthor = socialUser && socialUser.name === c.author;
+            const canDelete = isAdmin || isAuthor;
+
+            return (
+              <div key={c.id} className="social-comment-line">
+                <div className="social-comment-line-content">
+                  <span className="social-comment-author"><strong>{c.author}</strong></span>
+                  <span className="social-comment-text">{c.text}</span>
+                </div>
+                <div className="social-comment-meta-right" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span className="social-comment-date">{c.date}</span>
+                  {canDelete && (
+                    <button 
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); onDeleteComment && onDeleteComment(project.title, c.id); }}
+                      className="social-comment-delete-btn"
+                      title="Excluir Comentário"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  )}
+                </div>
               </div>
-              <span className="social-comment-date">{c.date}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* 6. Inline Add Comment Input */}
-      <form 
-        onSubmit={(e) => { 
-          e.preventDefault(); 
-          onAddComment && onAddComment(project.title, authorName, newComment); 
-          setNewComment(''); 
-          setAuthorName(''); 
-        }} 
-        className="social-comment-form"
-      >
-        <div className="social-comment-inputs-wrap">
-          <input 
-            type="text" 
-            placeholder="Seu Nome" 
-            value={authorName} 
-            onChange={(e) => setAuthorName(e.target.value)}
-            className="social-comment-name-input"
-          />
-          <input 
-            ref={commentInputRef}
-            type="text" 
-            placeholder="Adicione um comentário..." 
-            value={newComment} 
-            onChange={(e) => setNewComment(e.target.value)}
-            className="social-comment-text-input"
-            required
-          />
+      {/* 6. Inline Add Comment Input with Social Auth Protection */}
+      {!socialUser ? (
+        <div className="social-comment-login-grid">
+          <span className="social-login-grid-lbl">Conecte-se para comentar:</span>
+          <div className="social-login-grid-buttons">
+            <button 
+              type="button" 
+              onClick={(e) => { e.stopPropagation(); onSocialLoginTrigger && onSocialLoginTrigger('google'); }}
+              className="social-grid-login-btn login-google"
+            >
+              <Compass size={13} style={{ marginRight: '4px' }} />
+              <span>Google</span>
+            </button>
+            <button 
+              type="button" 
+              onClick={(e) => { e.stopPropagation(); onSocialLoginTrigger && onSocialLoginTrigger('instagram'); }}
+              className="social-grid-login-btn login-instagram"
+            >
+              <Camera size={13} style={{ marginRight: '4px' }} />
+              <span>Instagram</span>
+            </button>
+            <button 
+              type="button" 
+              onClick={(e) => { e.stopPropagation(); onSocialLoginTrigger && onSocialLoginTrigger('facebook'); }}
+              className="social-grid-login-btn login-facebook"
+            >
+              <MessageSquare size={13} style={{ marginRight: '4px' }} />
+              <span>Facebook</span>
+            </button>
+          </div>
         </div>
-        <button 
-          type="submit" 
-          className={`social-comment-submit-btn ${newComment.trim() ? 'active' : ''}`}
-          disabled={!newComment.trim()}
+      ) : (
+        <form 
+          onSubmit={(e) => { 
+            e.preventDefault(); 
+            onAddComment && onAddComment(project.title, socialUser.name, newComment); 
+            setNewComment(''); 
+          }} 
+          className="social-comment-form"
         >
-          Publicar
-        </button>
-      </form>
+          <div className="social-comment-inputs-wrap authenticated">
+            <div className="social-comment-user-badge">
+              <span className={`platform-status-dot ${socialUser.platform}`}></span>
+              <span className="user-badge-name">{socialUser.name}</span>
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); onSocialLogout && onSocialLogout(); }} 
+                className="social-user-logout-btn"
+                title="Desconectar Conta"
+              >
+                Sair
+              </button>
+            </div>
+            <input 
+              ref={commentInputRef}
+              type="text" 
+              placeholder="Adicione um comentário..." 
+              value={newComment} 
+              onChange={(e) => setNewComment(e.target.value)}
+              className="social-comment-text-input"
+              required
+            />
+          </div>
+          <button 
+            type="submit" 
+            className={`social-comment-submit-btn ${newComment.trim() ? 'active' : ''}`}
+            disabled={!newComment.trim()}
+          >
+            Publicar
+          </button>
+        </form>
+      )}
     </div>
   );
 };
@@ -341,11 +424,75 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const [lightboxCommentAuthor, setLightboxCommentAuthor] = useState('');
   const [isMuted, setIsMuted] = useState(true);
 
+  // Social authentication states
+  const [socialUser, setSocialUser] = useState(null);
+  const [activeAuthPlatform, setActiveAuthPlatform] = useState(null);
+  const [authUsername, setAuthUsername] = useState('');
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
   const [fictiveSettings, setFictiveSettings] = useState({
     pretitle: 'Espaços de Co-Criação',
     title: 'Retângulos Fictícios (Rascunhos)',
     description: 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
   });
+
+  // Load social user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('haja_luz_social_user');
+    if (storedUser) {
+      try {
+        setSocialUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Erro ao carregar usuário social:", e);
+      }
+    }
+  }, []);
+
+  const handleSocialLogin = (platform, username) => {
+    setIsAuthenticating(true);
+    setTimeout(() => {
+      const user = {
+        name: platform === 'instagram' ? (username.startsWith('@') ? username : `@${username}`) : username,
+        platform: platform
+      };
+      localStorage.setItem('haja_luz_social_user', JSON.stringify(user));
+      setSocialUser(user);
+      setIsAuthenticating(false);
+      setActiveAuthPlatform(null);
+      setAuthUsername('');
+    }, 1500); // Premium 1.5s gold spinner
+  };
+
+  const handleSocialLogout = () => {
+    localStorage.removeItem('haja_luz_social_user');
+    setSocialUser(null);
+  };
+
+  const handleDeleteComment = (projectTitle, commentId) => {
+    if (!window.confirm("Deseja realmente excluir este comentário?")) return;
+    const allProjs = dataService.getProjects();
+    const updated = allProjs.map(p => {
+      if (p.title === projectTitle) {
+        const currentComments = p.comments || [];
+        return {
+          ...p,
+          comments: currentComments.filter(c => c.id !== commentId)
+        };
+      }
+      return p;
+    });
+    dataService.saveProjects(updated);
+    setRealProjects(updated);
+
+    // Update active lightboxMedia comments immediately if matches!
+    if (lightboxMedia && lightboxMedia.title === projectTitle) {
+      const currentComments = lightboxMedia.comments || [];
+      setLightboxMedia(prev => ({
+        ...prev,
+        comments: currentComments.filter(c => c.id !== commentId)
+      }));
+    }
+  };
 
   // Auto slide interval for the Event Photo Carousel in Lightbox
   useEffect(() => {
@@ -448,7 +595,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         currentIndex: 0,
         likes: projectLikes,
         likedByUser: !!proj.likedByUser,
-        comments: projectComments
+        comments: projectComments,
+        views: proj.views || ''
       });
       return;
     }
@@ -458,7 +606,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
       title: proj.title,
       likes: projectLikes,
       likedByUser: !!proj.likedByUser,
-      comments: projectComments
+      comments: projectComments,
+      views: proj.views || ''
     };
 
     if (ytId) {
@@ -721,10 +870,10 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
       const isDrive = isGoogleDriveUrl(customFeatured.video);
       const videoSource = isDrive ? getGoogleDriveDirectLink(customFeatured.video) : customFeatured.video;
       
-      const hasCustomCover = customFeatured.image && !customFeatured.image.startsWith('/logo') && customFeatured.image !== '' && customFeatured.image !== '/favicon.svg';
+      const hasCustomCover = customFeatured.image && !customFeatured.image.startsWith('/logo') && customFeatured.image !== '' && customFeatured.image !== '/favicon.png';
       const displayCover = isYt && !hasCustomCover
         ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
-        : (customFeatured.image || '/favicon.svg');
+        : (customFeatured.image || '/favicon.png');
 
       return {
         title: customFeatured.title,
@@ -792,7 +941,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
             project: proj
           });
         });
-      } else if (proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.svg') {
+      } else if (proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.png') {
         slides.push({
           id: `${proj.title}-main`,
           src: proj.image,
@@ -840,7 +989,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
             project: proj
           });
         });
-      } else if (proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.svg') {
+      } else if (proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.png') {
         logos.push({
           id: `${proj.title}-logo-main`,
           src: proj.image,
@@ -1014,6 +1163,12 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         onImageClick={(src) => setExpandedImage(src)}
                         onLikeClick={handleLike}
                         onAddComment={handleAddComment}
+                        category={category}
+                        socialUser={socialUser}
+                        onSocialLoginTrigger={setActiveAuthPlatform}
+                        onSocialLogout={handleSocialLogout}
+                        onDeleteComment={handleDeleteComment}
+                        isAdmin={localStorage.getItem('haja_luz_admin_logged') === 'true'}
                       />
                     );
                   })
@@ -1162,9 +1317,16 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                     {/* Event Metadata (Title, Description, Like, Comments) */}
                     <div className="event-info-block" style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-                        <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#fff', margin: 0, letterSpacing: '-0.01em', fontWeight: 600 }}>
-                          {lightboxMedia.title}
-                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#fff', margin: 0, letterSpacing: '-0.01em', fontWeight: 600 }}>
+                            {lightboxMedia.title}
+                          </h3>
+                          {lightboxMedia.views && (
+                            <span style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', marginTop: '0.2rem', fontWeight: 500 }}>
+                              {lightboxMedia.views} visualizações
+                            </span>
+                          )}
+                        </div>
                         
                         {/* Like Button */}
                         <button 
@@ -1188,51 +1350,76 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         </span>
                         
                         <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '140px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
-                          {(lightboxMedia.comments || []).map((c) => (
-                            <div key={c.id} className="comment-item glass-panel" style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 'bold', color: 'var(--color-accent-gold)' }}>{c.author}</span>
-                                <span style={{ fontSize: '0.6rem', color: 'var(--color-text-dimmed)' }}>{c.date}</span>
+                          {(lightboxMedia.comments || []).map((c) => {
+                            const isAuthor = socialUser && socialUser.name === c.author;
+                            const canDelete = (localStorage.getItem('haja_luz_admin_logged') === 'true') || isAuthor;
+                            
+                            return (
+                              <div key={c.id} className="comment-item glass-panel" style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span style={{ fontWeight: 'bold', color: 'var(--color-accent-gold)' }}>{c.author}</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <span style={{ fontSize: '0.6rem', color: 'var(--color-text-dimmed)' }}>{c.date}</span>
+                                    {canDelete && (
+                                      <button 
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteComment(lightboxMedia.title, c.id); }}
+                                        style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center' }}
+                                        title="Excluir Comentário"
+                                      >
+                                        <Trash2 size={10} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                                <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: '1.4', fontWeight: 300 }}>{c.text}</p>
                               </div>
-                              <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: '1.4', fontWeight: 300 }}>{c.text}</p>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
 
-                        <form 
-                          onSubmit={(e) => { 
-                            e.preventDefault(); 
-                            handleAddComment(lightboxMedia.title, lightboxCommentAuthor, lightboxCommentText); 
-                            setLightboxCommentText(''); 
-                            setLightboxCommentAuthor(''); 
-                          }} 
-                          style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
-                        >
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem' }}>
-                            <input 
-                              type="text" 
-                              placeholder="Seu Nome" 
-                              value={lightboxCommentAuthor} 
-                              onChange={(e) => setLightboxCommentAuthor(e.target.value)}
-                              style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
-                            />
+                        {!socialUser ? (
+                          <div className="social-comment-login-grid lightbox-style" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '8px', textAlign: 'center' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.6rem' }}>Conecte-se para comentar:</span>
+                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                              <button type="button" onClick={() => setActiveAuthPlatform('google')} className="social-grid-login-btn login-google">Google</button>
+                              <button type="button" onClick={() => setActiveAuthPlatform('instagram')} className="social-grid-login-btn login-instagram">Instagram</button>
+                              <button type="button" onClick={() => setActiveAuthPlatform('facebook')} className="social-grid-login-btn login-facebook">Facebook</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <form 
+                            onSubmit={(e) => { 
+                              e.preventDefault(); 
+                              handleAddComment(lightboxMedia.title, socialUser.name, lightboxCommentText); 
+                              setLightboxCommentText(''); 
+                            }} 
+                            style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-dimmed)', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.3rem' }}>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <span className={`platform-status-dot ${socialUser.platform}`} style={{ width: '6px', height: '6px', borderRadius: '50%', display: 'inline-block' }}></span>
+                                Comentando como <strong>{socialUser.name}</strong>
+                              </span>
+                              <button type="button" onClick={handleSocialLogout} style={{ background: 'none', border: 'none', color: 'var(--color-accent-gold)', cursor: 'pointer', padding: 0, fontSize: '0.7rem' }}>Sair</button>
+                            </div>
                             <input 
                               type="text" 
                               placeholder="Escreva um comentário..." 
                               value={lightboxCommentText} 
                               onChange={(e) => setLightboxCommentText(e.target.value)}
-                              style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
+                              style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none', width: '100%' }}
                               required
                             />
-                          </div>
-                          <button 
-                            type="submit" 
-                            style={{ alignSelf: 'flex-end', background: 'rgba(230,173,69,0.1)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', padding: '0.35rem 1rem', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}
-                          >
-                            <Send size={10} />
-                            <span>Enviar Comentário</span>
-                          </button>
-                        </form>
+                            <button 
+                              type="submit" 
+                              style={{ alignSelf: 'flex-end', background: 'rgba(230,173,69,0.1)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', padding: '0.35rem 1rem', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                            >
+                              <Send size={10} />
+                              <span>Enviar</span>
+                            </button>
+                          </form>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1351,9 +1538,16 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                   {/* Right Column: Title, Description, Likes, Comments */}
                   <div className="event-info-block" style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-                      <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: '#fff', margin: 0, letterSpacing: '-0.01em', fontWeight: 600 }}>
-                        {lightboxMedia.title}
-                      </h3>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: '#fff', margin: 0, letterSpacing: '-0.01em', fontWeight: 600 }}>
+                          {lightboxMedia.title}
+                        </h3>
+                        {lightboxMedia.views && (
+                          <span style={{ fontSize: '0.74rem', color: 'var(--color-accent-cyan)', fontFamily: 'Space Grotesk, monospace', marginTop: '0.2rem', fontWeight: 500 }}>
+                            {lightboxMedia.views} visualizações
+                          </span>
+                        )}
+                      </div>
                       
                       {/* Like Button */}
                       <button 
@@ -1377,51 +1571,76 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       </span>
                       
                       <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '140px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
-                        {(lightboxMedia.comments || []).map((c) => (
-                          <div key={c.id} className="comment-item glass-panel" style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontWeight: 'bold', color: 'var(--color-accent-gold)' }}>{c.author}</span>
-                              <span style={{ fontSize: '0.6rem', color: 'var(--color-text-dimmed)' }}>{c.date}</span>
+                        {(lightboxMedia.comments || []).map((c) => {
+                          const isAuthor = socialUser && socialUser.name === c.author;
+                          const canDelete = (localStorage.getItem('haja_luz_admin_logged') === 'true') || isAuthor;
+                          
+                          return (
+                            <div key={c.id} className="comment-item glass-panel" style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 'bold', color: 'var(--color-accent-gold)' }}>{c.author}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                  <span style={{ fontSize: '0.6rem', color: 'var(--color-text-dimmed)' }}>{c.date}</span>
+                                  {canDelete && (
+                                    <button 
+                                      type="button"
+                                      onClick={(e) => { e.stopPropagation(); handleDeleteComment(lightboxMedia.title, c.id); }}
+                                      style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center' }}
+                                      title="Excluir Comentário"
+                                    >
+                                      <Trash2 size={10} />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: '1.4', fontWeight: 300 }}>{c.text}</p>
                             </div>
-                            <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: '1.4', fontWeight: 300 }}>{c.text}</p>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
-                      <form 
-                        onSubmit={(e) => { 
-                          e.preventDefault(); 
-                          handleAddComment(lightboxMedia.title, lightboxCommentAuthor, lightboxCommentText); 
-                          setLightboxCommentText(''); 
-                          setLightboxCommentAuthor(''); 
-                        }} 
-                        style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
-                      >
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem' }}>
-                          <input 
-                            type="text" 
-                            placeholder="Seu Nome" 
-                            value={lightboxCommentAuthor} 
-                            onChange={(e) => setLightboxCommentAuthor(e.target.value)}
-                            style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
-                          />
+                      {!socialUser ? (
+                        <div className="social-comment-login-grid lightbox-style" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '8px', textAlign: 'center' }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.6rem' }}>Conecte-se para comentar:</span>
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                            <button type="button" onClick={() => setActiveAuthPlatform('google')} className="social-grid-login-btn login-google">Google</button>
+                            <button type="button" onClick={() => setActiveAuthPlatform('instagram')} className="social-grid-login-btn login-instagram">Instagram</button>
+                            <button type="button" onClick={() => setActiveAuthPlatform('facebook')} className="social-grid-login-btn login-facebook">Facebook</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <form 
+                          onSubmit={(e) => { 
+                            e.preventDefault(); 
+                            handleAddComment(lightboxMedia.title, socialUser.name, lightboxCommentText); 
+                            setLightboxCommentText(''); 
+                          }} 
+                          style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-dimmed)', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.3rem' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                              <span className={`platform-status-dot ${socialUser.platform}`} style={{ width: '6px', height: '6px', borderRadius: '50%', display: 'inline-block' }}></span>
+                              Comentando como <strong>{socialUser.name}</strong>
+                            </span>
+                            <button type="button" onClick={handleSocialLogout} style={{ background: 'none', border: 'none', color: 'var(--color-accent-gold)', cursor: 'pointer', padding: 0, fontSize: '0.7rem' }}>Sair</button>
+                          </div>
                           <input 
                             type="text" 
                             placeholder="Escreva um comentário..." 
                             value={lightboxCommentText} 
                             onChange={(e) => setLightboxCommentText(e.target.value)}
-                            style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
+                            style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none', width: '100%' }}
                             required
                           />
-                        </div>
-                        <button 
-                          type="submit" 
-                          style={{ alignSelf: 'flex-end', background: 'rgba(230,173,69,0.1)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', padding: '0.35rem 1rem', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}
-                        >
-                          <Send size={10} />
-                          <span>Enviar Comentário</span>
-                        </button>
-                      </form>
+                          <button 
+                            type="submit" 
+                            style={{ alignSelf: 'flex-end', background: 'rgba(230,173,69,0.1)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', padding: '0.35rem 1rem', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                          >
+                            <Send size={10} />
+                            <span>Enviar</span>
+                          </button>
+                        </form>
+                      )}
                     </div>
                   </div>
 
@@ -1455,6 +1674,113 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               onClick={(e) => e.stopPropagation()}
             >
               <img src={expandedImage} alt="Foto Ampliada" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Interactive Mock Social Auth Modal Overlay */}
+      <AnimatePresence>
+        {activeAuthPlatform && (
+          <motion.div 
+            className="social-auth-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => { if (!isAuthenticating) setActiveAuthPlatform(null); }}
+          >
+            <motion.div 
+              className={`social-auth-modal-box glass-panel auth-brand-${activeAuthPlatform}`}
+              initial={{ scale: 0.92, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.92, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {!isAuthenticating && (
+                <button 
+                  type="button" 
+                  onClick={() => setActiveAuthPlatform(null)} 
+                  className="auth-modal-close-btn"
+                  title="Cancelar"
+                >
+                  <X size={18} />
+                </button>
+              )}
+
+              <div className="auth-brand-header">
+                {activeAuthPlatform === 'google' && (
+                  <>
+                    <Compass size={40} className="auth-platform-icon google" />
+                    <h3>Acesso Seguro com o Google</h3>
+                    <p>Entre com sua Conta do Google para interagir e comentar.</p>
+                  </>
+                )}
+                {activeAuthPlatform === 'instagram' && (
+                  <>
+                    <Camera size={40} className="auth-platform-icon instagram" />
+                    <h3>Conectar com o Instagram</h3>
+                    <p>Vincule seu perfil do Instagram para autenticar sua atividade.</p>
+                  </>
+                )}
+                {activeAuthPlatform === 'facebook' && (
+                  <>
+                    <MessageSquare size={40} className="auth-platform-icon facebook" />
+                    <h3>Entrar com o Facebook</h3>
+                    <p>Faça login de forma rápida e segura usando sua conta do Facebook.</p>
+                  </>
+                )}
+              </div>
+
+              {isAuthenticating ? (
+                <div className="auth-loading-flow">
+                  <motion.div 
+                    className="auth-spinner-glow"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
+                  >
+                    <Loader2 size={36} color="var(--color-accent-gold)" />
+                  </motion.div>
+                  <span className="auth-loading-text">Autenticando dados de segurança...</span>
+                  <span className="auth-loading-sub">Estabelecendo handshake SSL criptográfico</span>
+                </div>
+              ) : (
+                <form 
+                  onSubmit={(e) => { 
+                    e.preventDefault(); 
+                    if (authUsername.trim()) {
+                      handleSocialLogin(activeAuthPlatform, authUsername.trim()); 
+                    }
+                  }} 
+                  className="auth-form-wrap"
+                >
+                  <div className="auth-input-group">
+                    <label htmlFor="auth-username-field">
+                      {activeAuthPlatform === 'instagram' ? "Seu usuário do Instagram (@)" : "Seu Nome Completo"}
+                    </label>
+                    <input 
+                      id="auth-username-field"
+                      type="text" 
+                      placeholder={activeAuthPlatform === 'instagram' ? "Ex: @felipe.costa" : "Ex: Felipe Costa"}
+                      value={authUsername}
+                      onChange={(e) => setAuthUsername(e.target.value)}
+                      className="auth-username-input"
+                      required
+                      autoFocus
+                    />
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="auth-modal-submit-btn"
+                  >
+                    Autenticar Conexão
+                  </button>
+                  
+                  <div className="auth-secure-notice">
+                    <span>🔒 Conexão Criptografada e Segura</span>
+                  </div>
+                </form>
+              )}
             </motion.div>
           </motion.div>
         )}

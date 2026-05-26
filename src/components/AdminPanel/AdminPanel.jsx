@@ -168,7 +168,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     client: '',
     role: '',
     team: '',
-    strategy: ''
+    strategy: '',
+    views: ''
   });
 
   // 3.2 Equipe
@@ -205,8 +206,11 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       setProjects(dataService.getProjects());
       setTeam(dataService.getTeam());
       setFictiveSettings(dataService.getFictiveSettings());
-      // Mantém login ativo durante a sessão aberta no modal
       setAuthError(false);
+      // Restaurar login do administrador da sessão ativa
+      if (localStorage.getItem('haja_luz_admin_logged') === 'true') {
+        setIsAuthenticated(true);
+      }
     }
   }, [isOpen]);
 
@@ -228,9 +232,11 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     // Senha padrão corporativa Haja Luz
     if (password === 'hajaluz2026') {
       setIsAuthenticated(true);
+      localStorage.setItem('haja_luz_admin_logged', 'true');
       setAuthError(false);
       setPassword('');
       showNotification('Acesso Criptográfico Autorizado!');
+      onDataChange && onDataChange();
     } else {
       setAuthError(true);
       setPassword('');
@@ -239,7 +245,9 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem('haja_luz_admin_logged');
     setAuthError(false);
+    onDataChange && onDataChange();
   };
 
   // 6. Ações do Portfólio
@@ -373,7 +381,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       client: proj.client || '',
       role: proj.role || '',
       team: proj.team || '',
-      strategy: proj.strategy || ''
+      strategy: proj.strategy || '',
+      views: proj.views || ''
     });
   };
 
@@ -401,7 +410,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       client: '',
       role: '',
       team: '',
-      strategy: ''
+      strategy: '',
+      views: ''
     });
   };
 
@@ -574,10 +584,10 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         {projects.map((proj, idx) => {
                           const ytId = getYouTubeId(proj.video);
                           const isYt = !!ytId;
-                          const hasCustomCover = proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.svg';
+                          const hasCustomCover = proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.png';
                           const displayCover = isYt && !hasCustomCover
                             ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
-                            : (proj.image || '/favicon.svg');
+                            : (proj.image || '/favicon.png');
 
                           return (
                             <div key={proj.title + idx} className="admin-item-row glass-panel">
@@ -585,7 +595,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                 <img 
                                   src={displayCover} 
                                   alt={proj.title} 
-                                  onError={(e) => { e.target.src = '/favicon.svg'; }} 
+                                  onError={(e) => { e.target.src = '/favicon.png'; }} 
                                 />
                               </div>
                               <div className="item-row-info">
@@ -645,6 +655,17 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                               {allCategories.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                           </div>
+                        </div>
+
+                        <div className="form-row">
+                          <label>Visualizações do Vídeo (Manual)</label>
+                          <input 
+                            type="text" 
+                            value={projectForm.views || ''}
+                            onChange={(e) => setProjectForm({ ...projectForm, views: e.target.value })}
+                            placeholder="Ex: 15K, 2.4M, 153.400..."
+                          />
+                          <span className="input-hint">Opcional. Adiciona uma contagem elegante de visualizações ao card do post e no Cinema Player.</span>
                         </div>
 
                         <div className="form-row">

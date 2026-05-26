@@ -48,8 +48,8 @@ export const getYouTubeThumbnail = (url) => {
  */
 export const getGoogleDriveId = (url) => {
   if (!url) return null;
-  const reg1 = /\/d\/([a-zA-Z0-9_-]{25,})/;
-  const reg2 = /[?&]id=([a-zA-Z0-9_-]{25,})/;
+  const reg1 = /\/d\/([a-zA-Z0-9_-]+)/;
+  const reg2 = /[?&]id=([a-zA-Z0-9_-]+)/;
   const match1 = url.match(reg1);
   if (match1) return match1[1];
   const match2 = url.match(reg2);
