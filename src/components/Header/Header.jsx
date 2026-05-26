@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { brandConfig } from '../../brandConfig';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Video, Mic, Film, Sparkles, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, Compass } from 'lucide-react';
+import { ChevronDown, Video, Mic, Film, Sparkles, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, Compass, Menu, X } from 'lucide-react';
 import './Header.css';
 
 const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -79,7 +80,7 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
 
   return (
     <header className={`header ${scrolled ? 'header-scrolled' : 'header-transparent'}`}>
-      <div className="header-logo" onClick={() => handleScroll('home')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+      <div className="header-logo" onClick={() => { setIsMobileMenuOpen(false); handleScroll('home'); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
         <img 
           src={brandConfig.logoUrl} 
           alt="Haja Luz Studio Logo" 
@@ -161,6 +162,120 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
         <a href="#equipe" onClick={(e) => { e.preventDefault(); onEquipeClick && onEquipeClick(); }}>Equipe</a>
         <a href="#contato" onClick={(e) => { e.preventDefault(); handleScroll('contato'); }}>Contatos</a>
       </nav>
+
+      {/* Hamburger menu toggle button (Visible only on mobile screens) */}
+      <button 
+        className={`mobile-menu-toggle ${isMobileMenuOpen ? 'active' : ''}`}
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Alternar menu de navegação"
+      >
+        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* Full screen glassmorphic mobile navigation overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            className="mobile-menu-overlay"
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="mobile-menu-content glass-panel">
+              <nav className="mobile-nav">
+                <a 
+                  href="#home" 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    setIsMobileMenuOpen(false); 
+                    handleScroll('home'); 
+                  }}
+                  className="mobile-nav-link"
+                >
+                  Início
+                </a>
+                
+                <a 
+                  href="#sobre" 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    setIsMobileMenuOpen(false); 
+                    onSobreClick && onSobreClick(); 
+                  }}
+                  className="mobile-nav-link"
+                >
+                  Sobre
+                </a>
+                
+                {/* Collapsible Mobile Portfolio block instead of hover dropdown */}
+                <div className="mobile-portfolio-container">
+                  <span className="mobile-nav-section-title">Portfólio</span>
+                  <div className="mobile-portfolio-grid">
+                    <a 
+                      href="#portfolio" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIsMobileMenuOpen(false);
+                        if (onCategoryClick) onCategoryClick('todos');
+                        else window.location.search = '?category=todos';
+                      }}
+                      className="mobile-portfolio-all-link"
+                    >
+                      Ver Tudo
+                    </a>
+                    
+                    <div className="mobile-portfolio-categories">
+                      {portfolioCategories.slice(0, 8).map((cat) => {
+                        const Icon = cat.icon;
+                        return (
+                          <button 
+                            key={cat.name}
+                            className="mobile-category-tab"
+                            onClick={() => {
+                              const slug = cat.name.toLowerCase().replace("'", "");
+                              setIsMobileMenuOpen(false);
+                              if (onCategoryClick) onCategoryClick(slug);
+                              else window.location.search = '?category=' + encodeURIComponent(slug);
+                            }}
+                          >
+                            <Icon size={12} className="mobile-cat-tab-icon" />
+                            <span>{cat.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <a 
+                  href="#equipe" 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    setIsMobileMenuOpen(false); 
+                    onEquipeClick && onEquipeClick(); 
+                  }}
+                  className="mobile-nav-link"
+                >
+                  Equipe
+                </a>
+                
+                <a 
+                  href="#contato" 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    setIsMobileMenuOpen(false); 
+                    handleScroll('contato'); 
+                  }}
+                  className="mobile-nav-link"
+                >
+                  Contatos
+                </a>
+              </nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
