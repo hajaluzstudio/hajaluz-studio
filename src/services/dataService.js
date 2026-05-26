@@ -209,6 +209,7 @@ export const dataService = {
       return true;
     } catch (e) {
       console.error("Erro ao salvar projetos no localStorage:", e);
+      alert("⚠️ ERRO DE SISTEMA: O limite de armazenamento do navegador foi excedido! Remova fotos pesadas ou vídeos locais e use links do YouTube/Drive.");
       return false;
     }
   },

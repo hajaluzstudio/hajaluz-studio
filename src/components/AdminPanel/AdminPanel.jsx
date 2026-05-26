@@ -8,6 +8,44 @@ import { dataService } from '../../services/dataService';
 import { getYouTubeId } from '../../services/youtubeHelper';
 import './AdminPanel.css';
 
+const compressImage = (base64OrFile) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const isFile = base64OrFile instanceof File;
+    const url = isFile ? URL.createObjectURL(base64OrFile) : base64OrFile;
+    img.src = url;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      const MAX_WIDTH = 1000;
+      const MAX_HEIGHT = 1000;
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height = Math.round(height * (MAX_WIDTH / width));
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width = Math.round(width * (MAX_HEIGHT / height));
+          height = MAX_HEIGHT;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      if (isFile) URL.revokeObjectURL(url);
+      resolve(compressedDataUrl);
+    };
+    img.onerror = () => {
+      if (isFile) URL.revokeObjectURL(url);
+      resolve(typeof base64OrFile === 'string' ? base64OrFile : '');
+    };
+  });
+};
+
 const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   // 1. Estados Gerais
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -129,14 +167,15 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     resetProjectForm();
   };
 
-  const handleImageFileChange = (e) => {
+  const handleImageFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProjectForm(prev => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setProjectForm(prev => ({ ...prev, image: compressed }));
+      } catch (err) {
+        console.error("Erro ao comprimir imagem de capa:", err);
+      }
     }
   };
 
@@ -154,20 +193,21 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     }
   };
 
-  const handleCarouselFilesChange = (e) => {
+  const handleCarouselFilesChange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProjectForm(prev => ({
-          ...prev,
-          carouselImages: [...(prev.carouselImages || []), reader.result]
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      const compressedImages = await Promise.all(
+        files.map(file => compressImage(file))
+      );
+      setProjectForm(prev => ({
+        ...prev,
+        carouselImages: [...(prev.carouselImages || []), ...compressedImages]
+      }));
+    } catch (err) {
+      console.error("Erro ao comprimir fotos do carrossel:", err);
+    }
   };
 
   const removeCarouselImage = (imgIdx) => {
@@ -380,25 +420,38 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                     <div className="portfolio-list-side">
                       <h4 className="side-title">// Trabalhos Atuais ({projects.length})</h4>
                       <div className="admin-item-cards-list">
-                        {projects.map((proj, idx) => (
-                          <div key={proj.title + idx} className="admin-item-row glass-panel">
-                            <div className="item-row-preview">
-                              <img src={proj.image} alt={proj.title} onError={(e) => { e.target.src = '/favicon.svg'; }} />
+                        {projects.map((proj, idx) => {
+                          const ytId = getYouTubeId(proj.video);
+                          const isYt = !!ytId;
+                          const hasCustomCover = proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.svg';
+                          const displayCover = isYt && !hasCustomCover
+                            ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+                            : (proj.image || '/favicon.svg');
+
+                          return (
+                            <div key={proj.title + idx} className="admin-item-row glass-panel">
+                              <div className="item-row-preview">
+                                <img 
+                                  src={displayCover} 
+                                  alt={proj.title} 
+                                  onError={(e) => { e.target.src = '/favicon.svg'; }} 
+                                />
+                              </div>
+                              <div className="item-row-info">
+                                <span className="item-row-cat">{proj.category}</span>
+                                <span className="item-row-title">{proj.title}</span>
+                              </div>
+                              <div className="item-row-actions">
+                                <button onClick={() => startEditProject(idx)} className="action-btn edit-btn" title="Editar">
+                                  <Edit2 size={13} />
+                                </button>
+                                <button onClick={() => deleteProject(idx)} className="action-btn delete-btn" title="Excluir">
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
                             </div>
-                            <div className="item-row-info">
-                              <span className="item-row-cat">{proj.category}</span>
-                              <span className="item-row-title">{proj.title}</span>
-                            </div>
-                            <div className="item-row-actions">
-                              <button onClick={() => startEditProject(idx)} className="action-btn edit-btn" title="Editar">
-                                <Edit2 size={13} />
-                              </button>
-                              <button onClick={() => deleteProject(idx)} className="action-btn delete-btn" title="Excluir">
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
 
