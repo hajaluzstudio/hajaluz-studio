@@ -1108,7 +1108,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     return slides;
   };
 
-  // 4x8 Logo Grid collector helper (requires exactly 32 spots)
+  // 3-column Logo Grid collector helper (requires minimum of 3 spots)
   const getLogoGridItems = () => {
     const logos = [];
     matchedProjects.forEach(proj => {
@@ -1132,13 +1132,17 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     });
 
     const gridItems = [...logos];
-    while (gridItems.length < 32) {
-      gridItems.push({
-        id: `logo-placeholder-${gridItems.length}`,
-        isPlaceholder: true,
-        title: 'Espaço Disponível',
-        subtitle: 'Bezaleel Grid'
-      });
+    const minGridItems = 3;
+    if (gridItems.length < minGridItems) {
+      const needed = minGridItems - gridItems.length;
+      for (let i = 0; i < needed; i++) {
+        gridItems.push({
+          id: `logo-placeholder-${gridItems.length}`,
+          isPlaceholder: true,
+          title: 'Espaço Disponível',
+          subtitle: 'Bezaleel Grid'
+        });
+      }
     }
     return gridItems;
   };
@@ -1214,7 +1218,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               <span className="block-pretitle">Bezaleel Grid</span>
               <h2 className="block-title">Identidades Corporativas & Simbologia</h2>
               <p className="block-desc">
-                Uma grade rígida e precisa de 32 células baseada na proporção áurea e geometria clássica. Passe o mouse sobre os logotipos para um zoom holográfico ou clique para visualizá-los em alta fidelidade.
+                Um Backdrop digital de altíssima fidelidade. Passe o mouse sobre os painéis para uma projeção holográfica em 8K ou clique para conferir a estratégia conceitual da arte.
               </p>
             </div>
 
