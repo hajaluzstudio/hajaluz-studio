@@ -1,17 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, X } from 'lucide-react';
 import { dataService } from '../../services/dataService';
+import { getYouTubeId, getYouTubeThumbnail } from '../../services/youtubeHelper';
 import './PortfolioCategoryPage.css';
 
 const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpdateTrigger = 0 }) => {
-  const [activeVideo, setActiveVideo] = useState(null);
+  const [lightboxVideoId, setLightboxVideoId] = useState(null);
   const [realProjects, setRealProjects] = useState([]);
   const [hoveredProjectIdx, setHoveredProjectIdx] = useState(null);
 
   useEffect(() => {
     setRealProjects(dataService.getProjects());
   }, [category, dataUpdateTrigger]);
+
+  const handleCardClick = (proj) => {
+    const ytId = getYouTubeId(proj.video);
+    if (ytId) {
+      setLightboxVideoId(ytId);
+    } else {
+      window.open(proj.video, '_blank');
+    }
+  };
 
   // Capitalize category name for display
   const displayCategory = category.charAt(0).toUpperCase() + category.slice(1).replace('-', ' ');
@@ -419,44 +429,65 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
             }
 
             // Real Project Card rendered dynamically inside the subpage grid!
+            const ytId = getYouTubeId(item.video);
+            const isYt = !!ytId;
+            const coverImage = isYt && (!item.image || item.image.startsWith('/logo') || item.image === '' || item.image === '/favicon.svg') 
+              ? getYouTubeThumbnail(item.video) 
+              : item.image;
+
             return (
               <motion.div 
                 key={item.title + idx}
                 className="fictive-rectangle-card glass-panel real-project-subcard"
-                style={{ overflow: 'hidden', padding: 0 }}
+                style={{ overflow: 'hidden', padding: 0, cursor: 'pointer' }}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-80px' }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
-                onMouseEnter={(e) => {
-                  setHoveredProjectIdx(idx);
-                  const video = e.currentTarget.querySelector('.subcard-video');
-                  if (video) video.play().catch(() => {});
-                }}
-                onMouseLeave={(e) => {
-                  setHoveredProjectIdx(null);
-                  const video = e.currentTarget.querySelector('.subcard-video');
-                  if (video) {
-                    video.pause();
-                    video.currentTime = 0;
-                  }
-                }}
+                onMouseEnter={() => setHoveredProjectIdx(idx)}
+                onMouseLeave={() => setHoveredProjectIdx(null)}
+                onClick={() => handleCardClick(item)}
               >
                 {/* Media Layer */}
                 <div className="subcard-media-wrapper" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, overflow: 'hidden' }}>
                   <img 
-                    src={item.image} 
+                    src={coverImage} 
                     alt={item.title} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)', transform: isHovered ? 'scale(1.04)' : 'scale(1)' }}
+                    onError={(e) => {
+                      if (isYt && e.target.src.includes('maxresdefault')) {
+                        e.target.src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                      }
+                    }}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover', 
+                      transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease', 
+                      transform: isHovered ? 'scale(1.04)' : 'scale(1)',
+                      opacity: isHovered ? 0 : 1
+                    }}
                   />
-                  <video 
-                    src={item.video} 
-                    loop 
-                    muted 
-                    playsInline 
-                    className="subcard-video"
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: isHovered ? 1 : 0, transition: 'opacity 0.6s ease', zIndex: 2 }}
-                  />
+                  {isHovered && (
+                    isYt ? (
+                      <iframe 
+                        src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
+                        className="subcard-video video-active"
+                        allow="autoplay; encrypted-media"
+                        style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
+                        title={item.title}
+                      />
+                    ) : (
+                      <video 
+                        src={item.video} 
+                        loop 
+                        muted 
+                        playsInline 
+                        autoPlay
+                        className="subcard-video video-active"
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
+                      />
+                    )
+                  )}
                   <div className="subcard-overlay" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)', zIndex: 3 }}></div>
                 </div>
 
@@ -495,6 +526,42 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         <span>Artesania Humana & Potência Neural.</span>
       </footer>
 
+      {/* Cinematic Lightbox Video Player Modal */}
+      <AnimatePresence>
+        {lightboxVideoId && (
+          <motion.div 
+            className="lightbox-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxVideoId(null)}
+          >
+            <button className="lightbox-close-btn" onClick={() => setLightboxVideoId(null)} aria-label="Fechar cinema">
+              <X size={24} />
+            </button>
+            
+            <motion.div 
+              className="lightbox-content-box"
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: '980px', width: '100%' }}
+            >
+              <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
+                <iframe 
+                  src={`https://www.youtube.com/embed/${lightboxVideoId}?autoplay=1&controls=1&modestbranding=1&rel=0`}
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  title="Cinema Player"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, X } from 'lucide-react';
 import { dataService } from '../../services/dataService';
+import { getYouTubeId, getYouTubeThumbnail } from '../../services/youtubeHelper';
 import './Portfolio.css';
 
 const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdateTrigger = 0 }) => {
@@ -9,6 +10,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [glitchIdx, setGlitchIdx] = useState(null);
   const [realProjects, setRealProjects] = useState([]);
+  const [lightboxVideoId, setLightboxVideoId] = useState(null);
   const timeoutsRef = useRef({});
 
   useEffect(() => {
@@ -98,14 +100,12 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
     return [...matchingReal, ...fictiveProjects];
   };
 
-  const projectsToDisplay = getFilteredProjects();
-
   const handleMouseEnter = (e, idx) => {
     setHoveredIdx(idx);
     setGlitchIdx(idx);
     
     const video = e.currentTarget.querySelector('.card-video');
-    if (video) {
+    if (video && typeof video.play === 'function') {
       video.play().catch(() => {});
     }
 
@@ -121,11 +121,22 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
     if (timeoutsRef.current[idx]) clearTimeout(timeoutsRef.current[idx]);
     
     const video = e.currentTarget.querySelector('.card-video');
-    if (video) {
+    if (video && typeof video.pause === 'function') {
       video.pause();
       video.currentTime = 0;
     }
   };
+
+  const handleCardClick = (proj) => {
+    const ytId = getYouTubeId(proj.video);
+    if (ytId) {
+      setLightboxVideoId(ytId);
+    } else {
+      window.open(proj.video, '_blank');
+    }
+  };
+
+  const projectsToDisplay = getFilteredProjects();
 
   return (
     <section className="portfolio-section" id="portfolio" ref={containerRef}>
@@ -169,9 +180,15 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
             const isHovered = hoveredIdx === idx;
             const isGlitching = glitchIdx === idx;
 
+            const ytId = getYouTubeId(proj.video);
+            const isYt = !!ytId;
+            const coverImage = isYt && (!proj.image || proj.image.startsWith('/logo') || proj.image === '' || proj.image === '/favicon.svg') 
+              ? getYouTubeThumbnail(proj.video) 
+              : proj.image;
+
             return (
               <motion.div 
-                key={proj.title}
+                key={proj.title + idx}
                 className="portfolio-card-wrapper"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -179,25 +196,44 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: idx * 0.05 }}
                 onMouseEnter={(e) => handleMouseEnter(e, idx)}
                 onMouseLeave={(e) => handleMouseLeave(e, idx)}
+                onClick={() => handleCardClick(proj)}
               >
                 <div className={`portfolio-card glass-panel ${isGlitching ? 'glitch-active' : ''} ${proj.isFictive ? 'fictive-card' : ''}`}>
                   {/* Card Media Layer */}
                   <div className="card-media-wrapper">
                     {/* Background Static Image */}
                     <img 
-                      src={proj.image} 
+                      src={coverImage} 
                       alt={proj.title} 
                       className={`card-image ${isHovered ? 'image-fade' : ''}`} 
+                      onError={(e) => {
+                        if (isYt && e.target.src.includes('maxresdefault')) {
+                          e.target.src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                        }
+                      }}
                     />
                     
                     {/* Hover Video Loop */}
-                    <video 
-                      src={proj.video} 
-                      loop 
-                      muted 
-                      playsInline 
-                      className={`card-video ${isHovered ? 'video-active' : ''}`}
-                    />
+                    {isHovered && (
+                      isYt ? (
+                        <iframe 
+                          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
+                          className={`card-video video-active`}
+                          allow="autoplay; encrypted-media"
+                          style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
+                          title={proj.title}
+                        />
+                      ) : (
+                        <video 
+                          src={proj.video} 
+                          loop 
+                          muted 
+                          playsInline 
+                          autoPlay
+                          className={`card-video video-active`}
+                        />
+                      )
+                    )}
                     
                     {/* TV Static Noise Overlay for Glitch */}
                     {isGlitching && <div className="static-noise-overlay"></div>}
@@ -235,6 +271,43 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
           })}
         </div>
       </div>
+
+      {/* Cinematic Lightbox Video Player Modal */}
+      <AnimatePresence>
+        {lightboxVideoId && (
+          <motion.div 
+            className="lightbox-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxVideoId(null)}
+          >
+            <button className="lightbox-close-btn" onClick={() => setLightboxVideoId(null)} aria-label="Fechar cinema">
+              <X size={24} />
+            </button>
+            
+            <motion.div 
+              className="lightbox-content-box"
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: '980px', width: '100%' }}
+            >
+              <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
+                <iframe 
+                  src={`https://www.youtube.com/embed/${lightboxVideoId}?autoplay=1&controls=1&modestbranding=1&rel=0`}
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  title="Cinema Player"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

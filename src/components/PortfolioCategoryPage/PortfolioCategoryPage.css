@@ -696,9 +696,58 @@
     flex-wrap: wrap;
   }
 }
-@media (max-width: 899px) {
-  .subpage-categories-tabs-scroll {
-    justify-content: flex-start;
-  }
+
+/* --- LIGHTBOX MODAL OVERLAY --- */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(3, 3, 3, 0.95);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 2rem;
 }
 
+.lightbox-close-btn {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100000;
+}
+
+.lightbox-close-btn:hover {
+  background: rgba(231, 76, 60, 0.15);
+  border-color: rgba(231, 76, 60, 0.4);
+  color: #e74c3c;
+  transform: scale(1.05) rotate(90deg);
+}
+
+.lightbox-content-box {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.real-project-subcard {
+  cursor: pointer;
+}
