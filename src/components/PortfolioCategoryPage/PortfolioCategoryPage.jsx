@@ -9,13 +9,16 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
   const [currentIndex, setCurrentIndex] = useState(0);
   const [authorName, setAuthorName] = useState('');
   const [newComment, setNewComment] = useState('');
+  const [localMuted, setLocalMuted] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const commentInputRef = React.useRef(null);
 
   // Automatic slideshow interval for this specific project
   useEffect(() => {
     if (images.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
-    }, 4000); // 4 seconds transition
+    }, 4500); // Elegant 4.5 seconds transition
     return () => clearInterval(interval);
   }, [images.length]);
 
@@ -29,6 +32,13 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
+  const handleActionComment = (e) => {
+    e.stopPropagation();
+    if (commentInputRef.current) {
+      commentInputRef.current.focus();
+    }
+  };
+
   const isLiked = !!project.likedByUser;
   const likesCount = project.likes || (Math.abs(project.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 40 + 15);
   const commentsList = project.comments || [
@@ -36,171 +46,278 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
     { id: 2, author: 'Bezaleel', text: 'Conceito geométrico bem estruturado nas margens.', date: '14/04/2026' }
   ];
 
+  const getClientInitial = (clientName) => {
+    if (!clientName) return 'H';
+    return clientName.charAt(0).toUpperCase();
+  };
+
+  // Video parsing
+  const ytId = project.video ? getYouTubeId(project.video) : null;
+  const isYt = !!ytId;
+  const isDrive = project.video ? isGoogleDriveUrl(project.video) : false;
+  const videoSource = isDrive ? getGoogleDriveDirectLink(project.video) : project.video;
+  const hasVideo = !!project.video;
+
+  const handleWhatsAppBriefing = (e) => {
+    e.stopPropagation();
+    const text = encodeURIComponent(`Olá Haja Luz! Vi o projeto "${project.title}" desenvolvido para o cliente "${project.client || 'HAJA LUZ STUDIO'}" na categoria "${project.category || 'Portfólio'}" e gostaria de solicitar uma produção semelhante.`);
+    window.open(`https://wa.me/5554991109159?text=${text}`, '_blank');
+  };
+
+  const descText = project.description || 'Branding e artes de luxo concebidas pela Haja Luz Studio.';
+  const shouldTruncate = descText.length > 150;
+  const displayText = isExpanded ? descText : (shouldTruncate ? `${descText.slice(0, 140)}...` : descText);
+
   return (
-    <div className="project-showcase-row glass-panel">
-      {/* Column 1: Details & Strategy */}
-      <div className="project-details-col">
-        <span className="project-showcase-tag">// CLIENTE: {project.client || 'HAJA LUZ STUDIO'}</span>
-        <h3 className="project-showcase-title">{project.title}</h3>
-        
-        {project.category && (
-          <span className="project-showcase-subtitle">{project.category} {project.secondaryCategory && `// ${project.secondaryCategory}`}</span>
-        )}
-
-        <p className="project-showcase-desc">{project.description || 'Branding e artes de luxo concebidas pela Haja Luz Studio.'}</p>
-        
-        {project.strategy && (
-          <div className="project-showcase-strategy-box">
-            <span className="strategy-box-label">// O Posicionamento Estratégico</span>
-            <p className="strategy-box-text">{project.strategy}</p>
+    <div className={`social-post-card glass-panel ${project.featured ? 'featured-glow-card' : ''}`}>
+      {/* 1. Header (Instagram Style) */}
+      <div className="social-card-header">
+        <div className="social-header-profile">
+          <div className="social-avatar-circle">
+            <span>{getClientInitial(project.client)}</span>
+          </div>
+          <div className="social-header-text">
+            <span className="social-client-name">{project.client || 'HAJA LUZ STUDIO'}</span>
+            <span className="social-client-category">{project.category || 'PORTFÓLIO'} {project.secondaryCategory && `// ${project.secondaryCategory}`}</span>
+          </div>
+        </div>
+        {project.featured && (
+          <div className="social-featured-badge">
+            <span className="featured-badge-star">★</span>
+            <span>DESTAQUE EXCLUSIVO</span>
           </div>
         )}
-
-        <div className="project-showcase-meta-grid" style={{ marginTop: 'auto', marginBottom: '1.2rem' }}>
-          {project.role && (
-            <div className="strategy-meta-item" style={{ textAlign: 'left' }}>
-              <span className="meta-label">Formato</span>
-              <span className="meta-val">{project.role}</span>
-            </div>
-          )}
-          {project.team && (
-            <div className="strategy-meta-item" style={{ textAlign: 'left' }}>
-              <span className="meta-label">Equipe</span>
-              <span className="meta-val">{project.team}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Like Button */}
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <button 
-            type="button"
-            onClick={() => onLikeClick && onLikeClick(project.title)}
-            className={`like-button ${isLiked ? 'liked' : ''}`}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: isLiked ? 'rgba(231,76,60,0.1)' : 'rgba(255,255,255,0.02)', border: isLiked ? '1px solid #e74c3c' : '1px solid rgba(255,255,255,0.06)', color: isLiked ? '#e74c3c' : 'var(--color-text-muted)', padding: '0.45rem 1rem', borderRadius: '30px', cursor: 'pointer', transition: 'all 0.3s ease', fontSize: '0.72rem', fontWeight: 600 }}
-          >
-            <Heart size={13} fill={isLiked ? "#e74c3c" : "transparent"} />
-            <span>{likesCount} Curtidas</span>
-          </button>
-        </div>
-
-        {/* Comments Section */}
-        <div className="event-comments-section" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-          <span style={{ fontSize: '0.7rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace', display: 'block', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            // Comentários ({commentsList.length})
-          </span>
-          
-          <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '130px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
-            {commentsList.map((c) => (
-              <div key={c.id} className="comment-item glass-panel" style={{ padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 'bold', color: 'var(--color-accent-gold)' }}>{c.author}</span>
-                  <span style={{ fontSize: '0.6rem', color: 'var(--color-text-dimmed)' }}>{c.date}</span>
-                </div>
-                <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: '1.4', fontWeight: 300 }}>{c.text}</p>
-              </div>
-            ))}
-          </div>
-
-          <form 
-            onSubmit={(e) => { 
-              e.preventDefault(); 
-              onAddComment && onAddComment(project.title, authorName, newComment); 
-              setNewComment(''); 
-              setAuthorName(''); 
-            }} 
-            style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem' }}>
-              <input 
-                type="text" 
-                placeholder="Seu Nome" 
-                value={authorName} 
-                onChange={(e) => setAuthorName(e.target.value)}
-                style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
-              />
-              <input 
-                type="text" 
-                placeholder="Escreva um comentário..." 
-                value={newComment} 
-                onChange={(e) => setNewComment(e.target.value)}
-                style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '0.45rem 0.65rem', fontSize: '0.75rem', color: '#fff', outline: 'none' }}
-                required
-              />
-            </div>
-            <button 
-              type="submit" 
-              style={{ alignSelf: 'flex-end', background: 'rgba(230,173,69,0.1)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', padding: '0.35rem 1rem', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}
-            >
-              <Send size={10} />
-              <span>Enviar</span>
-            </button>
-          </form>
-        </div>
       </div>
 
-      {/* Column 2: Photo Carousel container */}
-      <div className="project-carousel-col">
-        {images.length > 0 ? (
-          <div className="project-carousel-frame">
-            <div className="active-slide-wrapper">
+      {/* 2. Media Section (Destaque Principal) */}
+      <div className="social-card-media">
+        {hasVideo ? (
+          <div className="social-video-frame">
+            {isYt ? (
+              <iframe 
+                src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
+                className="social-video-element"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                style={{ border: 'none', width: '100%', height: '100%' }}
+                title={project.title}
+              />
+            ) : (
+              <>
+                <video 
+                  src={videoSource}
+                  loop
+                  autoPlay
+                  muted={localMuted}
+                  playsInline
+                  className="social-video-element"
+                />
+                <button 
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setLocalMuted(!localMuted); }}
+                  className="social-video-mute-btn"
+                  title={localMuted ? "Ativar Áudio" : "Silenciar Áudio"}
+                >
+                  {localMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                </button>
+              </>
+            )}
+          </div>
+        ) : images.length > 0 ? (
+          <div className="social-image-carousel">
+            <div className="social-active-image-wrapper">
               <img 
                 src={images[currentIndex]} 
                 alt={`${project.title} slide ${currentIndex + 1}`}
                 onClick={() => onImageClick && onImageClick(images[currentIndex])}
-                className="showcase-contain-image"
+                className="social-contain-image"
                 title="Clique para ampliar a arte"
               />
               
-              {/* Zoom Glass Hint */}
               <div 
-                className="lightbox-zoom-hint"
+                className="social-zoom-hint"
                 onClick={() => onImageClick && onImageClick(images[currentIndex])}
-                style={{ position: 'absolute', top: '0.8rem', left: '0.8rem', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.62rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer', zIndex: 12, transition: 'all 0.3s ease' }}
               >
                 <span>🔍 Ampliar Arte</span>
               </div>
 
-              {/* Slider index badge */}
               {images.length > 1 && (
-                <span className="showcase-slide-badge">
+                <span className="social-slide-badge">
                   {currentIndex + 1} / {images.length}
                 </span>
               )}
             </div>
 
-            {/* Slider arrows controls */}
             {images.length > 1 && (
               <>
-                <button type="button" onClick={handlePrev} className="showcase-carousel-arrow arrow-left">
+                <button type="button" onClick={handlePrev} className="social-carousel-arrow arrow-left">
                   ‹
                 </button>
-                <button type="button" onClick={handleNext} className="showcase-carousel-arrow arrow-right">
+                <button type="button" onClick={handleNext} className="social-carousel-arrow arrow-right">
                   ›
                 </button>
               </>
             )}
 
-            {/* Bottom mini dot indicators */}
             {images.length > 1 && (
-              <div className="showcase-carousel-dots">
+              <div className="social-carousel-dots">
                 {images.map((_, dotIdx) => (
                   <button 
                     key={dotIdx}
                     onClick={(e) => { e.stopPropagation(); setCurrentIndex(dotIdx); }}
-                    className={`carousel-dot-btn ${currentIndex === dotIdx ? 'active' : ''}`}
-                    aria-label={`Ir para slide ${dotIdx + 1}`}
+                    className={`social-dot-btn ${currentIndex === dotIdx ? 'active' : ''}`}
                   />
                 ))}
               </div>
             )}
           </div>
         ) : (
-          <div className="no-images-showcase-frame">
+          <div className="social-no-media-frame">
             <span>Aguardando Capa ou Galeria</span>
           </div>
         )}
       </div>
+
+      {/* 3. Action Buttons Row (Instagram Style) */}
+      <div className="social-actions-bar">
+        <div className="social-actions-left">
+          <button 
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onLikeClick && onLikeClick(project.title); }}
+            className={`social-action-btn like-btn ${isLiked ? 'liked' : ''}`}
+            title="Curtir"
+          >
+            <Heart size={20} fill={isLiked ? "#e74c3c" : "transparent"} />
+          </button>
+          
+          <button 
+            type="button"
+            onClick={handleActionComment}
+            className="social-action-btn comment-btn"
+            title="Comentar"
+          >
+            <MessageSquare size={20} />
+          </button>
+        </div>
+
+        <button 
+          type="button"
+          onClick={handleWhatsAppBriefing}
+          className="social-action-btn share-btn"
+          title="Solicitar Briefing"
+        >
+          <Send size={15} />
+          <span className="social-share-label">Briefing</span>
+        </button>
+      </div>
+
+      {/* 4. Likes & Legend Details */}
+      <div className="social-card-details">
+        {/* Likes count */}
+        <span className="social-likes-count">
+          {isLiked ? (
+            <>Curtido por <strong>você</strong> e <strong>{likesCount - 1} outras pessoas</strong></>
+          ) : (
+            <><strong>{likesCount} curtidas</strong></>
+          )}
+        </span>
+
+        {/* Caption */}
+        <div className="social-caption-box">
+          <span className="social-caption-client"><strong>{project.client || 'HAJA LUZ STUDIO'}</strong></span>
+          <span className="social-caption-text">
+            {displayText}
+            {shouldTruncate && (
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+                className="social-expand-caption-btn"
+              >
+                {isExpanded ? ' menos' : '... mais'}
+              </button>
+            )}
+          </span>
+        </div>
+
+        {/* Strategic Positioning */}
+        {project.strategy && (
+          <div className="social-strategy-box">
+            <span className="social-strategy-label">// O Posicionamento Estratégico</span>
+            <p className="social-strategy-text">{project.strategy}</p>
+          </div>
+        )}
+
+        {/* Formato & Equipe Meta Grid */}
+        <div className="social-meta-grid">
+          {project.role && (
+            <div className="social-meta-badge">
+              <span className="social-meta-badge-lbl">Formato:</span>
+              <span className="social-meta-badge-val">{project.role}</span>
+            </div>
+          )}
+          {project.team && (
+            <div className="social-meta-badge">
+              <span className="social-meta-badge-lbl">Equipe:</span>
+              <span className="social-meta-badge-val">{project.team}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 5. Comments List (Integrated Feed) */}
+      <div className="social-comments-feed">
+        <span className="social-comments-count-header">
+          // Comentários ({commentsList.length})
+        </span>
+        
+        <div className="social-comments-scrollable">
+          {commentsList.map((c) => (
+            <div key={c.id} className="social-comment-line">
+              <div className="social-comment-line-content">
+                <span className="social-comment-author"><strong>{c.author}</strong></span>
+                <span className="social-comment-text">{c.text}</span>
+              </div>
+              <span className="social-comment-date">{c.date}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 6. Inline Add Comment Input */}
+      <form 
+        onSubmit={(e) => { 
+          e.preventDefault(); 
+          onAddComment && onAddComment(project.title, authorName, newComment); 
+          setNewComment(''); 
+          setAuthorName(''); 
+        }} 
+        className="social-comment-form"
+      >
+        <div className="social-comment-inputs-wrap">
+          <input 
+            type="text" 
+            placeholder="Seu Nome" 
+            value={authorName} 
+            onChange={(e) => setAuthorName(e.target.value)}
+            className="social-comment-name-input"
+          />
+          <input 
+            ref={commentInputRef}
+            type="text" 
+            placeholder="Adicione um comentário..." 
+            value={newComment} 
+            onChange={(e) => setNewComment(e.target.value)}
+            className="social-comment-text-input"
+            required
+          />
+        </div>
+        <button 
+          type="submit" 
+          className={`social-comment-submit-btn ${newComment.trim() ? 'active' : ''}`}
+          disabled={!newComment.trim()}
+        >
+          Publicar
+        </button>
+      </form>
     </div>
   );
 };
@@ -214,6 +331,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const [isFeaturedMuted, setIsFeaturedMuted] = useState(true);
   const [lightboxCommentText, setLightboxCommentText] = useState('');
   const [lightboxCommentAuthor, setLightboxCommentAuthor] = useState('');
+  const [isMuted, setIsMuted] = useState(true);
 
   const [fictiveSettings, setFictiveSettings] = useState({
     pretitle: 'Espaços de Co-Criação',
@@ -800,43 +918,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
       <div className="subpage-main-container">
         
-        {/* RENDER CATEGORY PATH 1: Design Grafico & Fotografia Showcase Separated Projects catalog */}
-        {isShowcaseCat && (
-          <div className="showcase-separated-projects-section">
-            <div className="subpage-block-heading-wrapper">
-              <span className="block-pretitle">Galeria de Destaques</span>
-              <h2 className="block-title">Projetos Editoriais & Artes Visuais</h2>
-              <p className="block-desc">
-                Exposição individual de cada obra e posicionamento estratégico desenvolvido sob medida para nossos clientes parceiros.
-              </p>
-            </div>
-
-            <div className="separated-projects-list">
-              {matchedProjects.length > 0 ? (
-                matchedProjects.map((proj, projIdx) => {
-                  const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
-                  const images = hasCarousel ? proj.carouselImages : [proj.image].filter(Boolean);
-                  
-                  return (
-                    <ProjectShowcaseBlock 
-                      key={proj.title + projIdx}
-                      project={proj}
-                      images={images}
-                      onImageClick={(src) => setExpandedImage(src)}
-                    />
-                  );
-                })
-              ) : (
-                /* Fallback Placeholders styled in a premium glass-panel way */
-                <div className="no-projects-placeholder glass-panel" style={{ padding: '4rem 3rem', textAlign: 'center', color: 'var(--color-text-dimmed)', border: '1px dashed rgba(230,173,69,0.15)', borderRadius: '12px' }}>
-                  <p style={{ margin: 0, fontFamily: 'Space Grotesk, monospace', fontSize: '0.85rem' }}>Nenhum projeto cadastrado nesta categoria. Acesse o Painel Administrativo para criar novos trabalhos de {displayCategory}.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* RENDER CATEGORY PATH 2: Logotipo Grade Geometrica 4x8 */}
+        {/* RENDER PATH 1: Logotipo Grade Geometrica 4x8 */}
         {isLogoCat && (
           <div className="logo-grid-4x8-section">
             <div className="subpage-block-heading-wrapper">
@@ -875,12 +957,19 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                     key={item.id} 
                     className="logo-grid-tile active-tile"
                     onClick={() => {
+                      const projLikes = item.project?.likes || (Math.abs(item.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 40 + 15);
+                      const projComments = item.project?.comments || [
+                        { id: 1, author: 'Felipe Costa', text: 'Conceito geométrico bem estruturado nas margens.', date: '12/04/2026' }
+                      ];
                       setLightboxMedia({
                         type: 'event',
                         title: item.title,
                         description: item.project?.description || 'Desenho vetorial sob medida com DNA estratégico.',
                         images: [item.src],
-                        currentIndex: 0
+                        currentIndex: 0,
+                        likes: projLikes,
+                        likedByUser: !!item.project?.likedByUser,
+                        comments: projComments
                       });
                     }}
                   >
@@ -898,102 +987,35 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
           </div>
         )}
 
-        {/* RENDER CATEGORY PATH 3: Standard Featured + Card Grid */}
-        {!isShowcaseCat && !isLogoCat && (
-          <>
-            {/* SECTION 1: Featured Work (Video + Rich Strategy Texts) */}
-            <div className="subpage-block-heading-wrapper">
-              <span className="block-pretitle">Destaque Exclusivo</span>
-              <h2 className="block-title">Produção de Destaque</h2>
-            </div>
-
-            <div className="subpage-featured-grid">
-              {/* Left Column: Premium video frame player */}
-              <motion.div 
-                className="featured-video-col"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-              >
-                <div className="featured-video-wrapper glass-panel" style={{ position: 'relative' }}>
-                  {featuredData.isYt ? (
-                    <iframe 
-                      src={`https://www.youtube.com/embed/${featuredData.ytId}?autoplay=1&mute=0&controls=1&loop=1&playlist=${featuredData.ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
-                      className="featured-video-element"
-                      allow="autoplay; encrypted-media"
-                      style={{ border: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                      title={featuredData.title}
-                    />
-                  ) : (
-                    <video 
-                      src={featuredData.video}
-                      controls
-                      autoPlay
-                      loop
-                      muted={isFeaturedMuted}
-                      playsInline
-                      className="featured-video-element"
-                    />
-                  )}
-                  <div className="video-player-glow-border"></div>
-                  <div className="video-player-scanline"></div>
-                  
-                  {/* Floating Mute Toggle for Direct HTML5 Video */}
-                  {!featuredData.isYt && (
-                    <button 
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setIsFeaturedMuted(!isFeaturedMuted); }}
-                      style={{ position: 'absolute', bottom: '1rem', right: '1rem', zIndex: 20, background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(230,173,69,0.3)', color: 'var(--color-accent-gold)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease' }}
-                      title={isFeaturedMuted ? "Ativar Áudio" : "Silenciar Áudio"}
-                      className="featured-video-mute-btn"
-                    >
-                      {isFeaturedMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-                    </button>
-                  )}
+        {/* RENDER PATH 2: Universal Social Feed for all other categories */}
+        {!isLogoCat && (
+          <div className="social-feed-section">
+            <div className="separated-projects-list social-feed-list">
+              {matchedProjects.length > 0 ? (
+                [...matchedProjects]
+                  .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
+                  .map((proj, projIdx) => {
+                    const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
+                    const images = hasCarousel ? proj.carouselImages : [proj.image].filter(Boolean);
+                    
+                    return (
+                      <ProjectShowcaseBlock 
+                        key={proj.title + projIdx}
+                        project={proj}
+                        images={images}
+                        onImageClick={(src) => setExpandedImage(src)}
+                        onLikeClick={handleLike}
+                        onAddComment={handleAddComment}
+                      />
+                    );
+                  })
+              ) : (
+                <div className="no-projects-placeholder glass-panel" style={{ padding: '4rem 3rem', textAlign: 'center', color: 'var(--color-text-dimmed)', border: '1px dashed rgba(230,173,69,0.15)', borderRadius: '12px', maxWidth: '680px', margin: '0 auto' }}>
+                  <p style={{ margin: 0, fontFamily: 'Space Grotesk, monospace', fontSize: '0.85rem' }}>
+                    Nenhum projeto cadastrado nesta categoria. Acesse o Painel Administrativo para criar novos trabalhos de {displayCategory}.
+                  </p>
                 </div>
-              </motion.div>
-
-              {/* Right Column: High-end strategy text blocks */}
-              <motion.div 
-                className="featured-text-col"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-              >
-                <div className="strategy-glass-panel glass-panel">
-                  <div className="strategy-heading-wrap">
-                    <Target size={16} className="strategy-heading-icon" />
-                    <h3 className="strategy-title">{featuredData.title}</h3>
-                  </div>
-
-                  <div className="strategy-meta-grid">
-                    <div className="strategy-meta-item">
-                      <span className="meta-label">Cliente</span>
-                      <span className="meta-val">{featuredData.client}</span>
-                    </div>
-                    <div className="strategy-meta-item">
-                      <span className="meta-label">Formato</span>
-                      <span className="meta-val">{featuredData.role}</span>
-                    </div>
-                    <div className="strategy-meta-item">
-                      <span className="meta-label">Operadores</span>
-                      <span className="meta-val">{featuredData.team}</span>
-                    </div>
-                  </div>
-
-                  <hr className="strategy-separator" />
-
-                  <div className="strategy-content-block">
-                    <h4 className="strategy-block-title">// O Posicionamento Estratégico</h4>
-                    <p className="strategy-block-desc">{featuredData.strategy}</p>
-                  </div>
-
-                  <div className="strategy-content-block">
-                    <h4 className="strategy-block-title">// Detalhes da Execução</h4>
-                    <p className="strategy-block-desc">{featuredData.desc}</p>
-                  </div>
-                </div>
-              </motion.div>
+              )}
             </div>
 
             {/* SECTION 2: Fictive Rectangles (Rascunhos / Aguardando real files) */}
@@ -1004,13 +1026,12 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
             </div>
 
             <div className={`fictive-rectangles-grid ${category.toLowerCase() === 'reels' ? 'reels-grid' : ''}`}>
-              {displayItems.map((item, idx) => {
-                const isFictive = item.isFictive;
-                const isHovered = hoveredProjectIdx === idx;
-                const CardIcon = isFictive ? Icon : (categoryIcons[item.category?.toLowerCase()] || Target);
-                const isReels = category.toLowerCase() === 'reels';
+              {displayItems
+                .filter(item => item.isFictive)
+                .map((item, idx) => {
+                  const CardIcon = Icon;
+                  const isReels = category.toLowerCase() === 'reels';
 
-                if (isFictive) {
                   return (
                     <motion.div 
                       key={item.id}
@@ -1034,109 +1055,9 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       </div>
                     </motion.div>
                   );
-                }
-
-                // Real Project Card rendered dynamically inside the subpage grid!
-                const ytId = getYouTubeId(item.video);
-                const isYt = !!ytId;
-                const isDrive = isGoogleDriveUrl(item.video);
-                const hasCustomCover = item.image && !item.image.startsWith('/logo') && item.image !== '' && item.image !== '/favicon.svg';
-                const videoSource = isDrive ? getGoogleDriveDirectLink(item.video) : item.video;
-
-                let coverImage = item.image;
-                let useVideoCover = false;
-
-                if (isYt) {
-                  if (!hasCustomCover) {
-                    coverImage = getYouTubeThumbnail(item.video);
-                  }
-                } else if (videoSource && !hasCustomCover) {
-                  useVideoCover = true;
-                }
-
-                return (
-                  <motion.div 
-                    key={item.title + idx}
-                    className={`fictive-rectangle-card glass-panel real-project-subcard ${isReels ? 'reels-vertical' : ''}`}
-                    style={{ overflow: 'hidden', padding: 0, cursor: 'pointer' }}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-80px' }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
-                    onMouseEnter={() => setHoveredProjectIdx(idx)}
-                    onMouseLeave={() => setHoveredProjectIdx(null)}
-                    onClick={() => handleCardClick(item)}
-                  >
-                    {/* Media Layer */}
-                    <div className="subcard-media-wrapper" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, overflow: 'hidden' }}>
-                      {useVideoCover ? (
-                        <video 
-                          src={videoSource} 
-                          preload="metadata" 
-                          style={{ 
-                            width: '100%', 
-                            height: '100%', 
-                            objectFit: 'cover',
-                            transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)', 
-                            transform: isHovered ? 'scale(1.04)' : 'scale(1)'
-                          }}
-                        />
-                      ) : (
-                        <img 
-                          src={coverImage || '/favicon.svg'} 
-                          alt={item.title} 
-                          onError={(e) => {
-                            if (isYt && e.target.src.includes('maxresdefault')) {
-                              e.target.src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                            }
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            height: '100%', 
-                            objectFit: 'cover', 
-                            transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease', 
-                            transform: isHovered ? 'scale(1.04)' : 'scale(1)',
-                            opacity: isHovered ? 0 : 1
-                          }}
-                        />
-                      )}
-                      {isHovered && (
-                        isYt ? (
-                          <iframe 
-                            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
-                            className="subcard-video video-active"
-                            allow="autoplay; encrypted-media"
-                            style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
-                            title={item.title}
-                          />
-                        ) : (
-                          <video 
-                            src={videoSource} 
-                            loop 
-                            muted 
-                            playsInline 
-                            autoPlay
-                            className="subcard-video video-active"
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
-                          />
-                        )
-                      )}
-                      <div className="subcard-overlay" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)', zIndex: 3 }}></div>
-                    </div>
-
-                    <div className="fictive-rect-content" style={{ zIndex: 10, width: '100%', padding: '1.5rem 1.8rem' }}>
-                      <CardIcon size={20} className="fictive-rect-icon" style={{ color: 'var(--color-accent-gold)', marginBottom: '0.4rem' }} />
-                      <h3 className="fictive-rect-title" style={{ fontSize: '1.15rem', color: '#ffffff', letterSpacing: '-0.01em', fontWeight: 500 }}>{item.title}</h3>
-                      <div className="fictive-rect-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.7rem', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-                        <span className="fictive-rect-author" style={{ color: 'var(--color-accent-cyan)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>PRODUÇÃO OFICIAL</span>
-                        <span className="fictive-rect-spec" style={{ fontSize: '0.68rem', color: 'var(--color-text-dimmed)' }}>{item.category} {item.secondaryCategory && `// ${item.secondaryCategory}`}</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                })}
             </div>
-          </>
+          </div>
         )}
 
         {/* Dynamic CTA Footer Section */}
