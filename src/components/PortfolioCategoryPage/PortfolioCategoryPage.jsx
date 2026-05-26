@@ -73,7 +73,7 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
   const isDrive = project.video ? isGoogleDriveUrl(project.video) : false;
   const videoSource = isDrive ? getGoogleDriveDirectLink(project.video) : project.video;
   const hasVideo = !!project.video;
-  const isReels = (category?.toLowerCase() === 'reels') || (project.category?.toLowerCase() === 'reels') || (project.secondaryCategory?.toLowerCase() === 'reels');
+  const isReels = (category?.toLowerCase() === 'reels') || (category?.toLowerCase() === 'motion design') || (project.category?.toLowerCase() === 'reels') || (project.category?.toLowerCase() === 'motion design') || (project.secondaryCategory?.toLowerCase() === 'reels') || (project.secondaryCategory?.toLowerCase() === 'motion design');
 
   const handleWhatsAppBriefing = (e) => {
     e.stopPropagation();
@@ -1323,10 +1323,10 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               <p className="block-desc">{fictiveSettings.description}</p>
             </div>
 
-            <div className={`fictive-rectangles-grid ${category.toLowerCase() === 'reels' ? 'reels-grid' : ''}`}>
+            <div className={`fictive-rectangles-grid ${(category.toLowerCase() === 'reels' || category.toLowerCase() === 'motion design') ? 'reels-grid' : ''}`}>
               {gridItems.map((item, idx) => {
                 const CardIcon = Icon;
-                const isReels = category.toLowerCase() === 'reels';
+                const isReels = category.toLowerCase() === 'reels' || category.toLowerCase() === 'motion design';
 
                 if (item.isFictive) {
                   return (

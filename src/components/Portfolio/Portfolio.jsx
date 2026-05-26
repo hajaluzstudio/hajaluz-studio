@@ -209,7 +209,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
           </div>
         </div>
 
-        <div className={`portfolio-grid ${selectedCategory === 'Reels' ? 'reels-grid' : ''}`}>
+        <div className={`portfolio-grid ${(selectedCategory === 'Reels' || selectedCategory === 'Motion Design') ? 'reels-grid' : ''}`}>
           {projectsToDisplay.map((proj, idx) => {
             const Icon = proj.icon || categoryIcons[proj.category] || Sparkles;
             const isHovered = hoveredIdx === idx;
@@ -220,7 +220,7 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
             const isDrive = isGoogleDriveUrl(proj.video);
             const hasCustomCover = proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.png';
             const videoSource = isDrive ? getGoogleDriveDirectLink(proj.video) : proj.video;
-            const isReels = proj.category === 'Reels' || proj.secondaryCategory === 'Reels';
+            const isReels = proj.category === 'Reels' || proj.secondaryCategory === 'Reels' || proj.category === 'Motion Design' || proj.secondaryCategory === 'Motion Design';
 
             let coverImage = proj.image;
             let useVideoCover = false;
