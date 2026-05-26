@@ -1361,3 +1361,45 @@
   }
 }
 
+/* Expanded Image Lightbox Zoom Overlay */
+.expanded-image-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.96);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 120000;
+}
+
+.expanded-image-content {
+  max-width: 92vw;
+  max-height: 90vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.expanded-image-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid rgba(230, 173, 69, 0.25);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(230, 173, 69, 0.05);
+}
+
+.lightbox-zoom-hint:hover {
+  background: rgba(230, 173, 69, 0.25) !important;
+  border-color: var(--color-accent-gold) !important;
+  color: var(--color-accent-gold) !important;
+  transform: scale(1.03);
+}
+
+

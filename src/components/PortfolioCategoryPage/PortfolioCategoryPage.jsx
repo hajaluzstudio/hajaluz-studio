@@ -10,6 +10,20 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const [realProjects, setRealProjects] = useState([]);
   const [hoveredProjectIdx, setHoveredProjectIdx] = useState(null);
   const [showcaseIndex, setShowcaseIndex] = useState(0);
+  const [expandedImage, setExpandedImage] = useState(null);
+
+  // Auto slide interval for the Event Photo Carousel in Lightbox
+  useEffect(() => {
+    let timer;
+    if (lightboxMedia && lightboxMedia.type === 'event' && lightboxMedia.images && lightboxMedia.images.length > 1) {
+      timer = setInterval(() => {
+        handleNextSlide();
+      }, 3800); // Elegant 3.8s transition
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [lightboxMedia?.currentIndex, lightboxMedia?.type]);
 
   useEffect(() => {
     setRealProjects(dataService.getProjects());
@@ -671,10 +685,10 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                 <div className="featured-video-wrapper glass-panel">
                   {featuredData.isYt ? (
                     <iframe 
-                      src={`https://www.youtube.com/embed/${featuredData.ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${featuredData.ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
+                      src={`https://www.youtube.com/embed/${featuredData.ytId}?autoplay=1&mute=0&controls=1&loop=1&playlist=${featuredData.ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
                       className="featured-video-element"
                       allow="autoplay; encrypted-media"
-                      style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                      style={{ border: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                       title={featuredData.title}
                     />
                   ) : (
@@ -683,7 +697,6 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       controls
                       autoPlay
                       loop
-                      muted
                       playsInline
                       className="featured-video-element"
                     />
@@ -936,7 +949,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
                         {lightboxMedia.video.type === 'youtube' ? (
                           <iframe 
-                            src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=0&controls=1&modestbranding=1&rel=0`}
+                            src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=1&loop=1&playlist=${lightboxMedia.video.src}&controls=1&modestbranding=1&rel=0`}
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                             allow="autoplay; encrypted-media; picture-in-picture"
                             allowFullScreen
@@ -946,6 +959,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                           <video 
                             src={lightboxMedia.video.src}
                             controls
+                            autoPlay
+                            loop
                             playsInline
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
                           />
@@ -971,8 +986,19 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         <img 
                           src={lightboxMedia.images[lightboxMedia.currentIndex]} 
                           alt={`Slide ${lightboxMedia.currentIndex + 1}`}
-                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                          onClick={() => setExpandedImage(lightboxMedia.images[lightboxMedia.currentIndex])}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'zoom-in' }}
+                          title="Clique para abrir a foto ampliada"
                         />
+                        
+                        {/* Zoom Glass Hint */}
+                        <div 
+                          className="lightbox-zoom-hint"
+                          onClick={() => setExpandedImage(lightboxMedia.images[lightboxMedia.currentIndex])}
+                          style={{ position: 'absolute', top: '0.8rem', left: '0.8rem', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.62rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer', zIndex: 12, transition: 'all 0.3s ease' }}
+                        >
+                          <span>🔍 Ampliar</span>
+                        </div>
 
                         {/* Slide Arrows overlay */}
                         {lightboxMedia.images.length > 1 && (
@@ -1035,7 +1061,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                 <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
                   {lightboxMedia.type === 'youtube' ? (
                     <iframe 
-                      src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&controls=1&modestbranding=1&rel=0`}
+                      src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0`}
                       style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                       allow="autoplay; encrypted-media; picture-in-picture"
                       allowFullScreen
@@ -1046,12 +1072,41 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       src={lightboxMedia.src}
                       controls
                       autoPlay
+                      loop
                       playsInline
                       style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
                     />
                   )}
                 </div>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Expanded Image Fullscreen Lightbox Zoom Modal */}
+      <AnimatePresence>
+        {expandedImage && (
+          <motion.div 
+            className="expanded-image-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setExpandedImage(null)}
+          >
+            <button className="lightbox-close-btn" onClick={() => setExpandedImage(null)} aria-label="Fechar zoom">
+              <X size={26} />
+            </button>
+            
+            <motion.div 
+              className="expanded-image-content"
+              initial={{ scale: 0.94, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.94, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img src={expandedImage} alt="Foto Ampliada" />
             </motion.div>
           </motion.div>
         )}
