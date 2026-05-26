@@ -819,3 +819,33 @@
   background: #e74c3c;
   transform: scale(1.1);
 }
+
+/* AI Suggest Button styling */
+.ai-suggest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(230, 173, 69, 0.05);
+  border: 1px solid rgba(230, 173, 69, 0.2);
+  color: var(--color-accent-gold);
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ai-suggest-btn:hover {
+  background: rgba(230, 173, 69, 0.15);
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 10px rgba(230, 173, 69, 0.15);
+}
+
+.ai-suggest-btn svg {
+  margin-top: -1px;
+}
+

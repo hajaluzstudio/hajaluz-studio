@@ -46,6 +46,101 @@ const compressImage = (base64OrFile) => {
   });
 };
 
+const generateAiCopy = (title, category) => {
+  const catLower = (category || 'Reels').toLowerCase();
+  
+  const intros = [
+    `Para o projeto "${title}", estruturamos uma narrativa magnética baseada em ritmo fático e artesania de alta costura, blindando a autoridade de ponta a ponta.`,
+    `A obra autoral "${title}" foi projetada sob rígidos conceitos geométricos e luz de cinema, desenhando uma experiência imersiva e de impacto visual memorável.`,
+    `No desenvolvimento de "${title}", alinhamos a potência de ganchos neurais de vanguarda ao peso da direção humana, ressaltando o valor absoluto da marca.`
+  ];
+  
+  const strategiesByCategory = {
+    reels: [
+      "Aplicação de cortes cirúrgicos e sound design volumétrico agressivo, retendo a atenção nos primeiros 3 segundos do feed e aumentando em até 180% o compartilhamento orgânico.",
+      "Uso de transições de timeline aceleradas e sincronia de beats urbanos com captação cinematográfica vertical, gerando engajamento profundo e conexão fática imediata."
+    ],
+    entrevistas: [
+      "Configuração de câmera dupla f/1.8 com iluminação contra-luz marrom quente e foco cirúrgico no olhar, ressaltando a seriedade, autoridade máxima e peso institucional do mentor.",
+      "Direção íntima run-and-gun com captação de áudio cristalina server-side, capturando a verdadeira essência de líderes sem roteiros repetitivos e com enquadramento dramático."
+    ],
+    "podcast's": [
+      "Sincronização server-side de microfones Shure SM7B com câmeras robóticas controladas por rastreamento inteligente de fala, entregando imagem cristalina e peso de cinema para distribuição.",
+      "Tratamento acústico de estúdio premium acoplado a workflows de multi-câmera dinâmicos, capturando cortes e recortes de altíssima conversão de forma automatizada."
+    ],
+    clipes: [
+      "Color grading cinematográfico denso com paleta cromática focada em tons quentes de marrom e ouro, unindo efeitos de grão de filme 35mm a transições abstratas de flow.",
+      "Composição artística que mescla a alma da música instrumental com beats urbanos sintéticos, estruturando um videoclipe de flow abstrato impecável."
+    ],
+    aniversários: [
+      "Cinematografia de legado familiar run-and-gun, mesclando entrevistas íntimas gravadas com som analógico e uma trilha sonora orquestral comovente que preserva a história entre gerações.",
+      "Captura discreta e artística focada nas texturas da luz natural do evento, registrando sorrisos orgânicos e discursos memoráveis sob um color grading dourado atemporal."
+    ],
+    sites: [
+      "Arquitetura digital minimalista desenvolvida com micro-animações dinâmicas de 60 FPS, modularidade de vetores SVG e paleta premium de quatro tons (Preto, Marrom, Ouro e Creme).",
+      "Programação de ponta com tempo de resposta neural absoluto e design system minimalista, desenhando portais digitais exclusivos focados em conversão e luxo visual."
+    ],
+    "design gráfico": [
+      "Criação de identidades cromáticas de luxo e peças premium estruturadas sobre rígidos conceitos geométricos e proporções áureas, projetando força máxima de mercado.",
+      "Composição visual corporativa unindo tipografia Space Grotesk refinada a contrastes de ouro e ciano, blindando o posicionamento estratégico e o desejo da marca."
+    ],
+    "motion design": [
+      "Uso de renderização de luz volumétrica e partículas 3D vetoriais de colisão em 60 FPS, dando movimento cirúrgico e dinamismo para aberturas institucionais de marcas de elite.",
+      "Simulações de física digital e transições vetoriais complexas de flow acelerado, entregando animações sofisticadas e impacto neural imediato no feed."
+    ],
+    logotipo: [
+      "Desenho de símbolo atemporal unindo conceitos clássicos baseados em especificações geométricas a uma tipografia Space Grotesk, gerando robustez absoluta e valor duradouro.",
+      "Naming e identidade gráfica profunda com raízes no latim e na simetria quadrática, blindando o logotipo corporativo contra cópias e ressaltando a soberania de mercado."
+    ],
+    fotografia: [
+      "Ensaios editoriais utilizando lentes nobres alemãs f/1.2 com bokeh cremoso industrial, gerando texturas dramáticas de luz natural nos olhos e nitidez extrema.",
+      "Sessão de retratos focados em CEO e líderes corporativos de vanguarda, captando a textura real da pele sob iluminação clássica de estúdio e enquadramento fático."
+    ],
+    documentário: [
+      "Montagem cinematográfica de ritmo lento e profundo, combinando tomadas aéreas em alta definição com áudio ambiente capturado em gravadores de fita analógica.",
+      "Desenvolvimento de documentário institucional com peso dramático, unindo histórias reais de legado e superação familiar sob uma fotografia comovente com textura cinematográfica."
+    ],
+    "produção de show": [
+      "Coordenação de captação multi-câmera com operadores de gimbal tridimensional integrados a uma captação direta de mesa de som SSL, registrando o espetáculo com peso máximo.",
+      "Cobertura massiva do evento musical de grande porte, alinhando luz volumétrica de palco a edições de timeline dinâmicas que recriam a energia presencial do show."
+    ]
+  };
+
+  const descriptionsByCategory = {
+    reels: "Campanha em formato vertical projetada para reter a atenção e viralizar de forma orgânica e impactante.",
+    entrevistas: "Entrevista cinematográfica profunda captando o posicionamento estratégico do profissional e sua autoridade.",
+    "podcast's": "Gravação premium em estúdio multi-câmera com altíssima fidelidade e dinâmica impecável de áudio e vídeo.",
+    clipes: "Videoclipe artístico de vanguarda fundindo narrativa conceitual profunda e fotografia densa de cinema.",
+    aniversários: "Filme e memórias eternizadas de um legado familiar inesquecível, registrando as gerações com emoção.",
+    sites: "Portal digital exclusivo programado com engenharia de ponta, velocidade neural e design system premium.",
+    "design gráfico": "Branding de luxo e peças corporativas desenhadas sob rígida proporção geométrica e elegância cromática.",
+    "motion design": "Animações tridimensionais complexas e física digital fluida para valorização da identidade de marca.",
+    logotipo: "Símbolo de marca forte com DNA estratégico profundo e conceitualização geométrica atemporal.",
+    fotografia: "Retratos e fotografia editorial de elite com foco dramático na textura da luz e lentes alemãs.",
+    documentário: "Documentário autoral cinematográfico registrando histórias de superação com peso narrativo clássico.",
+    "produção de show": "Registro oficial massivo de espetáculo ao vivo com som de peso e movimentação multi-câmera."
+  };
+
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) {
+    hash += title.charCodeAt(i);
+  }
+  
+  const intro = intros[hash % intros.length];
+  const categoryStrategies = strategiesByCategory[catLower] || [
+    "Aplicação de técnicas conceituais criativas com foco em impacto estético e alto engajamento visual.",
+    "Uso de ganchos visuais modernos alinhados à artesania humana para criar uma narrativa magnética de marca."
+  ];
+  
+  const strategy = categoryStrategies[hash % categoryStrategies.length];
+  const baseDesc = descriptionsByCategory[catLower] || "Produção autoral de vanguarda projetada pela equipe híbrida da Haja Luz Studio.";
+  
+  return {
+    description: `${baseDesc} ${intro}`,
+    strategy: strategy
+  };
+};
+
 const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   // 1. Estados Gerais
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -232,6 +327,20 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       ...prev,
       carouselImages: (prev.carouselImages || []).filter((_, idx) => idx !== imgIdx)
     }));
+  };
+
+  const handleAiGenerateTexts = () => {
+    if (!projectForm.title) {
+      alert("Por favor, preencha o Título do Projeto primeiro para que a IA possa analisar e sugerir os textos correspondentes.");
+      return;
+    }
+    const result = generateAiCopy(projectForm.title, projectForm.category);
+    setProjectForm(prev => ({
+      ...prev,
+      description: result.description,
+      strategy: result.strategy
+    }));
+    showNotification('Textos estratégicos sugeridos pela IA!');
   };
 
   const startEditProject = (idx) => {
@@ -570,7 +679,18 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </div>
 
                         <div className="form-row">
-                          <label>Descrição do Projeto / Evento</label>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                            <label style={{ margin: 0 }}>Descrição do Projeto / Evento</label>
+                            <button 
+                              type="button" 
+                              onClick={handleAiGenerateTexts}
+                              className="ai-suggest-btn"
+                              title="Gerar sugestão de descrição e posicionamento por IA"
+                            >
+                              <Sparkles size={11} />
+                              <span>Sugerir com IA</span>
+                            </button>
+                          </div>
                           <textarea 
                             rows={3}
                             value={projectForm.description || ''}
@@ -642,7 +762,19 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                               </div>
 
                               <div className="form-row" style={{ marginBottom: 0 }}>
-                                <label style={{ fontSize: '0.75rem', marginBottom: '0.3rem' }}>Posicionamento Estratégico</label>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                                  <label style={{ fontSize: '0.75rem', margin: 0 }}>Posicionamento Estratégico</label>
+                                  <button 
+                                    type="button" 
+                                    onClick={handleAiGenerateTexts}
+                                    className="ai-suggest-btn"
+                                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.65rem' }}
+                                    title="Gerar sugestão de descrição e posicionamento por IA"
+                                  >
+                                    <Sparkles size={10} />
+                                    <span>Sugerir com IA</span>
+                                  </button>
+                                </div>
                                 <textarea 
                                   rows={2}
                                   value={projectForm.strategy || ''} 
