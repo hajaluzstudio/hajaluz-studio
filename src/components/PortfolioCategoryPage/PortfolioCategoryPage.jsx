@@ -5,6 +5,130 @@ import { dataService } from '../../services/dataService';
 import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink } from '../../services/youtubeHelper';
 import './PortfolioCategoryPage.css';
 
+const ProjectShowcaseBlock = ({ project, images, onImageClick }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Automatic slideshow interval for this specific project
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 4000); // 4 seconds transition
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  const handlePrev = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleNext = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  return (
+    <div className="project-showcase-row glass-panel">
+      {/* Column 1: Details & Strategy */}
+      <div className="project-details-col">
+        <span className="project-showcase-tag">// CLIENTE: {project.client || 'HAJA LUZ STUDIO'}</span>
+        <h3 className="project-showcase-title">{project.title}</h3>
+        
+        {project.category && (
+          <span className="project-showcase-subtitle">{project.category} {project.secondaryCategory && `// ${project.secondaryCategory}`}</span>
+        )}
+
+        <p className="project-showcase-desc">{project.description || 'Branding e artes de luxo concebidas pela Haja Luz Studio.'}</p>
+        
+        {project.strategy && (
+          <div className="project-showcase-strategy-box">
+            <span className="strategy-box-label">// O Posicionamento Estratégico</span>
+            <p className="strategy-box-text">{project.strategy}</p>
+          </div>
+        )}
+
+        <div className="project-showcase-meta-grid" style={{ marginTop: 'auto' }}>
+          {project.role && (
+            <div className="strategy-meta-item" style={{ textAlign: 'left' }}>
+              <span className="meta-label">Formato</span>
+              <span className="meta-val">{project.role}</span>
+            </div>
+          )}
+          {project.team && (
+            <div className="strategy-meta-item" style={{ textAlign: 'left' }}>
+              <span className="meta-label">Equipe</span>
+              <span className="meta-val">{project.team}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Column 2: Photo Carousel container */}
+      <div className="project-carousel-col">
+        {images.length > 0 ? (
+          <div className="project-carousel-frame">
+            <div className="active-slide-wrapper">
+              <img 
+                src={images[currentIndex]} 
+                alt={`${project.title} slide ${currentIndex + 1}`}
+                onClick={() => onImageClick && onImageClick(images[currentIndex])}
+                className="showcase-contain-image"
+                title="Clique para ampliar a arte"
+              />
+              
+              {/* Zoom Glass Hint */}
+              <div 
+                className="lightbox-zoom-hint"
+                onClick={() => onImageClick && onImageClick(images[currentIndex])}
+                style={{ position: 'absolute', top: '0.8rem', left: '0.8rem', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.62rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer', zIndex: 12, transition: 'all 0.3s ease' }}
+              >
+                <span>🔍 Ampliar Arte</span>
+              </div>
+
+              {/* Slider index badge */}
+              {images.length > 1 && (
+                <span className="showcase-slide-badge">
+                  {currentIndex + 1} / {images.length}
+                </span>
+              )}
+            </div>
+
+            {/* Slider arrows controls */}
+            {images.length > 1 && (
+              <>
+                <button type="button" onClick={handlePrev} className="showcase-carousel-arrow arrow-left">
+                  ‹
+                </button>
+                <button type="button" onClick={handleNext} className="showcase-carousel-arrow arrow-right">
+                  ›
+                </button>
+              </>
+            )}
+
+            {/* Bottom mini dot indicators */}
+            {images.length > 1 && (
+              <div className="showcase-carousel-dots">
+                {images.map((_, dotIdx) => (
+                  <button 
+                    key={dotIdx}
+                    onClick={(e) => { e.stopPropagation(); setCurrentIndex(dotIdx); }}
+                    className={`carousel-dot-btn ${currentIndex === dotIdx ? 'active' : ''}`}
+                    aria-label={`Ir para slide ${dotIdx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="no-images-showcase-frame">
+            <span>Aguardando Capa ou Galeria</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpdateTrigger = 0 }) => {
   const [lightboxMedia, setLightboxMedia] = useState(null);
   const [realProjects, setRealProjects] = useState([]);
@@ -510,93 +634,36 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
       <div className="subpage-main-container">
         
-        {/* RENDER CATEGORY PATH 1: Design Grafico & Fotografia Showcase Master Slideshow */}
+        {/* RENDER CATEGORY PATH 1: Design Grafico & Fotografia Showcase Separated Projects catalog */}
         {isShowcaseCat && (
-          <div className="showcase-master-slideshow-section">
+          <div className="showcase-separated-projects-section">
             <div className="subpage-block-heading-wrapper">
-              <span className="block-pretitle">Showcase Master</span>
-              <h2 className="block-title">Galeria de Arte e Alta Costura</h2>
+              <span className="block-pretitle">Galeria de Destaques</span>
+              <h2 className="block-title">Projetos Editoriais & Artes Visuais</h2>
               <p className="block-desc">
-                Navegue pelas nossas criações de elite nesta categoria. Use as setas de controle ou selecione as miniaturas douradas abaixo para percorrer a exposição interativa.
+                Exposição individual de cada obra e posicionamento estratégico desenvolvido sob medida para nossos clientes parceiros.
               </p>
             </div>
 
-            {/* Showcase Container */}
-            <div className="master-showcase-container glass-panel">
-              {/* Active slide display with cross-fade */}
-              <div className="showcase-main-viewport">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={showcaseIndex}
-                    className="showcase-active-slide"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6, ease: 'easeInOut' }}
-                  >
-                    <img 
-                      src={getShowcaseSlides()[showcaseIndex]?.src} 
-                      alt={getShowcaseSlides()[showcaseIndex]?.title} 
-                      className="showcase-slide-image"
+            <div className="separated-projects-list">
+              {matchedProjects.length > 0 ? (
+                matchedProjects.map((proj, projIdx) => {
+                  const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
+                  const images = hasCarousel ? proj.carouselImages : [proj.image].filter(Boolean);
+                  
+                  return (
+                    <ProjectShowcaseBlock 
+                      key={proj.title + projIdx}
+                      project={proj}
+                      images={images}
+                      onImageClick={(src) => setExpandedImage(src)}
                     />
-                    {/* Dynamic floating card legend */}
-                    <div className="showcase-caption-overlay glass-panel">
-                      <span className="showcase-slide-tag">// PRODUÇÃO OFICIAL</span>
-                      <h3 className="showcase-slide-title">{getShowcaseSlides()[showcaseIndex]?.title}</h3>
-                      <p className="showcase-slide-desc">{getShowcaseSlides()[showcaseIndex]?.description}</p>
-                      {getShowcaseSlides()[showcaseIndex]?.project && (
-                        <button 
-                          onClick={() => handleCardClick(getShowcaseSlides()[showcaseIndex].project)}
-                          className="showcase-slide-cta"
-                        >
-                          Ver Detalhes do Projeto
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Controls overlay */}
-                {getShowcaseSlides().length > 1 && (
-                  <>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowcaseIndex(prev => (prev - 1 + getShowcaseSlides().length) % getShowcaseSlides().length)}
-                      className="showcase-arrow-btn showcase-prev"
-                      aria-label="Slide anterior"
-                    >
-                      ‹
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowcaseIndex(prev => (prev + 1) % getShowcaseSlides().length)}
-                      className="showcase-arrow-btn showcase-next"
-                      aria-label="Próximo slide"
-                    >
-                      ›
-                    </button>
-                  </>
-                )}
-
-                {/* Floating index indicator */}
-                <div className="showcase-index-counter">
-                  <span>{showcaseIndex + 1} // {getShowcaseSlides().length}</span>
-                </div>
-              </div>
-
-              {/* Gold/Bronze interactive thumbnails scrollbar at the bottom */}
-              {getShowcaseSlides().length > 1 && (
-                <div className="showcase-thumbnails-strip">
-                  {getShowcaseSlides().map((slide, sIdx) => (
-                    <div
-                      key={slide.id}
-                      onClick={() => setShowcaseIndex(sIdx)}
-                      className={`showcase-thumb-item ${showcaseIndex === sIdx ? 'active' : ''}`}
-                    >
-                      <img src={slide.src} alt={slide.title} />
-                      <div className="showcase-thumb-glow"></div>
-                    </div>
-                  ))}
+                  );
+                })
+              ) : (
+                /* Fallback Placeholders styled in a premium glass-panel way */
+                <div className="no-projects-placeholder glass-panel" style={{ padding: '4rem 3rem', textAlign: 'center', color: 'var(--color-text-dimmed)', border: '1px dashed rgba(230,173,69,0.15)', borderRadius: '12px' }}>
+                  <p style={{ margin: 0, fontFamily: 'Space Grotesk, monospace', fontSize: '0.85rem' }}>Nenhum projeto cadastrado nesta categoria. Acesse o Painel Administrativo para criar novos trabalhos de {displayCategory}.</p>
                 </div>
               )}
             </div>
