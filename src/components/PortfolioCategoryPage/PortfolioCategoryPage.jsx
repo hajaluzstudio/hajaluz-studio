@@ -103,25 +103,13 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
       </div>
 
       {/* 2. Media Section (Destaque Principal) */}
-      <div 
-        className={`social-card-media ${isReels ? 'reels-vertical' : ''}`}
-        onMouseEnter={() => {
-          if (isReels) {
-            setIsPlaying(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (isReels) {
-            setIsPlaying(false);
-          }
-        }}
-      >
+      <div className={`social-card-media ${isReels ? 'reels-vertical' : ''}`}>
         {hasVideo ? (
           hasCustomCover && !isPlaying ? (
             <div 
               className="social-video-cover-wrap" 
               onClick={() => { setIsPlaying(true); setLocalMuted(false); }}
-              title={isReels ? "Passe o mouse para reproduzir o vídeo" : "Clique para reproduzir o vídeo"}
+              title="Clique para reproduzir o vídeo"
             >
               <img 
                 src={project.image} 
@@ -132,7 +120,7 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
                 <div className="social-play-button-glow">
                   <Play size={28} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" style={{ marginLeft: '3px' }} />
                 </div>
-                <span className="social-play-label">{isReels ? "Hover para Assistir" : "Assistir Produção"}</span>
+                <span className="social-play-label">Assistir Produção</span>
               </div>
             </div>
           ) : (
@@ -159,6 +147,8 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
                     src={videoSource}
                     loop
                     autoPlay
+                    controls
+                    controlsList="nodownload"
                     muted={localMuted}
                     playsInline
                     className="social-video-element"
