@@ -908,15 +908,51 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   // Find custom featured project for this category
   const getCustomFeaturedProject = () => {
     const activeCatLower = category.toLowerCase();
-    return realProjects.find(p => 
+    const markedFeatured = realProjects.find(p => 
       p.featured && (
         (p.category && p.category.toLowerCase() === activeCatLower) || 
         (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
       )
     );
+    if (markedFeatured) return markedFeatured;
+    
+    // Fallback to first matched project if none is explicitly marked featured
+    const activeProjects = realProjects.filter(p => 
+      (p.category && p.category.toLowerCase() === activeCatLower) || 
+      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
+    );
+    if (activeProjects.length > 0) {
+      return activeProjects[0];
+    }
+    return null;
   };
 
   const customFeatured = getCustomFeaturedProject();
+
+  const getCategorizedProjects = () => {
+    if (!customFeatured) {
+      return {
+        featuredProjs: [],
+        gridRealProjs: []
+      };
+    }
+    
+    const activeCatLower = category.toLowerCase();
+    const activeProjects = realProjects.filter(p => 
+      (p.category && p.category.toLowerCase() === activeCatLower) || 
+      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
+    );
+    
+    const featuredProjs = [customFeatured];
+    const gridRealProjs = activeProjects.filter(p => p.title !== customFeatured.title);
+    
+    return {
+      featuredProjs,
+      gridRealProjs
+    };
+  };
+
+  const { featuredProjs, gridRealProjs } = getCategorizedProjects();
 
   const getFeaturedData = () => {
     if (customFeatured) {
@@ -963,11 +999,12 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   const featuredData = getFeaturedData();
 
-  // Dynamic list padding for standard category subpages (fewer than 3 projects)
-  const getDisplayItems = () => {
-    const list = [...matchedProjects];
-    if (list.length < 3) {
-      const needed = 3 - list.length;
+  // Dynamic list padding for standard category subpages (fewer than 3 projects in the bottom grid)
+  const getGridItems = () => {
+    const list = gridRealProjs.map(p => ({ ...p, isFictive: false }));
+    const minGridItems = 3;
+    if (list.length < minGridItems) {
+      const needed = minGridItems - list.length;
       const placeholders = [
         { id: 'f1', title: `${displayCategory} // Projeto Rascunho #01`, author: 'Agente Bezaleel', spec: 'Direção de Arte & Geometria', isFictive: true },
         { id: 'f2', title: `${displayCategory} // Projeto Rascunho #02`, author: 'Agente Neemias', spec: 'Edição Cirúrgica & Timeline', isFictive: true },
@@ -980,7 +1017,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     return list;
   };
 
-  const displayItems = getDisplayItems();
+  const gridItems = getGridItems();
 
   // Showcase Master Slideshow flattener helper for Design Grafico & Fotografia
   const getShowcaseSlides = () => {
@@ -1205,30 +1242,28 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         {!isLogoCat && (
           <div className="social-feed-section">
             <div className="separated-projects-list social-feed-list">
-              {matchedProjects.length > 0 ? (
-                [...matchedProjects]
-                  .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
-                  .map((proj, projIdx) => {
-                    const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
-                    const images = hasCarousel ? proj.carouselImages : [proj.image].filter(Boolean);
-                    
-                    return (
-                      <ProjectShowcaseBlock 
-                        key={proj.title + projIdx}
-                        project={proj}
-                        images={images}
-                        onImageClick={(src) => setExpandedImage(src)}
-                        onLikeClick={handleLike}
-                        onAddComment={handleAddComment}
-                        category={category}
-                        socialUser={socialUser}
-                        onSocialLoginTrigger={setActiveAuthPlatform}
-                        onSocialLogout={handleSocialLogout}
-                        onDeleteComment={handleDeleteComment}
-                        isAdmin={localStorage.getItem('haja_luz_admin_logged') === 'true'}
-                      />
-                    );
-                  })
+              {featuredProjs.length > 0 ? (
+                featuredProjs.map((proj, projIdx) => {
+                  const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
+                  const images = hasCarousel ? proj.carouselImages : [proj.image].filter(Boolean);
+                  
+                  return (
+                    <ProjectShowcaseBlock 
+                      key={proj.title + projIdx}
+                      project={proj}
+                      images={images}
+                      onImageClick={(src) => setExpandedImage(src)}
+                      onLikeClick={handleLike}
+                      onAddComment={handleAddComment}
+                      category={category}
+                      socialUser={socialUser}
+                      onSocialLoginTrigger={setActiveAuthPlatform}
+                      onSocialLogout={handleSocialLogout}
+                      onDeleteComment={handleDeleteComment}
+                      isAdmin={localStorage.getItem('haja_luz_admin_logged') === 'true'}
+                    />
+                  );
+                })
               ) : (
                 <div className="no-projects-placeholder glass-panel" style={{ padding: '4rem 3rem', textAlign: 'center', color: 'var(--color-text-dimmed)', border: '1px dashed rgba(230,173,69,0.15)', borderRadius: '12px', maxWidth: '680px', margin: '0 auto' }}>
                   <p style={{ margin: 0, fontFamily: 'Space Grotesk, monospace', fontSize: '0.85rem' }}>
@@ -1246,12 +1281,11 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
             </div>
 
             <div className={`fictive-rectangles-grid ${category.toLowerCase() === 'reels' ? 'reels-grid' : ''}`}>
-              {displayItems
-                .filter(item => item.isFictive)
-                .map((item, idx) => {
-                  const CardIcon = Icon;
-                  const isReels = category.toLowerCase() === 'reels';
+              {gridItems.map((item, idx) => {
+                const CardIcon = Icon;
+                const isReels = category.toLowerCase() === 'reels';
 
+                if (item.isFictive) {
                   return (
                     <motion.div 
                       key={item.id}
@@ -1275,7 +1309,48 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       </div>
                     </motion.div>
                   );
-                })}
+                } else {
+                  // Real non-featured project thumbnail card in bottom grid
+                  const coverImg = item.image && !item.image.startsWith('/logo') && item.image !== '' && item.image !== '/favicon.png' 
+                    ? item.image 
+                    : (item.video ? getYouTubeThumbnail(item.video) : '/favicon.png');
+
+                  return (
+                    <motion.div
+                      key={item.title}
+                      className={`real-project-subcard glass-panel ${isReels ? 'reels-vertical' : ''}`}
+                      onClick={() => handleCardClick(item)}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-80px' }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
+                    >
+                      {coverImg && <img src={coverImg} alt={item.title} className="subcard-image-bg" />}
+                      <div className="subcard-gradient-overlay"></div>
+                      <div className="subcard-badge">
+                        <span>★ Produção Real</span>
+                      </div>
+                      {item.video && (
+                        <div className="subcard-play-overlay">
+                          <div className="subcard-play-btn-glow">
+                            <Play size={18} fill="currentColor" />
+                          </div>
+                        </div>
+                      )}
+                      <div className="subcard-content">
+                        <span className="subcard-client">{item.client || 'HAJA LUZ STUDIO'}</span>
+                        <h3 className="subcard-title">{item.title}</h3>
+                        <div className="subcard-footer">
+                          <span className="subcard-role">{item.role || item.category}</span>
+                          {item.views && (
+                            <span className="subcard-views">{formatViews(item.views)} views</span>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                }
+              })}
             </div>
           </div>
         )}
