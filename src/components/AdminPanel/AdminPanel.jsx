@@ -24,8 +24,11 @@ const compressImage = (base64OrFile) => {
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
-      const MAX_WIDTH = 1000;
-      const MAX_HEIGHT = 1000;
+      
+      // Limit transparent logos to 600px max (displayed at max 150px on screen), saving >60% memory!
+      const MAX_WIDTH = isPng ? 600 : 1000;
+      const MAX_HEIGHT = isPng ? 600 : 1000;
+      
       if (width > height) {
         if (width > MAX_WIDTH) {
           height = Math.round(height * (MAX_WIDTH / width));
@@ -45,10 +48,18 @@ const compressImage = (base64OrFile) => {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Preserve transparency by saving as image/png for PNG files
-      const compressedDataUrl = isPng 
-        ? canvas.toDataURL('image/png') 
-        : canvas.toDataURL('image/jpeg', 0.7);
+      // Preserve transparency by saving as image/webp or image/png
+      // image/webp with 0.8 quality preserves transparent backgrounds and is up to 20x lighter than raw PNG!
+      let compressedDataUrl = '';
+      if (isPng) {
+        compressedDataUrl = canvas.toDataURL('image/webp', 0.8);
+        // Fallback: If webp is not supported by the browser canvas, it returns image/png
+        if (!compressedDataUrl.startsWith('data:image/webp')) {
+          compressedDataUrl = canvas.toDataURL('image/png');
+        }
+      } else {
+        compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      }
 
       if (isFile) URL.revokeObjectURL(url);
       resolve(compressedDataUrl);
