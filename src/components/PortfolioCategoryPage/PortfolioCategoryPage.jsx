@@ -149,8 +149,8 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
                 <iframe 
                   src={`https://drive.google.com/file/d/${getGoogleDriveId(project.video)}/preview`}
                   className="social-video-element"
-                  allow="autoplay; encrypted-media"
-                  style={{ border: 'none', width: '100%', height: '100%' }}
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  style={{ border: 'none', width: '100%', height: '100%', background: '#000' }}
                   title={project.title}
                 />
               ) : (
@@ -162,6 +162,7 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
                     muted={localMuted}
                     playsInline
                     className="social-video-element"
+                    style={{ background: '#000', objectFit: 'contain' }}
                   />
                   <button 
                     type="button" 
@@ -1431,8 +1432,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         ) : lightboxMedia.video.type === 'drive' ? (
                           <iframe 
                             src={`https://drive.google.com/file/d/${lightboxMedia.video.src}/preview`}
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                            allow="autoplay; encrypted-media"
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', background: '#000' }}
+                            allow="autoplay; encrypted-media; picture-in-picture"
                             allowFullScreen
                             title="Event Video Player"
                           />
@@ -1675,8 +1676,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                     ) : lightboxMedia.type === 'drive' ? (
                       <iframe 
                         src={`https://drive.google.com/file/d/${lightboxMedia.src}/preview`}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                        allow="autoplay; encrypted-media"
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', background: '#000' }}
+                        allow="autoplay; encrypted-media; picture-in-picture"
                         allowFullScreen
                         title="Cinema Player"
                       />
