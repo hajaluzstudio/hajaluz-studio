@@ -191,6 +191,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     description: 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
   });
 
+  const [selectedSettingsCategory, setSelectedSettingsCategory] = useState('global');
+
   const allCategories = [
     'Reels', 'Entrevistas', 'Podcast\'s', 'Clipes', 'Aniversários', 'Sites',
     'Design Gráfico', 'Motion Design', 'Logotipo', 'Fotografia', 'Documentário', 'Produção de Show'
@@ -205,7 +207,13 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     if (isOpen) {
       setProjects(dataService.getProjects());
       setTeam(dataService.getTeam());
-      setFictiveSettings(dataService.getFictiveSettings());
+      const allSettings = dataService.getFictiveSettings();
+      setFictiveSettings({
+        pretitle: allSettings.pretitle || 'Espaços de Co-Criação',
+        title: allSettings.title || 'Retângulos Fictícios (Rascunhos)',
+        description: allSettings.description || 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
+      });
+      setSelectedSettingsCategory('global');
       setAuthError(false);
       // Restaurar login do administrador da sessão ativa
       if (localStorage.getItem('haja_luz_admin_logged') === 'true') {
@@ -214,11 +222,57 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     }
   }, [isOpen]);
 
+  const handleSettingsCategoryChange = (catVal) => {
+    setSelectedSettingsCategory(catVal);
+    const allSettings = dataService.getFictiveSettings();
+    if (catVal === 'global') {
+      setFictiveSettings({
+        pretitle: allSettings.pretitle || 'Espaços de Co-Criação',
+        title: allSettings.title || 'Retângulos Fictícios (Rascunhos)',
+        description: allSettings.description || 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
+      });
+    } else if (allSettings[catVal]) {
+      setFictiveSettings({
+        pretitle: allSettings[catVal].pretitle || '',
+        title: allSettings[catVal].title || '',
+        description: allSettings[catVal].description || ''
+      });
+    } else {
+      // defaults empty to easily type or fall back to global
+      setFictiveSettings({
+        pretitle: '',
+        title: '',
+        description: ''
+      });
+    }
+  };
+
   const handleSaveFictiveSettings = (e) => {
     e.preventDefault();
-    dataService.saveFictiveSettings(fictiveSettings);
+    const allSettings = dataService.getFictiveSettings();
+    
+    if (selectedSettingsCategory === 'global') {
+      const updated = {
+        ...allSettings,
+        pretitle: fictiveSettings.pretitle,
+        title: fictiveSettings.title,
+        description: fictiveSettings.description
+      };
+      dataService.saveFictiveSettings(updated);
+    } else {
+      const updated = {
+        ...allSettings,
+        [selectedSettingsCategory]: {
+          pretitle: fictiveSettings.pretitle,
+          title: fictiveSettings.title,
+          description: fictiveSettings.description
+        }
+      };
+      dataService.saveFictiveSettings(updated);
+    }
+    
     onDataChange && onDataChange();
-    showNotification('Configurações de Rascunhos Salvas!');
+    showNotification('Ajustes da Página Salvos!');
   };
 
   const showNotification = (msg) => {
@@ -1031,10 +1085,24 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                       ⚙️ Textos das Subpáginas (Rascunhos)
                     </h3>
                     <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>
-                      Personalize o título e a descrição explicativa que aparecem na seção de retângulos fictícios/rascunhos de co-criação de todas as subpáginas de categorias.
+                      Escolha uma página específica ou selecione o Padrão Geral para personalizar o pré-título, título principal e descrição explicativa que aparecem na seção de retângulos fictícios/rascunhos de co-criação.
                     </p>
                     
                     <form onSubmit={handleSaveFictiveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Página para Ajuste de Texto</label>
+                        <select
+                          value={selectedSettingsCategory}
+                          onChange={(e) => handleSettingsCategoryChange(e.target.value)}
+                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(230,173,69,0.3)', borderRadius: '6px', color: '#fff', outline: 'none' }}
+                        >
+                          <option value="global">Todas as Páginas (Padrão Geral)</option>
+                          {allCategories.map(cat => (
+                            <option key={cat} value={cat}>Página: {cat}</option>
+                          ))}
+                        </select>
+                      </div>
+
                       <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                         <label style={{ fontSize: '0.72rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pré-Título (Ex: Espaços de Co-Criação)</label>
                         <input 
@@ -1042,7 +1110,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                           value={fictiveSettings.pretitle || ''} 
                           onChange={(e) => setFictiveSettings({ ...fictiveSettings, pretitle: e.target.value })}
                           placeholder="Ex: Espaços de Co-Criação"
-                          required
                           style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff' }}
                         />
                       </div>
@@ -1054,7 +1121,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                           value={fictiveSettings.title || ''} 
                           onChange={(e) => setFictiveSettings({ ...fictiveSettings, title: e.target.value })}
                           placeholder="Ex: Retângulos Fictícios (Rascunhos)"
-                          required
                           style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff' }}
                         />
                       </div>
@@ -1066,7 +1132,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                           value={fictiveSettings.description || ''} 
                           onChange={(e) => setFictiveSettings({ ...fictiveSettings, description: e.target.value })}
                           placeholder="Ex: Abaixo estão posicionados os retângulos de layout fictícios..."
-                          required
                           style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff', outline: 'none', resize: 'vertical' }}
                         />
                       </div>
@@ -1076,7 +1141,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         className="form-save-btn" 
                         style={{ alignSelf: 'flex-start', padding: '0.6rem 1.4rem', fontSize: '0.75rem', marginTop: '0.4rem' }}
                       >
-                        Salvar Ajustes Globais
+                        {selectedSettingsCategory === 'global' ? 'Salvar Ajustes Globais' : `Salvar Ajustes de ${selectedSettingsCategory}`}
                       </button>
                     </form>
                   </div>

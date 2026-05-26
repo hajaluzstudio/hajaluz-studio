@@ -509,7 +509,22 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   useEffect(() => {
     setRealProjects(dataService.getProjects());
-    setFictiveSettings(dataService.getFictiveSettings());
+    const allSettings = dataService.getFictiveSettings();
+    const catKey = Object.keys(allSettings).find(k => k.toLowerCase() === category.toLowerCase());
+    
+    if (catKey && allSettings[catKey]) {
+      setFictiveSettings({
+        pretitle: allSettings[catKey].pretitle || allSettings.pretitle || 'Espaços de Co-Criação',
+        title: allSettings[catKey].title || allSettings.title || 'Retângulos Fictícios (Rascunhos)',
+        description: allSettings[catKey].description || allSettings.description || 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
+      });
+    } else {
+      setFictiveSettings({
+        pretitle: allSettings.pretitle || 'Espaços de Co-Criação',
+        title: allSettings.title || 'Retângulos Fictícios (Rascunhos)',
+        description: allSettings.description || 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
+      });
+    }
   }, [category, dataUpdateTrigger]);
 
   const handleLike = (projectTitle) => {
