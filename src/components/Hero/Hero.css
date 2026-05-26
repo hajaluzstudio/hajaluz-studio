@@ -1,0 +1,181 @@
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5%;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Background video sharp layer */
+.hero-video-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* OTIMIZAÇÃO DE PERFORMANCE (Efeito Vapor de Chuva e Aceleração por GPU) */
+.hero-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* A camada de vapor/chuva */
+.hero-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* Mantém o fundo visível, mas aplica o desfoque do vapor */
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  
+  /* Textura sutil de gotas/vapor misturada com o fundo escuro */
+  background-color: rgba(0, 0, 0, 0.45);
+  background-image: url('https://www.transparenttextures.com/patterns/rain.png');
+  
+  /* Suavidade na hora de limpar */
+  transition: backdrop-filter 1.2s ease, -webkit-backdrop-filter 1.2s ease, opacity 1.2s ease;
+  pointer-events: none;
+  z-index: 2;
+  
+  /* Aceleração de hardware para não travar celulares */
+  will-change: backdrop-filter, opacity;
+  transform: translateZ(0);
+}
+
+/* Quando passa o mouse (PC) ou toca (Mobile) - O vapor dissipa */
+.hero-container:hover::after,
+.hero-container:active::after {
+  backdrop-filter: blur(2px) saturate(100%);
+  -webkit-backdrop-filter: blur(2px) saturate(100%);
+  opacity: 0.15; /* O vapor quase some, revelando o vídeo cristalino por trás */
+}
+
+/* Ambient glows */
+.hero-neon-light {
+  position: absolute;
+  width: 35vw;
+  height: 35vw;
+  border-radius: 50%;
+  filter: blur(140px);
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.25;
+}
+
+.hero-neon-cyan {
+  top: 15%;
+  left: 10%;
+  background: var(--color-accent-cyan);
+}
+
+.hero-neon-violet {
+  bottom: 15%;
+  right: 10%;
+  background: var(--color-accent-violet);
+}
+
+/* Hero Content overlay */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 900px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-cta {
+  margin-top: 1.5rem;
+}
+
+.hero-brand {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-accent-cyan);
+  margin-bottom: 2rem;
+  text-shadow: 0 0 10px var(--color-accent-cyan-glow);
+  font-weight: 500;
+}
+
+.hero-title-main {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6.5vw, 5.2rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 2.2rem;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
+}
+
+.hero-subtitle-main {
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  color: var(--color-text-muted);
+  max-width: 750px;
+  line-height: 1.6;
+  margin-bottom: 3.5rem;
+  font-weight: 300;
+}
+
+.hero-cta-btn-content {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cta-icon {
+  color: var(--color-accent-cyan);
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-text-muted);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 0 1.5rem;
+  }
+  
+  .hero-title-main {
+    line-height: 1.2;
+  }
+  
+  .hero-neon-light {
+    width: 60vw;
+    height: 60vw;
+    filter: blur(80px);
+  }
+}

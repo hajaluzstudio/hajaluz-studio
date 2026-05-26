@@ -1,0 +1,512 @@
+/* --- HAJA LUZ STUDIO // EQUIPE CAROUSEL STYLES --- */
+
+.team-section {
+  position: relative;
+  width: 100%;
+  padding: 8rem 5% 10rem 5%;
+  background-color: #000;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.team-neon {
+  position: absolute;
+  width: 45vw;
+  height: 45vw;
+  border-radius: 50%;
+  filter: blur(170px);
+  pointer-events: none;
+  opacity: 0.08;
+  z-index: 1;
+}
+
+.team-neon-cyan {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-accent-cyan);
+}
+
+.team-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.team-header {
+  text-align: center;
+  max-width: 750px;
+  margin: 0 auto 4rem auto;
+}
+
+.team-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-accent-cyan);
+  margin-bottom: 1rem;
+  display: block;
+  text-shadow: 0 0 10px var(--color-accent-cyan-glow);
+}
+
+.team-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.team-description-lead {
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* Widescreen Slide Card Setup */
+.team-card {
+  width: 100%;
+  display: flex;
+  background: rgba(8, 8, 8, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.03) !important;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.maestro-card {
+  flex-direction: row;
+  align-items: stretch;
+  background: rgba(10, 10, 10, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  min-height: 380px;
+}
+
+/* Widescreen Hover variables */
+.carousel-main-frame:hover .team-card {
+  border-color: var(--agent-color, var(--color-accent-violet)) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 30px var(--agent-glow, var(--color-accent-violet-glow)) !important;
+}
+
+.maestro-avatar-wrapper {
+  width: 380px;
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+  background-color: #050505;
+  overflow: hidden;
+}
+
+.maestro-info {
+  padding: 3rem 2.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.team-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.95;
+}
+
+.carousel-main-frame:hover .team-avatar {
+  transform: scale(1.03);
+}
+
+/* Badges human vs AI */
+.team-badge {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 0.8rem;
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 5;
+}
+
+.badge-human {
+  background: rgba(230, 173, 69, 0.07);
+  border: 1px solid rgba(230, 173, 69, 0.25);
+  color: var(--color-accent-gold);
+}
+
+.badge-ai {
+  background: rgba(230, 173, 69, 0.07);
+  border: 1px solid rgba(230, 173, 69, 0.2);
+  color: var(--color-accent-gold);
+}
+
+.member-role {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.member-name {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.01em;
+}
+
+/* Focus Indicator box */
+.member-focus-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.015);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  margin-bottom: 1.4rem;
+  max-width: fit-content;
+  transition: border-color 0.3s ease;
+}
+
+.carousel-main-frame:hover .member-focus-box {
+  border-color: var(--agent-color, rgba(0, 242, 254, 0.1)) !important;
+}
+
+.focus-icon {
+  transition: color 0.4s ease;
+}
+
+.focus-text {
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.member-desc {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+}
+
+/* Glitch styling for hover card */
+.team-card.team-glitch-active {
+  animation: team-glitch-shake 0.3s forwards;
+  border-color: var(--agent-color, var(--color-accent-violet)) !important;
+}
+
+@keyframes team-glitch-shake {
+  0% { transform: translate(0); }
+  25% { transform: translate(-2px, 1px) scale(0.99); }
+  50% { transform: translate(2px, -1px) scale(1.01); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0); }
+}
+
+.image-glitch {
+  animation: team-img-glitch 0.3s forwards;
+  filter: hue-rotate(15deg) contrast(1.2);
+}
+
+@keyframes team-img-glitch {
+  0% { transform: scale(1); filter: none; }
+  30% { transform: skew(3deg) scaleX(1.03); filter: hue-rotate(45deg); }
+  60% { transform: skew(-3deg) scaleY(0.97); filter: invert(0.05) contrast(1.3); }
+  100% { transform: scale(1.03); filter: none; }
+}
+
+.team-noise-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.2;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Carousel Mechanics & Structure */
+.carousel-outer-wrapper {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 5;
+}
+
+.carousel-main-frame {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.carousel-slide-content {
+  width: 100%;
+  outline: none;
+}
+
+/* Glass navigation arrows overlapping the frame */
+.carousel-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background: rgba(10, 10, 10, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.prev-btn {
+  left: -24px;
+}
+
+.next-btn {
+  right: -24px;
+}
+
+.carousel-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--agent-color);
+  color: var(--agent-color);
+  box-shadow: 0 0 15px var(--agent-glow);
+}
+
+.prev-btn:hover {
+  transform: translateY(-50%) translateX(-2px);
+}
+
+.next-btn:hover {
+  transform: translateY(-50%) translateX(2px);
+}
+
+/* Carousel HUD status panel */
+.carousel-hud-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding: 0.8rem 1.5rem;
+  background: rgba(12, 12, 12, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 30px;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* PlayPause Autopilot HUD indicator */
+.carousel-hud-playpause {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #27ae60;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  transition: background 0.3s ease;
+}
+
+.carousel-hud-playpause:hover {
+  background: rgba(39, 174, 96, 0.1);
+}
+
+/* Dots control */
+.carousel-hud-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.carousel-hud-dot {
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.hud-dot-inner {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.carousel-hud-dot:hover .hud-dot-inner {
+  background: var(--dot-color);
+  box-shadow: 0 0 6px var(--dot-glow);
+  transform: scale(1.15);
+}
+
+.carousel-hud-dot.active .hud-dot-inner {
+  background: var(--dot-color) !important;
+  box-shadow: 0 0 10px var(--dot-glow) !important;
+  transform: scale(1.3);
+}
+
+/* Autopilot indicator text */
+.carousel-hud-index {
+  color: var(--agent-color, var(--color-accent-cyan));
+  text-shadow: 0 0 5px var(--agent-glow);
+  font-weight: bold;
+  transition: color 0.4s ease;
+}
+
+/* Slide Card footer */
+.carousel-card-footer {
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  padding-top: 1rem;
+}
+
+.click-indicator {
+  display: block;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.65rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(5px);
+  pointer-events: none;
+}
+
+.carousel-main-frame:hover .click-indicator {
+  opacity: 0.85;
+  transform: translateY(0);
+}
+
+/* Full access button */
+.carousel-bottom-panel {
+  display: flex;
+  justify-content: center;
+  margin-top: 3.5rem;
+}
+
+.open-terminal-btn {
+  background: rgba(230, 173, 69, 0.04);
+  border: 1px solid rgba(230, 173, 69, 0.2);
+  color: var(--color-accent-gold, #e6ad45);
+  padding: 0.8rem 2.2rem;
+  font-family: var(--font-display, 'Space Grotesk', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 15px rgba(230, 173, 69, 0.05);
+}
+
+.open-terminal-btn:hover {
+  background: rgba(230, 173, 69, 0.1);
+  border-color: var(--color-accent-gold, #e6ad45);
+  box-shadow: 0 0 25px rgba(230, 173, 69, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  .carousel-outer-wrapper {
+    max-width: 100%;
+    padding: 0 1.5rem;
+  }
+
+  .maestro-avatar-wrapper {
+    width: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-section {
+    padding: 6rem 5% 7rem 5%;
+  }
+
+  .carousel-outer-wrapper {
+    padding: 0;
+  }
+
+  .carousel-nav-btn {
+    display: none; /* Hide side arrows on small screens; use dots instead */
+  }
+
+  .team-card {
+    flex-direction: column !important;
+  }
+
+  .maestro-avatar-wrapper {
+    width: 100% !important;
+    height: 250px !important;
+  }
+
+  .maestro-info {
+    padding: 2.2rem 1.5rem !important;
+  }
+
+  .member-name {
+    font-size: 1.8rem;
+  }
+
+  .member-desc {
+    font-size: 0.82rem;
+  }
+
+  .carousel-hud-controls {
+    margin-top: 1.5rem;
+    padding: 0.6rem 1rem;
+  }
+  
+  .carousel-hud-playpause span {
+    display: none; /* Hide autoplay label, keep icon for size */
+  }
+}
