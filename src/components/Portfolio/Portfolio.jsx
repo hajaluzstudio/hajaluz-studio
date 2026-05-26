@@ -128,16 +128,46 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
   };
 
   const handleCardClick = (proj) => {
+    const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
+    
+    if (proj.category === 'Aniversários' || hasCarousel) {
+      setLightboxMedia({
+        type: 'event',
+        title: proj.title,
+        description: proj.description || '',
+        video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : { type: 'direct', src: isGoogleDriveUrl(proj.video) ? getGoogleDriveDirectLink(proj.video) : proj.video }) : null,
+        images: proj.carouselImages || [],
+        currentIndex: 0
+      });
+      return;
+    }
+
     const ytId = getYouTubeId(proj.video);
     if (ytId) {
       setLightboxMedia({ type: 'youtube', src: ytId });
     } else if (isGoogleDriveUrl(proj.video)) {
       setLightboxMedia({ type: 'direct', src: getGoogleDriveDirectLink(proj.video) });
-    } else if (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co')) {
+    } else if (proj.video && (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co'))) {
       setLightboxMedia({ type: 'direct', src: proj.video });
     } else {
-      window.open(proj.video, '_blank');
+      window.open(proj.video || proj.image, '_blank');
     }
+  };
+
+  const handleNextSlide = () => {
+    setLightboxMedia(prev => {
+      if (!prev || !prev.images || prev.images.length === 0) return prev;
+      const nextIdx = (prev.currentIndex + 1) % prev.images.length;
+      return { ...prev, currentIndex: nextIdx };
+    });
+  };
+
+  const handlePrevSlide = () => {
+    setLightboxMedia(prev => {
+      if (!prev || !prev.images || prev.images.length === 0) return prev;
+      const prevIdx = (prev.currentIndex - 1 + prev.images.length) % prev.images.length;
+      return { ...prev, currentIndex: prevIdx };
+    });
   };
 
   const projectsToDisplay = getFilteredProjects();
@@ -187,13 +217,20 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
             const ytId = getYouTubeId(proj.video);
             const isYt = !!ytId;
             const isDrive = isGoogleDriveUrl(proj.video);
-            
-            const coverImage = isYt && (!proj.image || proj.image.startsWith('/logo') || proj.image === '' || proj.image === '/favicon.svg') 
-              ? getYouTubeThumbnail(proj.video) 
-              : proj.image;
-
+            const hasCustomCover = proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.svg';
             const videoSource = isDrive ? getGoogleDriveDirectLink(proj.video) : proj.video;
             const isReels = proj.category === 'Reels' || proj.secondaryCategory === 'Reels';
+
+            let coverImage = proj.image;
+            let useVideoCover = false;
+
+            if (isYt) {
+              if (!hasCustomCover) {
+                coverImage = getYouTubeThumbnail(proj.video);
+              }
+            } else if (videoSource && !hasCustomCover) {
+              useVideoCover = true;
+            }
 
             return (
               <motion.div 
@@ -210,17 +247,26 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
                 <div className={`portfolio-card glass-panel ${isGlitching ? 'glitch-active' : ''} ${proj.isFictive ? 'fictive-card' : ''}`}>
                   {/* Card Media Layer */}
                   <div className="card-media-wrapper">
-                    {/* Background Static Image */}
-                    <img 
-                      src={coverImage} 
-                      alt={proj.title} 
-                      className={`card-image ${isHovered ? 'image-fade' : ''}`} 
-                      onError={(e) => {
-                        if (isYt && e.target.src.includes('maxresdefault')) {
-                          e.target.src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                        }
-                      }}
-                    />
+                    {/* Background Static Image or Preloaded Video Cover */}
+                    {useVideoCover ? (
+                      <video 
+                        src={videoSource} 
+                        preload="metadata" 
+                        className={`card-image ${isHovered ? 'image-fade' : ''}`}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <img 
+                        src={coverImage || '/favicon.svg'} 
+                        alt={proj.title} 
+                        className={`card-image ${isHovered ? 'image-fade' : ''}`} 
+                        onError={(e) => {
+                          if (isYt && e.target.src.includes('maxresdefault')) {
+                            e.target.src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                          }
+                        }}
+                      />
+                    )}
                     
                     {/* Hover Video Loop */}
                     {isHovered && (
@@ -302,27 +348,134 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
               exit={{ scale: 0.95, y: 15 }}
               transition={{ type: 'spring', stiffness: 280, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: '980px', width: '100%' }}
+              style={{ maxWidth: lightboxMedia.type === 'event' ? '1100px' : '980px', width: '100%' }}
             >
-              <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
-                {lightboxMedia.type === 'youtube' ? (
-                  <iframe 
-                    src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&controls=1&modestbranding=1&rel=0`}
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                    allow="autoplay; encrypted-media; picture-in-picture"
-                    allowFullScreen
-                    title="Cinema Player"
-                  />
-                ) : (
-                  <video 
-                    src={lightboxMedia.src}
-                    controls
-                    autoPlay
-                    playsInline
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
-                  />
-                )}
-              </div>
+              {lightboxMedia.type === 'event' ? (
+                /* EVENT SLIDESHOW AND DETAILS MODE */
+                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: lightboxMedia.video ? '1.1fr 0.9fr' : '1fr', gap: '2rem', width: '100%', padding: '1rem' }}>
+                  
+                  {/* Left Column: Event Video (or Info block if no video) */}
+                  <div className="event-left-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                    {lightboxMedia.video && (
+                      <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
+                        {lightboxMedia.video.type === 'youtube' ? (
+                          <iframe 
+                            src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=0&controls=1&modestbranding=1&rel=0`}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                            allow="autoplay; encrypted-media; picture-in-picture"
+                            allowFullScreen
+                            title="Event Video Player"
+                          />
+                        ) : (
+                          <video 
+                            src={lightboxMedia.video.src}
+                            controls
+                            playsInline
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    {/* Event Metadata (Title and Description) */}
+                    <div className="event-info-block" style={{ textAlign: 'left' }}>
+                      <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#fff', marginBottom: '0.6rem', letterSpacing: '-0.01em', fontWeight: 600 }}>
+                        {lightboxMedia.title}
+                      </h3>
+                      <p className="event-lightbox-desc" style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: '1.6', fontWeight: 300 }}>
+                        {lightboxMedia.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Carousel Photo Slideshow */}
+                  {lightboxMedia.images && lightboxMedia.images.length > 0 && (
+                    <div className="event-right-column event-photo-carousel-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', position: 'relative' }}>
+                      <div className="active-slide-frame" style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.8)' }}>
+                        <img 
+                          src={lightboxMedia.images[lightboxMedia.currentIndex]} 
+                          alt={`Slide ${lightboxMedia.currentIndex + 1}`}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
+
+                        {/* Slide Arrows overlay */}
+                        {lightboxMedia.images.length > 1 && (
+                          <>
+                            <button 
+                              type="button" 
+                              onClick={handlePrevSlide} 
+                              className="slide-arrow-btn prev-arrow" 
+                              style={{ position: 'absolute', left: '0.8rem', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease', zIndex: 10, fontSize: '1.2rem', fontWeight: 'bold' }}
+                            >
+                              ‹
+                            </button>
+                            <button 
+                              type="button" 
+                              onClick={handleNextSlide} 
+                              className="slide-arrow-btn next-arrow" 
+                              style={{ position: 'absolute', right: '0.8rem', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease', zIndex: 10, fontSize: '1.2rem', fontWeight: 'bold' }}
+                            >
+                              ›
+                            </button>
+                          </>
+                        )}
+
+                        {/* counter badge */}
+                        <span className="slide-counter-badge" style={{ position: 'absolute', bottom: '0.8rem', right: '0.8rem', background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(230,173,69,0.2)', color: 'var(--color-accent-gold)', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+                          {lightboxMedia.currentIndex + 1} / {lightboxMedia.images.length}
+                        </span>
+                      </div>
+
+                      {/* Small Thumbnails strip indicator */}
+                      {lightboxMedia.images.length > 1 && (
+                        <div className="slideshow-thumbnails-strip" style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', padding: '0.2rem 0', scrollbarWidth: 'none' }}>
+                          {lightboxMedia.images.map((img, thumbIdx) => (
+                            <div 
+                              key={thumbIdx} 
+                              onClick={() => setLightboxMedia(prev => ({ ...prev, currentIndex: thumbIdx }))}
+                              style={{ 
+                                width: '55px', 
+                                height: '55px', 
+                                borderRadius: '6px', 
+                                overflow: 'hidden', 
+                                cursor: 'pointer', 
+                                border: lightboxMedia.currentIndex === thumbIdx ? '2px solid var(--color-accent-gold)' : '1px solid rgba(255,255,255,0.1)',
+                                opacity: lightboxMedia.currentIndex === thumbIdx ? 1 : 0.4,
+                                transition: 'all 0.3s ease',
+                                flexShrink: 0
+                              }}
+                            >
+                              <img src={img} alt="thumb" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                </div>
+              ) : (
+                /* REGULAR VIDEO SINGLE PLAYER MODE */
+                <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
+                  {lightboxMedia.type === 'youtube' ? (
+                    <iframe 
+                      src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&controls=1&modestbranding=1&rel=0`}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                      allow="autoplay; encrypted-media; picture-in-picture"
+                      allowFullScreen
+                      title="Cinema Player"
+                    />
+                  ) : (
+                    <video 
+                      src={lightboxMedia.src}
+                      controls
+                      autoPlay
+                      playsInline
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
+                    />
+                  )}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

@@ -9,6 +9,8 @@ const DEFAULT_PROJECTS = [
     secondaryCategory: 'Podcast\'s',
     image: '/traco_e_tom.png',
     video: 'https://assets.mixkit.co/videos/preview/mixkit-electronic-music-dj-playing-at-club-41712-large.mp4',
+    carouselImages: [],
+    description: 'Videoclipe musical de alta costura com fusão de jazz clássico e texturas eletrônicas.',
     isReal: true
   },
   {
@@ -17,6 +19,8 @@ const DEFAULT_PROJECTS = [
     secondaryCategory: 'Entrevistas',
     image: '/destino_de_peao.png',
     video: 'https://assets.mixkit.co/videos/preview/mixkit-misty-mountains-and-pine-trees-43224-large.mp4',
+    carouselImages: [],
+    description: 'Documentário cinematográfico profundo cobrindo o legado e a rotina poética dos peões da serra.',
     isReal: true
   },
   {
@@ -25,6 +29,8 @@ const DEFAULT_PROJECTS = [
     secondaryCategory: 'Motion Design',
     image: '/piquezin_do_sul.png',
     video: 'https://assets.mixkit.co/videos/preview/mixkit-graphic-animation-of-futuristic-lines-and-dots-41617-large.mp4',
+    carouselImages: [],
+    description: 'Campanha de Reels de alta energia unindo transições ágeis e ganchos dinâmicos nos feeds.',
     isReal: true
   },
   {
@@ -33,6 +39,22 @@ const DEFAULT_PROJECTS = [
     secondaryCategory: 'Logotipo',
     image: '/shark.png',
     video: 'https://assets.mixkit.co/videos/preview/mixkit-abstract-glowing-lines-rotating-in-a-loop-41616-large.mp4',
+    carouselImages: [],
+    description: 'Branding e identidade corporativa sofisticada estruturada em proporção áurea geométrica.',
+    isReal: true
+  },
+  {
+    title: 'Aniversário Vó Eni',
+    category: 'Aniversários',
+    secondaryCategory: 'Documentário',
+    image: '',
+    video: 'https://assets.mixkit.co/videos/preview/mixkit-misty-mountains-and-pine-trees-43224-large.mp4',
+    carouselImages: [
+      'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800',
+      'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800',
+      'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800'
+    ],
+    description: 'Celebração emocionante de 90 anos de história, reunindo quatro gerações da família em uma noite repleta de memórias, sorrisos e homenagens inesquecíveis.',
     isReal: true
   }
 ];

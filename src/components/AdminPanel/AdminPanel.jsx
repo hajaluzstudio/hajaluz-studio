@@ -28,7 +28,9 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     category: 'Reels',
     secondaryCategory: '',
     image: '',
-    video: ''
+    video: '',
+    carouselImages: [],
+    description: ''
   });
 
   // 3.2 Equipe
@@ -90,17 +92,18 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   // 6. Ações do Portfólio
   const handleAddOrEditProject = (e) => {
     e.preventDefault();
-    
-    const ytId = getYouTubeId(projectForm.video);
-    const isYt = !!ytId;
 
-    if (!projectForm.title || !projectForm.video) {
-      alert("Por favor, preencha o Título e o Vídeo.");
+    if (!projectForm.title) {
+      alert("Por favor, preencha o Título.");
       return;
     }
 
-    if (!isYt && !projectForm.image) {
-      alert("Para vídeos que não são do YouTube, por favor defina ou carregue uma imagem de capa.");
+    const hasVideo = !!projectForm.video;
+    const hasCover = !!projectForm.image;
+    const hasCarousel = projectForm.carouselImages && projectForm.carouselImages.length > 0;
+
+    if (!hasVideo && !hasCover && !hasCarousel) {
+      alert("Por favor, forneça pelo menos um Vídeo, uma Imagem de Capa ou envie fotos para a Galeria.");
       return;
     }
 
@@ -151,9 +154,41 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     }
   };
 
+  const handleCarouselFilesChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProjectForm(prev => ({
+          ...prev,
+          carouselImages: [...(prev.carouselImages || []), reader.result]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeCarouselImage = (imgIdx) => {
+    setProjectForm(prev => ({
+      ...prev,
+      carouselImages: (prev.carouselImages || []).filter((_, idx) => idx !== imgIdx)
+    }));
+  };
+
   const startEditProject = (idx) => {
     setEditingProjectIdx(idx);
-    setProjectForm(projects[idx]);
+    const proj = projects[idx];
+    setProjectForm({
+      title: proj.title || '',
+      category: proj.category || 'Reels',
+      secondaryCategory: proj.secondaryCategory || '',
+      image: proj.image || '',
+      video: proj.video || '',
+      carouselImages: proj.carouselImages || [],
+      description: proj.description || ''
+    });
   };
 
   const deleteProject = (idx) => {
@@ -173,7 +208,9 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       category: 'Reels',
       secondaryCategory: '',
       image: '',
-      video: ''
+      video: '',
+      carouselImages: [],
+      description: ''
     });
   };
 
@@ -430,14 +467,13 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </div>
 
                         <div className="form-row">
-                          <label>Vídeo do Projeto (YouTube, Drive ou PC) *</label>
+                          <label>Vídeo do Projeto (YouTube, Drive ou PC)</label>
                           <div className="media-input-group">
                             <input 
                               type="text" 
                               value={projectForm.video}
                               onChange={(e) => setProjectForm({ ...projectForm, video: e.target.value })}
                               placeholder="Cole o link do YouTube, Google Drive ou link MP4..."
-                              required
                               style={{ flex: 1 }}
                             />
                             <label className="file-upload-label glass-panel">
@@ -452,6 +488,57 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                           </div>
                           <span className="input-hint">Suporta links do YouTube, Google Drive (links de compartilhamento padrão), CDN MP4 direto ou arquivos do PC (&lt; 4.5MB).</span>
                         </div>
+
+                        <div className="form-row">
+                          <label>Descrição do Projeto / Evento</label>
+                          <textarea 
+                            rows={3}
+                            value={projectForm.description || ''}
+                            onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
+                            placeholder="Escreva detalhes do projeto, estratégias de execução ou memórias do evento..."
+                            style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', padding: '0.75rem 1rem', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                          />
+                        </div>
+
+                        {['Design Gráfico', 'Fotografia', 'Logotipo', 'Aniversários'].includes(projectForm.category) && (
+                          <div className="form-row carousel-manager-section glass-panel" style={{ padding: '1.2rem', marginTop: '0.5rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '8px' }}>
+                            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                              <span>Galeria de Fotos do Carrossel ({projectForm.carouselImages?.length || 0})</span>
+                              <label className="file-upload-label glass-panel" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem' }}>
+                                ➕ Adicionar Fotos (PC)
+                                <input 
+                                  type="file" 
+                                  multiple 
+                                  accept="image/*" 
+                                  onChange={handleCarouselFilesChange} 
+                                  style={{ display: 'none' }} 
+                                />
+                              </label>
+                            </label>
+                            
+                            {projectForm.carouselImages && projectForm.carouselImages.length > 0 ? (
+                              <div className="admin-carousel-grid">
+                                {projectForm.carouselImages.map((img, idx) => (
+                                  <div key={idx} className="admin-carousel-thumb-wrapper">
+                                    <img src={img} alt={`Slide ${idx + 1}`} className="admin-carousel-thumb" />
+                                    <button 
+                                      type="button" 
+                                      onClick={() => removeCarouselImage(idx)} 
+                                      className="admin-carousel-thumb-remove"
+                                      title="Remover Slide"
+                                    >
+                                      <Trash2 size={10} />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="input-hint" style={{ fontStyle: 'italic', display: 'block', textAlign: 'center', padding: '1rem 0' }}>
+                                Nenhuma imagem cadastrada no carrossel. Use o botão acima para enviar fotos do PC.
+                              </span>
+                            )}
+                          </div>
+                        )}
 
                         <div className="form-buttons-row">
                           <button type="submit" className="form-save-btn">

@@ -9,22 +9,53 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const [lightboxMedia, setLightboxMedia] = useState(null);
   const [realProjects, setRealProjects] = useState([]);
   const [hoveredProjectIdx, setHoveredProjectIdx] = useState(null);
+  const [showcaseIndex, setShowcaseIndex] = useState(0);
 
   useEffect(() => {
     setRealProjects(dataService.getProjects());
   }, [category, dataUpdateTrigger]);
 
   const handleCardClick = (proj) => {
+    const hasCarousel = proj.carouselImages && proj.carouselImages.length > 0;
+    
+    if (proj.category === 'Aniversários' || hasCarousel) {
+      setLightboxMedia({
+        type: 'event',
+        title: proj.title,
+        description: proj.description || '',
+        video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : { type: 'direct', src: isGoogleDriveUrl(proj.video) ? getGoogleDriveDirectLink(proj.video) : proj.video }) : null,
+        images: proj.carouselImages || [],
+        currentIndex: 0
+      });
+      return;
+    }
+
     const ytId = getYouTubeId(proj.video);
     if (ytId) {
       setLightboxMedia({ type: 'youtube', src: ytId });
     } else if (isGoogleDriveUrl(proj.video)) {
       setLightboxMedia({ type: 'direct', src: getGoogleDriveDirectLink(proj.video) });
-    } else if (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co')) {
+    } else if (proj.video && (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co'))) {
       setLightboxMedia({ type: 'direct', src: proj.video });
     } else {
-      window.open(proj.video, '_blank');
+      window.open(proj.video || proj.image, '_blank');
     }
+  };
+
+  const handleNextSlide = () => {
+    setLightboxMedia(prev => {
+      if (!prev || !prev.images || prev.images.length === 0) return prev;
+      const nextIdx = (prev.currentIndex + 1) % prev.images.length;
+      return { ...prev, currentIndex: nextIdx };
+    });
+  };
+
+  const handlePrevSlide = () => {
+    setLightboxMedia(prev => {
+      if (!prev || !prev.images || prev.images.length === 0) return prev;
+      const prevIdx = (prev.currentIndex - 1 + prev.images.length) % prev.images.length;
+      return { ...prev, currentIndex: prevIdx };
+    });
   };
 
   // Capitalize category name for display
@@ -32,6 +63,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setShowcaseIndex(0); // Reset showcase slide when category changes!
   }, [category]);
 
   const categoryIcons = {
@@ -138,8 +170,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         title: 'Identidade Corporativa Shark',
         video: 'https://assets.mixkit.co/videos/preview/mixkit-abstract-glowing-lines-rotating-in-a-loop-41616-large.mp4',
         client: 'Shark Holdings',
-        role: 'Direção Artística / Branding',
-        team: 'Bezaleel (Design de Arte) & Salomão (Naming)',
+        role: 'Branding de Vanguarda',
+        team: 'Bezaleel & Salomão',
         strategy: 'Desenho de linhas angulares inspiradas na barbatana do tubarão, acopladas à geometria bíblica clássica para demonstrar robustez de mercado.',
         desc: 'Rebranding completo e design de peças institucionais de alto luxo corporativo.'
       }
@@ -239,7 +271,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   const matchedProjects = getFilteredProjects();
 
-  // Dynamic list padding: if fewer than 3 projects, pad with beautifully designed fictive cards
+  // Dynamic list padding for standard category subpages (fewer than 3 projects)
   const getDisplayItems = () => {
     const list = [...matchedProjects];
     if (list.length < 3) {
@@ -257,6 +289,93 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   };
 
   const displayItems = getDisplayItems();
+
+  // Showcase Master Slideshow flattener helper for Design Grafico & Fotografia
+  const getShowcaseSlides = () => {
+    const slides = [];
+    matchedProjects.forEach(proj => {
+      if (proj.carouselImages && proj.carouselImages.length > 0) {
+        proj.carouselImages.forEach((img, idx) => {
+          slides.push({
+            id: `${proj.title}-slide-${idx}`,
+            src: img,
+            title: proj.title,
+            description: proj.description || proj.spec || 'Produção Exclusiva Haja Luz Studio',
+            project: proj
+          });
+        });
+      } else if (proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.svg') {
+        slides.push({
+          id: `${proj.title}-main`,
+          src: proj.image,
+          title: proj.title,
+          description: proj.description || proj.spec || 'Produção Exclusiva Haja Luz Studio',
+          project: proj
+        });
+      }
+    });
+
+    if (slides.length === 0) {
+      // Add luxurious custom showcase placeholder slides
+      slides.push({
+        id: 'f-slide-1',
+        src: '/bezaleel.png',
+        title: `${displayCategory} // Showcase Rascunho #01`,
+        description: 'Layout conceitual e artesania em andamento pela equipe Haja Luz Studio.'
+      });
+      slides.push({
+        id: 'f-slide-2',
+        src: '/enoque.png',
+        title: `${displayCategory} // Showcase Rascunho #02`,
+        description: 'Estudo espacial de movimento e composição projetado por Enoque.'
+      });
+      slides.push({
+        id: 'f-slide-3',
+        src: '/calebe.png',
+        title: `${displayCategory} // Showcase Rascunho #03`,
+        description: 'Engenharia de dados, performance e integrações digitais por Calebe.'
+      });
+    }
+    return slides;
+  };
+
+  // 4x8 Logo Grid collector helper (requires exactly 32 spots)
+  const getLogoGridItems = () => {
+    const logos = [];
+    matchedProjects.forEach(proj => {
+      if (proj.carouselImages && proj.carouselImages.length > 0) {
+        proj.carouselImages.forEach((img, idx) => {
+          logos.push({
+            id: `${proj.title}-logo-${idx}`,
+            src: img,
+            title: proj.title,
+            project: proj
+          });
+        });
+      } else if (proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.svg') {
+        logos.push({
+          id: `${proj.title}-logo-main`,
+          src: proj.image,
+          title: proj.title,
+          project: proj
+        });
+      }
+    });
+
+    const gridItems = [...logos];
+    while (gridItems.length < 32) {
+      gridItems.push({
+        id: `logo-placeholder-${gridItems.length}`,
+        isPlaceholder: true,
+        title: 'Espaço Disponível',
+        subtitle: 'Bezaleel Grid'
+      });
+    }
+    return gridItems;
+  };
+
+  const isShowcaseCat = category.toLowerCase() === 'design gráfico' || category.toLowerCase() === 'fotografia';
+  const isLogoCat = category.toLowerCase() === 'logotipo';
 
   return (
     <div className="portfolio-subpage-root">
@@ -319,198 +438,380 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
       <div className="subpage-main-container">
         
-        {/* SECTION 1: Featured Work (Video + Rich Strategy Texts) */}
-        <div className="subpage-block-heading-wrapper">
-          <span className="block-pretitle">Destaque Exclusivo</span>
-          <h2 className="block-title">Produção de Destaque</h2>
-        </div>
-
-        <div className="subpage-featured-grid">
-          {/* Left Column: Premium video frame player */}
-          <motion.div 
-            className="featured-video-col"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-          >
-            <div className="featured-video-wrapper glass-panel">
-              <video 
-                src={activeData.featured.video}
-                controls
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="featured-video-element"
-              />
-              <div className="video-player-glow-border"></div>
-              <div className="video-player-scanline"></div>
+        {/* RENDER CATEGORY PATH 1: Design Grafico & Fotografia Showcase Master Slideshow */}
+        {isShowcaseCat && (
+          <div className="showcase-master-slideshow-section">
+            <div className="subpage-block-heading-wrapper">
+              <span className="block-pretitle">Showcase Master</span>
+              <h2 className="block-title">Galeria de Arte e Alta Costura</h2>
+              <p className="block-desc">
+                Navegue pelas nossas criações de elite nesta categoria. Use as setas de controle ou selecione as miniaturas douradas abaixo para percorrer a exposição interativa.
+              </p>
             </div>
-          </motion.div>
 
-          {/* Right Column: High-end strategy text blocks */}
-          <motion.div 
-            className="featured-text-col"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          >
-            <div className="strategy-glass-panel glass-panel">
-              <div className="strategy-heading-wrap">
-                <Target size={16} className="strategy-heading-icon" />
-                <h3 className="strategy-title">{activeData.featured.title}</h3>
-              </div>
+            {/* Showcase Container */}
+            <div className="master-showcase-container glass-panel">
+              {/* Active slide display with cross-fade */}
+              <div className="showcase-main-viewport">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={showcaseIndex}
+                    className="showcase-active-slide"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6, ease: 'easeInOut' }}
+                  >
+                    <img 
+                      src={getShowcaseSlides()[showcaseIndex]?.src} 
+                      alt={getShowcaseSlides()[showcaseIndex]?.title} 
+                      className="showcase-slide-image"
+                    />
+                    {/* Dynamic floating card legend */}
+                    <div className="showcase-caption-overlay glass-panel">
+                      <span className="showcase-slide-tag">// PRODUÇÃO OFICIAL</span>
+                      <h3 className="showcase-slide-title">{getShowcaseSlides()[showcaseIndex]?.title}</h3>
+                      <p className="showcase-slide-desc">{getShowcaseSlides()[showcaseIndex]?.description}</p>
+                      {getShowcaseSlides()[showcaseIndex]?.project && (
+                        <button 
+                          onClick={() => handleCardClick(getShowcaseSlides()[showcaseIndex].project)}
+                          className="showcase-slide-cta"
+                        >
+                          Ver Detalhes do Projeto
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
 
-              <div className="strategy-meta-grid">
-                <div className="strategy-meta-item">
-                  <span className="meta-label">Cliente</span>
-                  <span className="meta-val">{activeData.featured.client}</span>
+                {/* Controls overlay */}
+                {getShowcaseSlides().length > 1 && (
+                  <>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowcaseIndex(prev => (prev - 1 + getShowcaseSlides().length) % getShowcaseSlides().length)}
+                      className="showcase-arrow-btn showcase-prev"
+                      aria-label="Slide anterior"
+                    >
+                      ‹
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowcaseIndex(prev => (prev + 1) % getShowcaseSlides().length)}
+                      className="showcase-arrow-btn showcase-next"
+                      aria-label="Próximo slide"
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
+
+                {/* Floating index indicator */}
+                <div className="showcase-index-counter">
+                  <span>{showcaseIndex + 1} // {getShowcaseSlides().length}</span>
                 </div>
-                <div className="strategy-meta-item">
-                  <span className="meta-label">Formato</span>
-                  <span className="meta-val">{activeData.featured.role}</span>
+              </div>
+
+              {/* Gold/Bronze interactive thumbnails scrollbar at the bottom */}
+              {getShowcaseSlides().length > 1 && (
+                <div className="showcase-thumbnails-strip">
+                  {getShowcaseSlides().map((slide, sIdx) => (
+                    <div
+                      key={slide.id}
+                      onClick={() => setShowcaseIndex(sIdx)}
+                      className={`showcase-thumb-item ${showcaseIndex === sIdx ? 'active' : ''}`}
+                    >
+                      <img src={slide.src} alt={slide.title} />
+                      <div className="showcase-thumb-glow"></div>
+                    </div>
+                  ))}
                 </div>
-                <div className="strategy-meta-item">
-                  <span className="meta-label">Operadores</span>
-                  <span className="meta-val">{activeData.featured.team}</span>
-                </div>
-              </div>
-
-              <hr className="strategy-separator" />
-
-              <div className="strategy-content-block">
-                <h4 className="strategy-block-title">// O Posicionamento Estratégico</h4>
-                <p className="strategy-block-desc">{activeData.featured.strategy}</p>
-              </div>
-
-              <div className="strategy-content-block">
-                <h4 className="strategy-block-title">// Detalhes da Execução</h4>
-                <p className="strategy-block-desc">{activeData.featured.desc}</p>
-              </div>
+              )}
             </div>
-          </motion.div>
-        </div>
+          </div>
+        )}
 
-        {/* SECTION 2: Fictive Rectangles (Rascunhos / Aguardando real files) */}
-        <div className="subpage-block-heading-wrapper" style={{ marginTop: '7rem' }}>
-          <span className="block-pretitle">Espaços de Co-Criação</span>
-          <h2 className="block-title">Retângulos Fictícios (Rascunhos)</h2>
-          <p className="block-desc">
-            Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.
-          </p>
-        </div>
+        {/* RENDER CATEGORY PATH 2: Logotipo Grade Geometrica 4x8 */}
+        {isLogoCat && (
+          <div className="logo-grid-4x8-section">
+            <div className="subpage-block-heading-wrapper">
+              <span className="block-pretitle">Bezaleel Grid</span>
+              <h2 className="block-title">Identidades Corporativas & Simbologia</h2>
+              <p className="block-desc">
+                Uma grade rígida e precisa de 32 células baseada na proporção áurea e geometria clássica. Passe o mouse sobre os logotipos para um zoom holográfico ou clique para visualizá-los em alta fidelidade.
+              </p>
+            </div>
 
-        <div className={`fictive-rectangles-grid ${category.toLowerCase() === 'reels' ? 'reels-grid' : ''}`}>
-          {displayItems.map((item, idx) => {
-            const isFictive = item.isFictive;
-            const isHovered = hoveredProjectIdx === idx;
-            const CardIcon = isFictive ? Icon : (categoryIcons[item.category?.toLowerCase()] || Target);
-            const isReels = category.toLowerCase() === 'reels';
+            {/* The 4x8 Grid Container */}
+            <div className="logo-4x8-grid-container">
+              {getLogoGridItems().map((item, idx) => {
+                if (item.isPlaceholder) {
+                  return (
+                    <div key={item.id} className="logo-grid-tile placeholder-tile">
+                      <div className="placeholder-wireframe-svg">
+                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="10" y="10" width="80" height="80" rx="4" stroke="rgba(230,173,69,0.12)" strokeWidth="1" strokeDasharray="4 4"/>
+                          <line x1="10" y1="10" x2="90" y2="90" stroke="rgba(230,173,69,0.06)" strokeWidth="0.5"/>
+                          <line x1="90" y1="10" x2="10" y2="90" stroke="rgba(230,173,69,0.06)" strokeWidth="0.5"/>
+                          <circle cx="50" cy="50" r="25" stroke="rgba(0,206,209,0.08)" strokeWidth="1" strokeDasharray="2 2"/>
+                        </svg>
+                      </div>
+                      <div className="placeholder-tile-text">
+                        <span className="placeholder-main-text">{item.title}</span>
+                        <span className="placeholder-sub-text">{item.subtitle}</span>
+                      </div>
+                    </div>
+                  );
+                }
 
-            if (isFictive) {
-              return (
-                <motion.div 
-                  key={item.id}
-                  className={`fictive-rectangle-card glass-panel ${isReels ? 'reels-vertical' : ''}`}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-80px' }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
-                >
-                  <div className="fictive-pattern-bg"></div>
-                  <div className="fictive-rect-badge">
-                    <span>Rascunho // Aguardando Arquivos Reais</span>
+                // Active Logo grid tile
+                return (
+                  <div 
+                    key={item.id} 
+                    className="logo-grid-tile active-tile"
+                    onClick={() => {
+                      setLightboxMedia({
+                        type: 'event',
+                        title: item.title,
+                        description: item.project?.description || 'Desenho vetorial sob medida com DNA estratégico.',
+                        images: [item.src],
+                        currentIndex: 0
+                      });
+                    }}
+                  >
+                    <div className="tile-logo-frame">
+                      <img src={item.src} alt={item.title} className="tile-logo-img" />
+                    </div>
+                    <div className="tile-hover-overlay">
+                      <span className="tile-hover-title">{item.title}</span>
+                    </div>
+                    <div className="tile-border-glow"></div>
                   </div>
-                  <div className="fictive-rect-content">
-                    <CardIcon size={24} className="fictive-rect-icon" />
-                    <h3 className="fictive-rect-title">{item.title}</h3>
-                    <div className="fictive-rect-footer">
-                      <span className="fictive-rect-author">Responsável: {item.author}</span>
-                      <span className="fictive-rect-spec">{item.spec}</span>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* RENDER CATEGORY PATH 3: Standard Featured + Card Grid */}
+        {!isShowcaseCat && !isLogoCat && (
+          <>
+            {/* SECTION 1: Featured Work (Video + Rich Strategy Texts) */}
+            <div className="subpage-block-heading-wrapper">
+              <span className="block-pretitle">Destaque Exclusivo</span>
+              <h2 className="block-title">Produção de Destaque</h2>
+            </div>
+
+            <div className="subpage-featured-grid">
+              {/* Left Column: Premium video frame player */}
+              <motion.div 
+                className="featured-video-col"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+              >
+                <div className="featured-video-wrapper glass-panel">
+                  <video 
+                    src={activeData.featured.video}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="featured-video-element"
+                  />
+                  <div className="video-player-glow-border"></div>
+                  <div className="video-player-scanline"></div>
+                </div>
+              </motion.div>
+
+              {/* Right Column: High-end strategy text blocks */}
+              <motion.div 
+                className="featured-text-col"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+              >
+                <div className="strategy-glass-panel glass-panel">
+                  <div className="strategy-heading-wrap">
+                    <Target size={16} className="strategy-heading-icon" />
+                    <h3 className="strategy-title">{activeData.featured.title}</h3>
+                  </div>
+
+                  <div className="strategy-meta-grid">
+                    <div className="strategy-meta-item">
+                      <span className="meta-label">Cliente</span>
+                      <span className="meta-val">{activeData.featured.client}</span>
+                    </div>
+                    <div className="strategy-meta-item">
+                      <span className="meta-label">Formato</span>
+                      <span className="meta-val">{activeData.featured.role}</span>
+                    </div>
+                    <div className="strategy-meta-item">
+                      <span className="meta-label">Operadores</span>
+                      <span className="meta-val">{activeData.featured.team}</span>
                     </div>
                   </div>
-                </motion.div>
-              );
-            }
 
-            // Real Project Card rendered dynamically inside the subpage grid!
-            const ytId = getYouTubeId(item.video);
-            const isYt = !!ytId;
-            const isDrive = isGoogleDriveUrl(item.video);
-            const coverImage = isYt && (!item.image || item.image.startsWith('/logo') || item.image === '' || item.image === '/favicon.svg') 
-              ? getYouTubeThumbnail(item.video) 
-              : item.image;
+                  <hr className="strategy-separator" />
 
-            const videoSource = isDrive ? getGoogleDriveDirectLink(item.video) : item.video;
+                  <div className="strategy-content-block">
+                    <h4 className="strategy-block-title">// O Posicionamento Estratégico</h4>
+                    <p className="strategy-block-desc">{activeData.featured.strategy}</p>
+                  </div>
 
-            return (
-              <motion.div 
-                key={item.title + idx}
-                className={`fictive-rectangle-card glass-panel real-project-subcard ${isReels ? 'reels-vertical' : ''}`}
-                style={{ overflow: 'hidden', padding: 0, cursor: 'pointer' }}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
-                onMouseEnter={() => setHoveredProjectIdx(idx)}
-                onMouseLeave={() => setHoveredProjectIdx(null)}
-                onClick={() => handleCardClick(item)}
-              >
-                {/* Media Layer */}
-                <div className="subcard-media-wrapper" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, overflow: 'hidden' }}>
-                  <img 
-                    src={coverImage} 
-                    alt={item.title} 
-                    onError={(e) => {
-                      if (isYt && e.target.src.includes('maxresdefault')) {
-                        e.target.src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                      }
-                    }}
-                    style={{ 
-                      width: '100%', 
-                      height: '100%', 
-                      objectFit: 'cover', 
-                      transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease', 
-                      transform: isHovered ? 'scale(1.04)' : 'scale(1)',
-                      opacity: isHovered ? 0 : 1
-                    }}
-                  />
-                  {isHovered && (
-                    isYt ? (
-                      <iframe 
-                        src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
-                        className="subcard-video video-active"
-                        allow="autoplay; encrypted-media"
-                        style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
-                        title={item.title}
-                      />
-                    ) : (
-                      <video 
-                        src={videoSource} 
-                        loop 
-                        muted 
-                        playsInline 
-                        autoPlay
-                        className="subcard-video video-active"
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
-                      />
-                    )
-                  )}
-                  <div className="subcard-overlay" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)', zIndex: 3 }}></div>
-                </div>
-
-                <div className="fictive-rect-content" style={{ zIndex: 10, width: '100%', padding: '1.5rem 1.8rem' }}>
-                  <CardIcon size={20} className="fictive-rect-icon" style={{ color: 'var(--color-accent-gold)', marginBottom: '0.4rem' }} />
-                  <h3 className="fictive-rect-title" style={{ fontSize: '1.15rem', color: '#ffffff', letterSpacing: '-0.01em', fontWeight: 500 }}>{item.title}</h3>
-                  <div className="fictive-rect-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.7rem', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-                    <span className="fictive-rect-author" style={{ color: 'var(--color-accent-cyan)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>PRODUÇÃO OFICIAL</span>
-                    <span className="fictive-rect-spec" style={{ fontSize: '0.68rem', color: 'var(--color-text-dimmed)' }}>{item.category} {item.secondaryCategory && `// ${item.secondaryCategory}`}</span>
+                  <div className="strategy-content-block">
+                    <h4 className="strategy-block-title">// Detalhes da Execução</h4>
+                    <p className="strategy-block-desc">{activeData.featured.desc}</p>
                   </div>
                 </div>
               </motion.div>
-            );
-          })}
-        </div>
+            </div>
+
+            {/* SECTION 2: Fictive Rectangles (Rascunhos / Aguardando real files) */}
+            <div className="subpage-block-heading-wrapper" style={{ marginTop: '7rem' }}>
+              <span className="block-pretitle">Espaços de Co-Criação</span>
+              <h2 className="block-title">Retângulos Fictícios (Rascunhos)</h2>
+              <p className="block-desc">
+                Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.
+              </p>
+            </div>
+
+            <div className={`fictive-rectangles-grid ${category.toLowerCase() === 'reels' ? 'reels-grid' : ''}`}>
+              {displayItems.map((item, idx) => {
+                const isFictive = item.isFictive;
+                const isHovered = hoveredProjectIdx === idx;
+                const CardIcon = isFictive ? Icon : (categoryIcons[item.category?.toLowerCase()] || Target);
+                const isReels = category.toLowerCase() === 'reels';
+
+                if (isFictive) {
+                  return (
+                    <motion.div 
+                      key={item.id}
+                      className={`fictive-rectangle-card glass-panel ${isReels ? 'reels-vertical' : ''}`}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-80px' }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
+                    >
+                      <div className="fictive-pattern-bg"></div>
+                      <div className="fictive-rect-badge">
+                        <span>Rascunho // Aguardando Arquivos Reais</span>
+                      </div>
+                      <div className="fictive-rect-content">
+                        <CardIcon size={24} className="fictive-rect-icon" />
+                        <h3 className="fictive-rect-title">{item.title}</h3>
+                        <div className="fictive-rect-footer">
+                          <span className="fictive-rect-author">Responsável: {item.author}</span>
+                          <span className="fictive-rect-spec">{item.spec}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                }
+
+                // Real Project Card rendered dynamically inside the subpage grid!
+                const ytId = getYouTubeId(item.video);
+                const isYt = !!ytId;
+                const isDrive = isGoogleDriveUrl(item.video);
+                const hasCustomCover = item.image && !item.image.startsWith('/logo') && item.image !== '' && item.image !== '/favicon.svg';
+                const videoSource = isDrive ? getGoogleDriveDirectLink(item.video) : item.video;
+
+                let coverImage = item.image;
+                let useVideoCover = false;
+
+                if (isYt) {
+                  if (!hasCustomCover) {
+                    coverImage = getYouTubeThumbnail(item.video);
+                  }
+                } else if (videoSource && !hasCustomCover) {
+                  useVideoCover = true;
+                }
+
+                return (
+                  <motion.div 
+                    key={item.title + idx}
+                    className={`fictive-rectangle-card glass-panel real-project-subcard ${isReels ? 'reels-vertical' : ''}`}
+                    style={{ overflow: 'hidden', padding: 0, cursor: 'pointer' }}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-80px' }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
+                    onMouseEnter={() => setHoveredProjectIdx(idx)}
+                    onMouseLeave={() => setHoveredProjectIdx(null)}
+                    onClick={() => handleCardClick(item)}
+                  >
+                    {/* Media Layer */}
+                    <div className="subcard-media-wrapper" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, overflow: 'hidden' }}>
+                      {useVideoCover ? (
+                        <video 
+                          src={videoSource} 
+                          preload="metadata" 
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover',
+                            transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)', 
+                            transform: isHovered ? 'scale(1.04)' : 'scale(1)'
+                          }}
+                        />
+                      ) : (
+                        <img 
+                          src={coverImage || '/favicon.svg'} 
+                          alt={item.title} 
+                          onError={(e) => {
+                            if (isYt && e.target.src.includes('maxresdefault')) {
+                              e.target.src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                            }
+                          }}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover', 
+                            transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease', 
+                            transform: isHovered ? 'scale(1.04)' : 'scale(1)',
+                            opacity: isHovered ? 0 : 1
+                          }}
+                        />
+                      )}
+                      {isHovered && (
+                        isYt ? (
+                          <iframe 
+                            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
+                            className="subcard-video video-active"
+                            allow="autoplay; encrypted-media"
+                            style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
+                            title={item.title}
+                          />
+                        ) : (
+                          <video 
+                            src={videoSource} 
+                            loop 
+                            muted 
+                            playsInline 
+                            autoPlay
+                            className="subcard-video video-active"
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 2 }}
+                          />
+                        )
+                      )}
+                      <div className="subcard-overlay" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)', zIndex: 3 }}></div>
+                    </div>
+
+                    <div className="fictive-rect-content" style={{ zIndex: 10, width: '100%', padding: '1.5rem 1.8rem' }}>
+                      <CardIcon size={20} className="fictive-rect-icon" style={{ color: 'var(--color-accent-gold)', marginBottom: '0.4rem' }} />
+                      <h3 className="fictive-rect-title" style={{ fontSize: '1.15rem', color: '#ffffff', letterSpacing: '-0.01em', fontWeight: 500 }}>{item.title}</h3>
+                      <div className="fictive-rect-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.7rem', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                        <span className="fictive-rect-author" style={{ color: 'var(--color-accent-cyan)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>PRODUÇÃO OFICIAL</span>
+                        <span className="fictive-rect-spec" style={{ fontSize: '0.68rem', color: 'var(--color-text-dimmed)' }}>{item.category} {item.secondaryCategory && `// ${item.secondaryCategory}`}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </>
+        )}
 
         {/* Dynamic CTA Footer Section */}
         <div className="subpage-cta-section glass-panel">
@@ -555,27 +856,134 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               exit={{ scale: 0.95, y: 15 }}
               transition={{ type: 'spring', stiffness: 280, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: '980px', width: '100%' }}
+              style={{ maxWidth: lightboxMedia.type === 'event' ? '1100px' : '980px', width: '100%' }}
             >
-              <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
-                {lightboxMedia.type === 'youtube' ? (
-                  <iframe 
-                    src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&controls=1&modestbranding=1&rel=0`}
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                    allow="autoplay; encrypted-media; picture-in-picture"
-                    allowFullScreen
-                    title="Cinema Player"
-                  />
-                ) : (
-                  <video 
-                    src={lightboxMedia.src}
-                    controls
-                    autoPlay
-                    playsInline
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
-                  />
-                )}
-              </div>
+              {lightboxMedia.type === 'event' ? (
+                /* EVENT SLIDESHOW AND DETAILS MODE */
+                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: lightboxMedia.video ? '1.1fr 0.9fr' : '1fr', gap: '2rem', width: '100%', padding: '1rem' }}>
+                  
+                  {/* Left Column: Event Video (or Info block if no video) */}
+                  <div className="event-left-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                    {lightboxMedia.video && (
+                      <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
+                        {lightboxMedia.video.type === 'youtube' ? (
+                          <iframe 
+                            src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=0&controls=1&modestbranding=1&rel=0`}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                            allow="autoplay; encrypted-media; picture-in-picture"
+                            allowFullScreen
+                            title="Event Video Player"
+                          />
+                        ) : (
+                          <video 
+                            src={lightboxMedia.video.src}
+                            controls
+                            playsInline
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    {/* Event Metadata (Title and Description) */}
+                    <div className="event-info-block" style={{ textAlign: 'left' }}>
+                      <h3 className="event-lightbox-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#fff', marginBottom: '0.6rem', letterSpacing: '-0.01em', fontWeight: 600 }}>
+                        {lightboxMedia.title}
+                      </h3>
+                      <p className="event-lightbox-desc" style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: '1.6', fontWeight: 300 }}>
+                        {lightboxMedia.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Carousel Photo Slideshow */}
+                  {lightboxMedia.images && lightboxMedia.images.length > 0 && (
+                    <div className="event-right-column event-photo-carousel-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', position: 'relative' }}>
+                      <div className="active-slide-frame" style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.8)' }}>
+                        <img 
+                          src={lightboxMedia.images[lightboxMedia.currentIndex]} 
+                          alt={`Slide ${lightboxMedia.currentIndex + 1}`}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
+
+                        {/* Slide Arrows overlay */}
+                        {lightboxMedia.images.length > 1 && (
+                          <>
+                            <button 
+                              type="button" 
+                              onClick={handlePrevSlide} 
+                              className="slide-arrow-btn prev-arrow" 
+                              style={{ position: 'absolute', left: '0.8rem', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease', zIndex: 10, fontSize: '1.2rem', fontWeight: 'bold' }}
+                            >
+                              ‹
+                            </button>
+                            <button 
+                              type="button" 
+                              onClick={handleNextSlide} 
+                              className="slide-arrow-btn next-arrow" 
+                              style={{ position: 'absolute', right: '0.8rem', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s ease', zIndex: 10, fontSize: '1.2rem', fontWeight: 'bold' }}
+                            >
+                              ›
+                            </button>
+                          </>
+                        )}
+
+                        {/* counter badge */}
+                        <span className="slide-counter-badge" style={{ position: 'absolute', bottom: '0.8rem', right: '0.8rem', background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(230,173,69,0.2)', color: 'var(--color-accent-gold)', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.05em' }}>
+                          {lightboxMedia.currentIndex + 1} / {lightboxMedia.images.length}
+                        </span>
+                      </div>
+
+                      {/* Small Thumbnails strip indicator */}
+                      {lightboxMedia.images.length > 1 && (
+                        <div className="slideshow-thumbnails-strip" style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', padding: '0.2rem 0', scrollbarWidth: 'none' }}>
+                          {lightboxMedia.images.map((img, thumbIdx) => (
+                            <div 
+                              key={thumbIdx} 
+                              onClick={() => setLightboxMedia(prev => ({ ...prev, currentIndex: thumbIdx }))}
+                              style={{ 
+                                width: '55px', 
+                                height: '55px', 
+                                borderRadius: '6px', 
+                                overflow: 'hidden', 
+                                cursor: 'pointer', 
+                                border: lightboxMedia.currentIndex === thumbIdx ? '2px solid var(--color-accent-gold)' : '1px solid rgba(255,255,255,0.1)',
+                                opacity: lightboxMedia.currentIndex === thumbIdx ? 1 : 0.4,
+                                transition: 'all 0.3s ease',
+                                flexShrink: 0
+                              }}
+                            >
+                              <img src={img} alt="thumb" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                </div>
+              ) : (
+                /* REGULAR VIDEO SINGLE PLAYER MODE */
+                <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(230,173,69,0.05)' }}>
+                  {lightboxMedia.type === 'youtube' ? (
+                    <iframe 
+                      src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&controls=1&modestbranding=1&rel=0`}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                      allow="autoplay; encrypted-media; picture-in-picture"
+                      allowFullScreen
+                      title="Cinema Player"
+                    />
+                  ) : (
+                    <video 
+                      src={lightboxMedia.src}
+                      controls
+                      autoPlay
+                      playsInline
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
+                    />
+                  )}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
