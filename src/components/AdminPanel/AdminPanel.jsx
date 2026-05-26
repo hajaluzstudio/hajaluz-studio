@@ -68,7 +68,12 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     image: '',
     video: '',
     carouselImages: [],
-    description: ''
+    description: '',
+    featured: false,
+    client: '',
+    role: '',
+    team: '',
+    strategy: ''
   });
 
   // 3.2 Equipe
@@ -145,11 +150,23 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       return;
     }
 
-    const updatedProjects = [...projects];
+    let updatedProjects = [...projects];
     const newProj = {
       ...projectForm,
       isReal: true
     };
+
+    // If this project is marked as featured, unmark any other project in the same category!
+    if (newProj.featured) {
+      const activeCat = newProj.category.toLowerCase();
+      updatedProjects = updatedProjects.map((p, pIdx) => {
+        if (editingProjectIdx !== null && pIdx === editingProjectIdx) return p;
+        if (p.category && p.category.toLowerCase() === activeCat) {
+          return { ...p, featured: false };
+        }
+        return p;
+      });
+    }
 
     if (editingProjectIdx !== null) {
       // Editar existente
@@ -227,7 +244,12 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       image: proj.image || '',
       video: proj.video || '',
       carouselImages: proj.carouselImages || [],
-      description: proj.description || ''
+      description: proj.description || '',
+      featured: !!proj.featured,
+      client: proj.client || '',
+      role: proj.role || '',
+      team: proj.team || '',
+      strategy: proj.strategy || ''
     });
   };
 
@@ -250,7 +272,12 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       image: '',
       video: '',
       carouselImages: [],
-      description: ''
+      description: '',
+      featured: false,
+      client: '',
+      role: '',
+      team: '',
+      strategy: ''
     });
   };
 
@@ -552,6 +579,81 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', padding: '0.75rem 1rem', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
                           />
                         </div>
+
+                        <div className="form-row checkbox-row" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.5rem 0', margin: '0.5rem 0' }}>
+                          <input 
+                            type="checkbox" 
+                            id="project-featured"
+                            checked={!!projectForm.featured}
+                            onChange={(e) => setProjectForm({ ...projectForm, featured: e.target.checked })}
+                            style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-accent-gold)', margin: 0 }}
+                          />
+                          <label htmlFor="project-featured" style={{ cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-accent-gold)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
+                            <Award size={14} />
+                            Definir como Trabalho em Destaque desta Categoria
+                          </label>
+                        </div>
+
+                        <AnimatePresence>
+                          {projectForm.featured && (
+                            <motion.div 
+                              className="featured-extra-meta-fields glass-panel" 
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              style={{ overflow: 'hidden', padding: '1rem', background: 'rgba(230,173,69,0.03)', border: '1px solid rgba(230,173,69,0.15)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '0.5rem', marginBottom: '0.5rem' }}
+                            >
+                              <span style={{ fontSize: '0.72rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace' }}>
+                                // METADADOS DO DESTAQUE (OPCIONAIS)
+                              </span>
+                              
+                              <div className="form-row-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                                <div className="form-row" style={{ marginBottom: 0 }}>
+                                  <label style={{ fontSize: '0.75rem', marginBottom: '0.3rem' }}>Cliente</label>
+                                  <input 
+                                    type="text" 
+                                    value={projectForm.client || ''} 
+                                    onChange={(e) => setProjectForm({ ...projectForm, client: e.target.value })} 
+                                    placeholder="Ex: Haja Luz Studio"
+                                    style={{ padding: '0.5rem', fontSize: '0.8rem' }}
+                                  />
+                                </div>
+                                <div className="form-row" style={{ marginBottom: 0 }}>
+                                  <label style={{ fontSize: '0.75rem', marginBottom: '0.3rem' }}>Formato / Papel</label>
+                                  <input 
+                                    type="text" 
+                                    value={projectForm.role || ''} 
+                                    onChange={(e) => setProjectForm({ ...projectForm, role: e.target.value })} 
+                                    placeholder="Ex: Direção de Arte"
+                                    style={{ padding: '0.5rem', fontSize: '0.8rem' }}
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="form-row" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '0.75rem', marginBottom: '0.3rem' }}>Operadores / Equipe</label>
+                                <input 
+                                  type="text" 
+                                  value={projectForm.team || ''} 
+                                  onChange={(e) => setProjectForm({ ...projectForm, team: e.target.value })} 
+                                  placeholder="Ex: Felipe Costa & Salomão"
+                                  style={{ padding: '0.5rem', fontSize: '0.8rem' }}
+                                />
+                              </div>
+
+                              <div className="form-row" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '0.75rem', marginBottom: '0.3rem' }}>Posicionamento Estratégico</label>
+                                <textarea 
+                                  rows={2}
+                                  value={projectForm.strategy || ''} 
+                                  onChange={(e) => setProjectForm({ ...projectForm, strategy: e.target.value })} 
+                                  placeholder="Descreva a estratégia por trás desse trabalho de destaque..."
+                                  style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', padding: '0.5rem', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                                />
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
 
                         {['Design Gráfico', 'Fotografia', 'Logotipo', 'Aniversários'].includes(projectForm.category) && (
                           <div className="form-row carousel-manager-section glass-panel" style={{ padding: '1.2rem', marginTop: '0.5rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '8px' }}>

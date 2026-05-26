@@ -271,6 +271,64 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   const matchedProjects = getFilteredProjects();
 
+  // Find custom featured project for this category
+  const getCustomFeaturedProject = () => {
+    const activeCatLower = category.toLowerCase();
+    return realProjects.find(p => 
+      p.featured && (
+        (p.category && p.category.toLowerCase() === activeCatLower) || 
+        (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
+      )
+    );
+  };
+
+  const customFeatured = getCustomFeaturedProject();
+
+  const getFeaturedData = () => {
+    if (customFeatured) {
+      const ytId = getYouTubeId(customFeatured.video);
+      const isYt = !!ytId;
+      const isDrive = isGoogleDriveUrl(customFeatured.video);
+      const videoSource = isDrive ? getGoogleDriveDirectLink(customFeatured.video) : customFeatured.video;
+      
+      const hasCustomCover = customFeatured.image && !customFeatured.image.startsWith('/logo') && customFeatured.image !== '' && customFeatured.image !== '/favicon.svg';
+      const displayCover = isYt && !hasCustomCover
+        ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+        : (customFeatured.image || '/favicon.svg');
+
+      return {
+        title: customFeatured.title,
+        video: videoSource,
+        isYt: isYt,
+        ytId: ytId,
+        cover: displayCover,
+        client: customFeatured.client || 'Haja Luz Studio',
+        role: customFeatured.role || customFeatured.category,
+        team: customFeatured.team || 'A Equipe Haja Luz',
+        strategy: customFeatured.strategy || 'Composição conceitual focada em captar a real alma da produção e engajamento fático.',
+        desc: customFeatured.description || 'Trabalho de destaque integrado ao nosso portfólio oficial de produções.'
+      };
+    }
+
+    // Default fallback
+    const fallback = activeData.featured;
+    const ytId = getYouTubeId(fallback.video);
+    return {
+      title: fallback.title,
+      video: fallback.video,
+      isYt: !!ytId,
+      ytId: ytId,
+      cover: '',
+      client: fallback.client,
+      role: fallback.role,
+      team: fallback.team,
+      strategy: fallback.strategy,
+      desc: fallback.desc
+    };
+  };
+
+  const featuredData = getFeaturedData();
+
   // Dynamic list padding for standard category subpages (fewer than 3 projects)
   const getDisplayItems = () => {
     const list = [...matchedProjects];
@@ -611,15 +669,25 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
               >
                 <div className="featured-video-wrapper glass-panel">
-                  <video 
-                    src={activeData.featured.video}
-                    controls
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="featured-video-element"
-                  />
+                  {featuredData.isYt ? (
+                    <iframe 
+                      src={`https://www.youtube.com/embed/${featuredData.ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${featuredData.ytId}&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`}
+                      className="featured-video-element"
+                      allow="autoplay; encrypted-media"
+                      style={{ border: 'none', pointerEvents: 'none', transform: 'scale(1.35)', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                      title={featuredData.title}
+                    />
+                  ) : (
+                    <video 
+                      src={featuredData.video}
+                      controls
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="featured-video-element"
+                    />
+                  )}
                   <div className="video-player-glow-border"></div>
                   <div className="video-player-scanline"></div>
                 </div>
@@ -635,21 +703,21 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                 <div className="strategy-glass-panel glass-panel">
                   <div className="strategy-heading-wrap">
                     <Target size={16} className="strategy-heading-icon" />
-                    <h3 className="strategy-title">{activeData.featured.title}</h3>
+                    <h3 className="strategy-title">{featuredData.title}</h3>
                   </div>
 
                   <div className="strategy-meta-grid">
                     <div className="strategy-meta-item">
                       <span className="meta-label">Cliente</span>
-                      <span className="meta-val">{activeData.featured.client}</span>
+                      <span className="meta-val">{featuredData.client}</span>
                     </div>
                     <div className="strategy-meta-item">
                       <span className="meta-label">Formato</span>
-                      <span className="meta-val">{activeData.featured.role}</span>
+                      <span className="meta-val">{featuredData.role}</span>
                     </div>
                     <div className="strategy-meta-item">
                       <span className="meta-label">Operadores</span>
-                      <span className="meta-val">{activeData.featured.team}</span>
+                      <span className="meta-val">{featuredData.team}</span>
                     </div>
                   </div>
 
@@ -657,12 +725,12 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
                   <div className="strategy-content-block">
                     <h4 className="strategy-block-title">// O Posicionamento Estratégico</h4>
-                    <p className="strategy-block-desc">{activeData.featured.strategy}</p>
+                    <p className="strategy-block-desc">{featuredData.strategy}</p>
                   </div>
 
                   <div className="strategy-content-block">
                     <h4 className="strategy-block-title">// Detalhes da Execução</h4>
-                    <p className="strategy-block-desc">{activeData.featured.desc}</p>
+                    <p className="strategy-block-desc">{featuredData.desc}</p>
                   </div>
                 </div>
               </motion.div>
