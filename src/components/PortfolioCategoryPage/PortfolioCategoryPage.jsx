@@ -86,8 +86,16 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
       {/* 1. Header (Instagram Style) */}
       <div className="social-card-header">
         <div className="social-header-profile">
-          <div className="social-avatar-circle">
-            <span>{getClientInitial(project.client)}</span>
+          <div className="social-avatar-circle" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111', border: '1px solid rgba(230, 173, 69, 0.3)' }}>
+            {project.image ? (
+              <img 
+                src={project.image} 
+                alt={project.client || 'Profile'} 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+            ) : (
+              <span>{getClientInitial(project.client)}</span>
+            )}
           </div>
           <div className="social-header-text">
             <span className="social-client-name">{project.client || 'HAJA LUZ STUDIO'}</span>
