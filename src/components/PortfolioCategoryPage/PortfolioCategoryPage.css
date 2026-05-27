@@ -1260,6 +1260,7 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.4s ease;
+  perspective: 800px;
 }
 
 .active-tile:hover .tile-logo-frame {

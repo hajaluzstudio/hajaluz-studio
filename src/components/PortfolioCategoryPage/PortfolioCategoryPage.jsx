@@ -518,6 +518,82 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     description: 'Abaixo estão posicionados os retângulos de layout fictícios que representam as novas produções em andamento nesta categoria. Quando nos enviar seus arquivos reais, eles serão implantados nesses espaços estruturados.'
   });
 
+  // --- LOGO BACKDROP ROTATION SYSTEM ---
+  const getBaseLogosList = () => {
+    const activeCatLower = category.toLowerCase();
+    const activeProjects = realProjects.filter(p => 
+      (p.category && p.category.toLowerCase() === activeCatLower) || 
+      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
+    );
+
+    const list = [];
+    activeProjects.forEach(proj => {
+      if (proj.carouselImages && proj.carouselImages.length > 0) {
+        proj.carouselImages.forEach((img, idx) => {
+          list.push({
+            id: `${proj.title}-logo-${idx}`,
+            src: img,
+            title: proj.title,
+            project: proj
+          });
+        });
+      } else if (proj.image && !proj.image.startsWith('/logo') && proj.image !== '' && proj.image !== '/favicon.png') {
+        list.push({
+          id: `${proj.title}-logo-main`,
+          src: proj.image,
+          title: proj.title,
+          project: proj
+        });
+      }
+    });
+    
+    return list.length > 0 ? list : [
+      { isPlaceholder: true, title: 'Haja Luz Studio', subtitle: 'Design & Code', id: 'def-1' },
+      { isPlaceholder: true, title: 'Bezaleel Grid', subtitle: 'Geometria Sacra', id: 'def-2' },
+      { isPlaceholder: true, title: 'Enoque Flow', subtitle: 'Motion Fático', id: 'def-3' }
+    ];
+  };
+
+  const [tileLogoIndices, setTileLogoIndices] = useState(() => 
+    Array.from({ length: 15 }, (_, i) => i)
+  );
+  const [isHoveredBackdrop, setIsHoveredBackdrop] = useState(false);
+
+  useEffect(() => {
+    const baseLogos = getBaseLogosList();
+    setTileLogoIndices(Array.from({ length: 15 }, (_, i) => i % baseLogos.length));
+  }, [realProjects, category]);
+
+  useEffect(() => {
+    if (isHoveredBackdrop) return;
+
+    const baseLogos = getBaseLogosList();
+    if (baseLogos.length <= 1) return;
+
+    const timer = setInterval(() => {
+      const tilesToRotateCount = Math.floor(Math.random() * 3) + 2; // Rotate 2 to 4 tiles dynamically
+      
+      setTileLogoIndices(prev => {
+        const nextIndices = [...prev];
+        const chosenTiles = new Set();
+        
+        while (chosenTiles.size < tilesToRotateCount) {
+          const randomIdx = Math.floor(Math.random() * 15);
+          chosenTiles.add(randomIdx);
+        }
+        
+        chosenTiles.forEach(tileIdx => {
+          nextIndices[tileIdx] = (nextIndices[tileIdx] + 1) % baseLogos.length;
+        });
+        
+        return nextIndices;
+      });
+    }, 4000); // Smooth rotation every 4 seconds
+
+    return () => clearInterval(timer);
+  }, [isHoveredBackdrop, realProjects, category]);
+
+
   // Load social user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('haja_luz_social_user');
@@ -1262,11 +1338,19 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               </div>
 
               {/* Repeating step-and-repeat logo grid */}
-              <div className="logo-4x8-grid-container backdrop-grid">
-                {getLogoGridItems(true).map((item, idx) => {
+              <div 
+                className="logo-4x8-grid-container backdrop-grid"
+                onMouseEnter={() => setIsHoveredBackdrop(true)}
+                onMouseLeave={() => setIsHoveredBackdrop(false)}
+              >
+                {tileLogoIndices.map((logoIndex, idx) => {
+                  const baseLogos = getBaseLogosList();
+                  const item = baseLogos[logoIndex % baseLogos.length] || baseLogos[0];
+                  const itemKey = `${item.id || item.title}-tile-${idx}`;
+
                   if (item.isPlaceholder) {
                     return (
-                      <div key={item.id} className="logo-grid-tile placeholder-tile backdrop-tile">
+                      <div key={itemKey} className="logo-grid-tile placeholder-tile backdrop-tile">
                         <div className="placeholder-tile-text">
                           <span className="placeholder-main-text">{item.title}</span>
                           <span className="placeholder-sub-text">{item.subtitle}</span>
@@ -1276,9 +1360,10 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                   }
 
                   return (
-                    <div 
-                      key={item.id} 
+                    <motion.div 
+                      key={itemKey} 
                       className="logo-grid-tile active-tile backdrop-tile"
+                      layout
                       onClick={() => {
                         const projLikes = item.project?.likes || (Math.abs(item.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 40 + 15);
                         const projComments = item.project?.comments || [
@@ -1300,13 +1385,24 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       }}
                     >
                       <div className="tile-logo-frame">
-                        <img src={item.src} alt={item.title} className="tile-logo-img" />
+                        <AnimatePresence mode="wait">
+                          <motion.img 
+                            key={item.src}
+                            src={item.src} 
+                            alt={item.title} 
+                            className="tile-logo-img"
+                            initial={{ rotateX: 90, opacity: 0 }}
+                            animate={{ rotateX: 0, opacity: 1 }}
+                            exit={{ rotateX: -90, opacity: 0 }}
+                            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                          />
+                        </AnimatePresence>
                       </div>
                       <div className="tile-hover-overlay">
                         <span className="tile-hover-title">{item.title}</span>
                       </div>
                       <div className="tile-border-glow"></div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
