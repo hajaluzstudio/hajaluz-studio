@@ -739,6 +739,68 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     return report.sort((a, b) => b.sizeInKB - a.sizeInKB);
   };
 
+  const handleExportData = () => {
+    try {
+      const data = {
+        projects: dataService.getProjects(),
+        team: dataService.getTeam(),
+        settings: dataService.getFictiveSettings(),
+        leads: dataService.getLeads()
+      };
+      
+      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", jsonString);
+      downloadAnchor.setAttribute("download", `hajaluz_backup_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '_')}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      
+      showNotification("Backup exportado com sucesso!");
+    } catch (e) {
+      console.error(e);
+      showNotification("Erro ao exportar backup.");
+    }
+  };
+
+  const handleImportData = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        
+        if (parsed.projects) {
+          localStorage.setItem('hajaluz_portfolio_projects', JSON.stringify(parsed.projects));
+          setProjects(parsed.projects);
+        }
+        if (parsed.team) {
+          localStorage.setItem('hajaluz_team_members', JSON.stringify(parsed.team));
+          setTeam(parsed.team);
+        }
+        if (parsed.settings) {
+          localStorage.setItem('hajaluz_fictive_settings', JSON.stringify(parsed.settings));
+          setFictiveSettings(parsed.settings);
+        }
+        if (parsed.leads) {
+          localStorage.setItem('hajaluz_captured_leads', JSON.stringify(parsed.leads));
+          setLeads(parsed.leads);
+        }
+        
+        onDataChange && onDataChange();
+        showNotification("Importação concluída! Seus dados foram sincronizados com sucesso!");
+        alert("Sincronização realizada com sucesso! A página será recarregada para aplicar todas as suas informações reais.");
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao ler o arquivo de backup. Verifique se selecionou o arquivo .json correto gerado pelo seu PC.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -1433,6 +1495,45 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </span>
                       </div>
                     )}
+                  </div>
+
+                  {/* Backup & Sync Section */}
+                  <div className="system-settings-section glass-panel" style={{ padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(230,173,69,0.12)', borderRadius: '12px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
+                    <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', color: 'var(--color-accent-gold)', fontSize: '0.95rem', borderBottom: '1px solid rgba(230,173,69,0.15)', paddingBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                      📲 Backup & Sincronização Mobile
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                      Como as fotos e dados que você cadastra ficam guardados localmente na memória do seu navegador (por velocidade e segurança), as informações do seu computador não aparecem automaticamente no seu celular ou tablet.
+                    </p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-accent-gold)', fontWeight: 600, margin: 0 }}>
+                      Como sincronizar seus dados reais com o celular em 3 passos:
+                    </p>
+                    <ol style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      <li>No seu <b>computador</b>, clique em <b>"Exportar Backup (.json)"</b> abaixo para baixar o arquivo.</li>
+                      <li>Envie esse arquivo baixado para o seu celular (por WhatsApp, Email ou Google Drive).</li>
+                      <li>No seu <b>celular</b>, acesse o painel, clique em <b>"Importar Backup"</b> e selecione o arquivo!</li>
+                    </ol>
+
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                      <button 
+                        type="button"
+                        onClick={handleExportData}
+                        className="form-save-btn" 
+                        style={{ padding: '0.65rem 1.4rem', fontSize: '0.75rem', cursor: 'pointer' }}
+                      >
+                        📥 Exportar Backup (.json)
+                      </button>
+
+                      <label className="file-upload-label glass-panel" style={{ padding: '0.65rem 1.4rem', fontSize: '0.75rem', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        📤 Importar Backup (.json)
+                        <input 
+                          type="file" 
+                          accept=".json" 
+                          onChange={handleImportData} 
+                          style={{ display: 'none' }} 
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   {/* Factory Reset */}
