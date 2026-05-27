@@ -903,10 +903,41 @@ const KEYS = {
   LEADS: 'hajaluz_captured_leads'
 };
 
+const DB_VERSION_KEY = 'hajaluz_db_version';
+const CURRENT_DB_VERSION = '1.0.8';
+
 export const dataService = {
+  // --- VERSIONAMENTO AUTOMÁTICO DO BANCO DE DADOS ---
+  checkVersionAndMigrate: () => {
+    try {
+      const currentVer = localStorage.getItem(DB_VERSION_KEY);
+      if (currentVer !== CURRENT_DB_VERSION) {
+        // Se a versão for antiga ou inexistente, força a gravação dos novos padrões oficiais do código,
+        // preservando intactos os leads de clientes já capturados!
+        const existingLeads = localStorage.getItem(KEYS.LEADS);
+        
+        localStorage.setItem(KEYS.PROJECTS, JSON.stringify(DEFAULT_PROJECTS));
+        localStorage.setItem(KEYS.TEAM, JSON.stringify(DEFAULT_TEAM));
+        localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(DEFAULT_FICTIVE_SETTINGS));
+        
+        if (existingLeads) {
+          localStorage.setItem(KEYS.LEADS, existingLeads);
+        } else {
+          localStorage.setItem(KEYS.LEADS, JSON.stringify([]));
+        }
+        
+        localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
+        console.log(`[BANCO LOCAL] Banco de dados auto-atualizado com sucesso para a versão oficial ${CURRENT_DB_VERSION}`);
+      }
+    } catch (e) {
+      console.error("Erro ao rodar migration de banco local:", e);
+    }
+  },
+
   // --- PORTFÓLIO DE PROJETOS ---
   getProjects: () => {
     try {
+      dataService.checkVersionAndMigrate();
       const stored = localStorage.getItem(KEYS.PROJECTS);
       if (stored) {
         return JSON.parse(stored);
@@ -934,6 +965,7 @@ export const dataService = {
   // --- MEMBROS DA EQUIPE ---
   getTeam: () => {
     try {
+      dataService.checkVersionAndMigrate();
       const stored = localStorage.getItem(KEYS.TEAM);
       if (stored) {
         return JSON.parse(stored);
@@ -960,6 +992,7 @@ export const dataService = {
   // --- CONFIGURAÇÕES DE RASCUNHO (TEXTOS GLOBAIS) ---
   getFictiveSettings: () => {
     try {
+      dataService.checkVersionAndMigrate();
       const stored = localStorage.getItem(KEYS.FICTIVE_SETTINGS);
       if (stored) {
         return JSON.parse(stored);
