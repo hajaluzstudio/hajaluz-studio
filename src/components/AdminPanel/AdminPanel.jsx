@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Plus, Trash2, Edit2, RotateCcw, User, Cpu, Film, Compass, Target, Sparkles, Monitor, Mic, Play, Award, Paintbrush, Type, Camera, FilmIcon, ShieldAlert, Check, Save, LogOut, MessageSquare } from 'lucide-react';
 import { dataService } from '../../services/dataService';
-import { getYouTubeId } from '../../services/youtubeHelper';
+import { getYouTubeId, isGoogleDriveUrl, getGoogleDriveId } from '../../services/youtubeHelper';
 import './AdminPanel.css';
 
 const cleanPhoneForWhatsApp = (num) => {
@@ -403,8 +403,26 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     }
 
     let updatedProjects = [...projects];
+    
+    // Auto-resolve Google Drive sharing URLs for images to direct CDN endpoints
+    let resolvedImage = projectForm.image;
+    if (resolvedImage && isGoogleDriveUrl(resolvedImage)) {
+      const driveId = getGoogleDriveId(resolvedImage);
+      if (driveId) resolvedImage = `https://lh3.googleusercontent.com/d/${driveId}`;
+    }
+
+    const resolvedCarousel = (projectForm.carouselImages || []).map(img => {
+      if (img && isGoogleDriveUrl(img)) {
+        const driveId = getGoogleDriveId(img);
+        return driveId ? `https://lh3.googleusercontent.com/d/${driveId}` : img;
+      }
+      return img;
+    });
+
     const newProj = {
       ...projectForm,
+      image: resolvedImage,
+      carouselImages: resolvedCarousel,
       isReal: true
     };
 
