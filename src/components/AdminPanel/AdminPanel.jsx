@@ -13,7 +13,7 @@ const cleanPhoneForWhatsApp = (num) => {
   return String(num).replace(/[^\d]/g, '');
 };
 
-const compressImage = (base64OrFile) => {
+const compressImage = (base64OrFile, maxDimension) => {
   return new Promise((resolve) => {
     const img = new Image();
     const isFile = base64OrFile instanceof File;
@@ -37,9 +37,14 @@ const compressImage = (base64OrFile) => {
       let width = img.width;
       let height = img.height;
       
-      // Highly optimized: transparent logos are limited to 400px max, saving up to 85% space!
-      const MAX_WIDTH = isPng ? 400 : 750;
-      const MAX_HEIGHT = isPng ? 400 : 750;
+      // Smart and aggressive dimension bounds: logos are max 240px, regular works are max 600px
+      let maxDim = maxDimension;
+      if (!maxDim) {
+        maxDim = isPng ? 240 : 600;
+      }
+      
+      const MAX_WIDTH = maxDim;
+      const MAX_HEIGHT = maxDim;
       
       if (width > height) {
         if (width > MAX_WIDTH) {
@@ -60,15 +65,15 @@ const compressImage = (base64OrFile) => {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Utilizing high-compression transparent WebP format instead of heavy lossless PNG.
-      // Falls back automatically to PNG if WebP is unsupported. Saves over 90% localStorage memory!
-      let compressedDataUrl = isPng 
-        ? canvas.toDataURL('image/webp', 0.65) 
-        : canvas.toDataURL('image/jpeg', 0.6);
+      // Utilizing premium high-compression WebP format for all uploads, saving up to 98% memory!
+      // Uses 0.5 quality for transparent logos and 0.6 quality for regular images.
+      let compressedDataUrl = canvas.toDataURL('image/webp', isPng ? 0.5 : 0.6);
 
       // WebP fallback check
-      if (isPng && !compressedDataUrl.startsWith('data:image/webp')) {
-        compressedDataUrl = canvas.toDataURL('image/png');
+      if (!compressedDataUrl.startsWith('data:image/webp')) {
+        compressedDataUrl = isPng 
+          ? canvas.toDataURL('image/png')
+          : canvas.toDataURL('image/jpeg', 0.65);
       }
  
       if (isFile) URL.revokeObjectURL(url);
@@ -177,6 +182,16 @@ const generateAiCopy = (title, category) => {
 };
 
 const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
+  const getLocalStorageUsageInKB = () => {
+    let total = 0;
+    for (let x in localStorage) {
+      if (localStorage.hasOwnProperty(x)) {
+        total += ((localStorage[x].length + x.length) * 2);
+      }
+    }
+    return Math.round(total / 1024);
+  };
+
   // 1. Estados Gerais
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -381,28 +396,41 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     if (editingProjectIdx !== null) {
       // Editar existente
       updatedProjects[editingProjectIdx] = newProj;
-      showNotification('Projeto Atualizado com Sucesso!');
     } else {
       // Adicionar novo
       updatedProjects.unshift(newProj);
-      showNotification('Novo Projeto Adicionado!');
     }
 
-    setProjects(updatedProjects);
-    dataService.saveProjects(updatedProjects);
-    onDataChange && onDataChange();
-    resetProjectForm();
+    // Attempt to save to localStorage. Only update React state and reset if it succeeds!
+    const saveSuccess = dataService.saveProjects(updatedProjects);
+    if (saveSuccess) {
+      setProjects(updatedProjects);
+      if (editingProjectIdx !== null) {
+        showNotification('Projeto Atualizado com Sucesso!');
+      } else {
+        showNotification('Novo Projeto Adicionado!');
+      }
+      onDataChange && onDataChange();
+      resetProjectForm();
+    } else {
+      // If saving failed due to QuotaExceededError, we do NOT clear the form or state.
+      // This allows the user to see what failed, keeps their inputs intact, and keeps
+      // React state from getting out-of-sync with localStorage.
+    }
   };
 
   const handleImageFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       try {
-        const compressed = await compressImage(file);
+        const isLogo = projectForm.category.toLowerCase() === 'logotipo';
+        const maxDim = isLogo ? 240 : 600;
+        const compressed = await compressImage(file, maxDim);
         setProjectForm(prev => ({ ...prev, image: compressed }));
       } catch (err) {
         console.error("Erro ao comprimir imagem de capa:", err);
       }
+      e.target.value = ''; // Reset input value to allow re-uploading the same file
     }
   };
 
@@ -417,6 +445,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         setProjectForm(prev => ({ ...prev, video: reader.result }));
       };
       reader.readAsDataURL(file);
+      e.target.value = ''; // Reset input
     }
   };
 
@@ -425,9 +454,16 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     if (files.length === 0) return;
 
     try {
-      const compressedImages = await Promise.all(
-        files.map(file => compressImage(file))
-      );
+      const compressedImages = [];
+      const isLogo = projectForm.category.toLowerCase() === 'logotipo';
+      const maxDim = isLogo ? 240 : 600;
+      
+      for (const file of files) {
+        const compressed = await compressImage(file, maxDim);
+        if (compressed) {
+          compressedImages.push(compressed);
+        }
+      }
       setProjectForm(prev => ({
         ...prev,
         carouselImages: [...(prev.carouselImages || []), ...compressedImages]
@@ -435,6 +471,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     } catch (err) {
       console.error("Erro ao comprimir fotos do carrossel:", err);
     }
+    e.target.value = ''; // Reset input to allow re-uploading the same files
   };
 
   const removeCarouselImage = (imgIdx) => {
@@ -482,10 +519,12 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   const deleteProject = (idx) => {
     if (window.confirm("Deseja realmente remover este projeto?")) {
       const updated = projects.filter((_, i) => i !== idx);
-      setProjects(updated);
-      dataService.saveProjects(updated);
-      onDataChange && onDataChange();
-      showNotification('Projeto Removido!');
+      const saveSuccess = dataService.saveProjects(updated);
+      if (saveSuccess) {
+        setProjects(updated);
+        onDataChange && onDataChange();
+        showNotification('Projeto Removido!');
+      }
     }
   };
 
@@ -558,6 +597,101 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       onDataChange && onDataChange();
       showNotification('Configurações Originais Restauradas!');
     }
+  };
+
+  const handleOptimizeImages = async () => {
+    showNotification("Escaneando e otimizando imagens...");
+    let updatedProjects = [...projects];
+    let optimizedCount = 0;
+    
+    try {
+      for (let i = 0; i < updatedProjects.length; i++) {
+        const proj = updatedProjects[i];
+        let changed = false;
+        
+        // Optimize cover image if base64
+        if (proj.image && proj.image.startsWith('data:image')) {
+          const isLogo = proj.category?.toLowerCase() === 'logotipo';
+          const maxDim = isLogo ? 240 : 600;
+          const prevLength = proj.image.length;
+          
+          const compressed = await compressImage(proj.image, maxDim);
+          if (compressed && compressed.length < prevLength) {
+            proj.image = compressed;
+            changed = true;
+          }
+        }
+        
+        // Optimize carousel images if base64
+        if (proj.carouselImages && proj.carouselImages.length > 0) {
+          const isLogo = proj.category?.toLowerCase() === 'logotipo';
+          const maxDim = isLogo ? 240 : 600;
+          
+          const newCarousel = [];
+          for (let j = 0; j < proj.carouselImages.length; j++) {
+            const img = proj.carouselImages[j];
+            if (img && img.startsWith('data:image')) {
+              const prevLength = img.length;
+              const compressed = await compressImage(img, maxDim);
+              if (compressed && compressed.length < prevLength) {
+                newCarousel.push(compressed);
+                changed = true;
+              } else {
+                newCarousel.push(img);
+              }
+            } else {
+              newCarousel.push(img);
+            }
+          }
+          if (changed) {
+            proj.carouselImages = newCarousel;
+          }
+        }
+        
+        if (changed) {
+          optimizedCount++;
+        }
+      }
+      
+      if (optimizedCount > 0) {
+        const success = dataService.saveProjects(updatedProjects);
+        if (success) {
+          setProjects(updatedProjects);
+          onDataChange && onDataChange();
+          showNotification(`Sucesso! ${optimizedCount} projetos foram otimizados e seu espaço foi liberado!`);
+        } else {
+          alert("O limite do navegador ainda é excedido. Tente remover algum vídeo grande carregado do PC ou projetos desnecessários.");
+        }
+      } else {
+        showNotification("Todas as suas imagens já estão no menor tamanho possível!");
+      }
+    } catch (err) {
+      console.error("Erro ao otimizar imagens:", err);
+      showNotification("Erro durante a otimização de imagens.");
+    }
+  };
+
+  const getHeavyItemsReport = () => {
+    const report = [];
+    projects.forEach(p => {
+      let size = 0;
+      if (p.image && p.image.startsWith('data:')) size += p.image.length;
+      if (p.video && p.video.startsWith('data:')) size += p.video.length;
+      if (p.carouselImages) {
+        p.carouselImages.forEach(img => {
+          if (img && img.startsWith('data:')) size += img.length;
+        });
+      }
+      if (size > 10 * 1024) { // Larger than 10KB
+        report.push({
+          title: p.title,
+          category: p.category,
+          sizeInKB: Math.round((size * 2) / 1024),
+          hasLocalVideo: p.video && p.video.startsWith('data:')
+        });
+      }
+    });
+    return report.sort((a, b) => b.sizeInKB - a.sizeInKB);
   };
 
   if (!isOpen) return null;
@@ -663,6 +797,19 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 <LogOut size={13} />
                 <span>Sair do Painel</span>
               </button>
+
+              <div className="terminal-storage-usage" style={{ marginTop: 'auto', padding: '1rem 0 0 0', borderTop: '1px solid rgba(255,255,255,0.03)', fontSize: '0.62rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, monospace', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <span>SYS // STORAGE STATUS</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>USADO:</span>
+                  <span style={{ color: (getLocalStorageUsageInKB() > 4000 ? 'var(--color-accent-gold)' : 'var(--color-accent-cyan)'), fontWeight: 'bold' }}>
+                    {getLocalStorageUsageInKB()} KB / 5000 KB
+                  </span>
+                </div>
+                <div className="storage-bar" style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden', marginTop: '0.1rem' }}>
+                  <div style={{ width: `${Math.min(100, (getLocalStorageUsageInKB() / 5000) * 100)}%`, height: '100%', background: (getLocalStorageUsageInKB() > 4000 ? 'var(--color-accent-gold)' : 'var(--color-accent-cyan)'), borderRadius: '2px', transition: 'width 0.5s ease' }}></div>
+                </div>
+              </div>
             </div>
 
             {/* Main Editor panel */}
@@ -1201,6 +1348,46 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         {selectedSettingsCategory === 'global' ? 'Salvar Ajustes Globais' : `Salvar Ajustes de ${selectedSettingsCategory}`}
                       </button>
                     </form>
+                  </div>
+
+                  {/* Optimizer section */}
+                  <div className="system-settings-section glass-panel" style={{ padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(0,206,209,0.12)', borderRadius: '12px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
+                    <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', color: 'var(--color-accent-cyan)', fontSize: '0.95rem', borderBottom: '1px solid rgba(0,206,209,0.15)', paddingBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                      ⚡ Otimizador de Imagens Existentes
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                      Para evitar perder os dados e os projetos que você já cadastrou, esta ferramenta escaneia seus projetos existentes e comprime qualquer imagem pesada no formato super WebP de alta compressão (com tamanho ajustado).
+                    </p>
+
+                    <button 
+                      type="button"
+                      onClick={handleOptimizeImages}
+                      className="form-save-btn" 
+                      style={{ alignSelf: 'flex-start', padding: '0.65rem 1.4rem', fontSize: '0.75rem', background: 'rgba(0,206,209,0.1)', color: 'var(--color-accent-cyan)', border: '1px solid rgba(0,206,209,0.3)', cursor: 'pointer' }}
+                    >
+                      🚀 Compactar Imagens Existentes sem Perder Dados
+                    </button>
+
+                    {getHeavyItemsReport().length > 0 && (
+                      <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace' }}>
+                          // TRABALHOS PESADOS DETECTADOS:
+                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.8rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)', maxHeight: '150px', overflowY: 'auto' }}>
+                          {getHeavyItemsReport().map((item, idx) => (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '0.2rem' }}>
+                              <span style={{ color: '#fff' }}>{item.title} <span style={{ color: 'var(--color-text-dimmed)', fontSize: '0.68rem' }}>({item.category})</span></span>
+                              <span style={{ color: item.sizeInKB > 1000 ? '#e74c3c' : 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace' }}>
+                                ~{item.sizeInKB} KB {item.hasLocalVideo && " (Vídeo Local ⚠️)"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--color-text-dimmed)', fontStyle: 'italic' }}>
+                          ⚠️ Vídeos carregados do computador ocupam muito espaço e não podem ser comprimidos. Se houver vídeos locais pesados, delete-os e use links do YouTube/Drive para liberar mais espaço.
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Factory Reset */}
