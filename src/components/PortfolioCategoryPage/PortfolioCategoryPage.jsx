@@ -16,7 +16,7 @@ const formatViews = (views) => {
   return views;
 };
 
-const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment, category, socialUser, onSocialLoginTrigger, onSocialLogout, onDeleteComment, isAdmin, onPlayStateChange }) => {
+const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAddComment, category, socialUser, onSocialLoginTrigger, onSocialLogout, onDeleteComment, isAdmin, onPlayStateChange, onWhatsAppClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [newComment, setNewComment] = useState('');
   const [localMuted, setLocalMuted] = useState(true);
@@ -78,8 +78,12 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
 
   const handleWhatsAppBriefing = (e) => {
     e.stopPropagation();
-    const text = encodeURIComponent(`Olá Haja Luz! Vi o projeto "${project.title}" desenvolvido para o cliente "${project.client || 'HAJA LUZ STUDIO'}" na categoria "${project.category || 'Portfólio'}" e gostaria de solicitar uma produção semelhante.`);
-    window.open(`https://wa.me/5554991109159?text=${text}`, '_blank');
+    const rawText = `Olá Haja Luz! Vi o projeto "${project.title}" desenvolvido para o cliente "${project.client || 'HAJA LUZ STUDIO'}" na categoria "${project.category || 'Portfólio'}" e gostaria de solicitar uma produção semelhante.`;
+    if (onWhatsAppClick) {
+      onWhatsAppClick(rawText);
+    } else {
+      window.open(`https://wa.me/5554991109159?text=${encodeURIComponent(rawText)}`, '_blank');
+    }
   };
 
   const descText = project.description || 'Branding e artes de luxo concebidas pela Haja Luz Studio.';
@@ -459,6 +463,8 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
 
 const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpdateTrigger = 0 }) => {
   const [lightboxMedia, setLightboxMedia] = useState(null);
+  const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [leadFormState, setLeadFormState] = useState({ name: '', whatsapp: '', category: '', customText: '' });
   const [realProjects, setRealProjects] = useState([]);
   const [hoveredProjectIdx, setHoveredProjectIdx] = useState(null);
   const [showcaseIndex, setShowcaseIndex] = useState(0);
@@ -624,6 +630,29 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const handleSocialLogout = () => {
     localStorage.removeItem('haja_luz_social_user');
     setSocialUser(null);
+  };
+
+  const handleLeadSubmit = (e) => {
+    e.preventDefault();
+    if (!leadFormState.name || !leadFormState.whatsapp) {
+      alert("Por favor, preencha o seu Nome e o seu WhatsApp.");
+      return;
+    }
+
+    // 1. Salvar o lead no banco de dados local
+    dataService.saveLead({
+      name: leadFormState.name,
+      whatsapp: leadFormState.whatsapp,
+      category: leadFormState.category
+    });
+
+    // 2. Redirecionar para o WhatsApp
+    const message = leadFormState.customText + ` Meu nome é ${leadFormState.name}.`;
+    window.open(`https://wa.me/5554991109159?text=${encodeURIComponent(message)}`, '_blank');
+
+    // 3. Fechar modal e limpar formulário
+    setLeadModalOpen(false);
+    setLeadFormState({ name: '', whatsapp: '', category: '', customText: '' });
   };
 
   const handleDeleteComment = (projectTitle, commentId) => {
@@ -1463,6 +1492,15 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                       onDeleteComment={handleDeleteComment}
                       isAdmin={localStorage.getItem('haja_luz_admin_logged') === 'true'}
                       onPlayStateChange={(playing) => setIsAnyVideoPlaying(playing)}
+                      onWhatsAppClick={(whatsappText) => {
+                        setLeadModalOpen(true);
+                        setLeadFormState({
+                          name: '',
+                          whatsapp: '',
+                          category: displayCategory,
+                          customText: whatsappText
+                        });
+                      }}
                     />
                   );
                 })()
@@ -1565,10 +1603,22 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               Preencha os detalhes e inicie um briefing estruturado direto com nossos diretores humanos e agentes neurais de IA.
             </p>
           </div>
-          <a href="https://wa.me/5554991109159" target="_blank" rel="noopener noreferrer" className="subpage-cta-btn">
+          <button 
+            onClick={() => {
+              setLeadModalOpen(true);
+              setLeadFormState({
+                name: '',
+                whatsapp: '',
+                category: displayCategory,
+                customText: `Olá Felipe Costa! Vi os trabalhos na categoria de ${displayCategory} no site da Haja Luz Studio e gostaria de solicitar um orçamento para o meu projeto!`
+              });
+            }}
+            className="subpage-cta-btn"
+            style={{ border: '1px solid rgba(230,173,69,0.35)', background: 'rgba(230,173,69,0.1)', cursor: 'pointer' }}
+          >
             <MessageSquare size={16} />
             <span>Solicitar Produção em {displayCategory}</span>
-          </a>
+          </button>
         </div>
 
       </div>
@@ -2146,6 +2196,90 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                   </div>
                 </form>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Premium Frictionless Lead Capture & WhatsApp Redirect Modal */}
+      <AnimatePresence>
+        {leadModalOpen && (
+          <motion.div 
+            className="lightbox-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLeadModalOpen(false)}
+            style={{ zIndex: 999999 }}
+          >
+            <button className="lightbox-close-btn" onClick={() => setLeadModalOpen(false)} aria-label="Fechar Briefing">
+              <X size={24} />
+            </button>
+
+            <motion.div 
+              className="social-auth-modal glass-panel"
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ padding: '2.5rem', maxWidth: '460px', width: '100%' }}
+            >
+              <div className="auth-brand-header">
+                <MessageSquare size={40} className="auth-platform-icon google" style={{ color: 'var(--color-accent-gold)', filter: 'drop-shadow(0 2px 10px rgba(230,173,69,0.35))' }} />
+                <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.4rem', color: '#fff', margin: '0.8rem 0 0.4rem 0', fontWeight: 600 }}>// BRIEFING RÁPIDO //</h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                  Preencha seu contato para registrar seu projeto no painel do estúdio e abrir o WhatsApp para falar direto com o diretor Felipe Costa.
+                </p>
+              </div>
+
+              <form onSubmit={handleLeadSubmit} className="auth-form-wrap" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="auth-input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left' }}>
+                  <label htmlFor="lead-name-field" style={{ fontSize: '0.72rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 'bold' }}>
+                    Seu Nome Completo *
+                  </label>
+                  <input 
+                    id="lead-name-field"
+                    type="text" 
+                    placeholder="Ex: João Silva"
+                    value={leadFormState.name}
+                    onChange={(e) => setLeadFormState({ ...leadFormState, name: e.target.value })}
+                    className="auth-username-input"
+                    style={{ padding: '0.75rem 1rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff', fontSize: '0.85rem', outline: 'none', width: '100%' }}
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <div className="auth-input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left' }}>
+                  <label htmlFor="lead-whatsapp-field" style={{ fontSize: '0.72rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 'bold' }}>
+                    Seu WhatsApp (com DDD) *
+                  </label>
+                  <input 
+                    id="lead-whatsapp-field"
+                    type="text" 
+                    placeholder="Ex: 54 99110-9159"
+                    value={leadFormState.whatsapp}
+                    onChange={(e) => setLeadFormState({ ...leadFormState, whatsapp: e.target.value })}
+                    className="auth-username-input"
+                    style={{ padding: '0.75rem 1rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff', fontSize: '0.85rem', outline: 'none', width: '100%' }}
+                    required
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="auth-modal-submit-btn"
+                  style={{ marginTop: '0.5rem', background: 'rgba(230,173,69,0.12)', border: '1px solid var(--color-accent-gold)', color: 'var(--color-accent-gold)', padding: '0.8rem', borderRadius: '30px', cursor: 'pointer', fontFamily: 'Space Grotesk, monospace', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                >
+                  <MessageSquare size={14} />
+                  <span>Abrir WhatsApp & Enviar Briefing</span>
+                </button>
+                
+                <div className="auth-secure-notice" style={{ fontSize: '0.68rem', color: 'var(--color-text-dimmed)', textAlign: 'center', marginTop: '0.5rem' }}>
+                  <span>🔒 Briefing Seguro e Rápido (Atrito Zero)</span>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}

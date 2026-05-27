@@ -190,7 +190,8 @@ const DEFAULT_FICTIVE_SETTINGS = {
 const KEYS = {
   PROJECTS: 'hajaluz_portfolio_projects',
   TEAM: 'hajaluz_team_members',
-  FICTIVE_SETTINGS: 'hajaluz_fictive_settings'
+  FICTIVE_SETTINGS: 'hajaluz_fictive_settings',
+  LEADS: 'hajaluz_captured_leads'
 };
 
 export const dataService = {
@@ -272,12 +273,72 @@ export const dataService = {
     }
   },
 
+  // --- CAPTURA DE LEADS (CLIENTES) ---
+  getLeads: () => {
+    try {
+      const stored = localStorage.getItem(KEYS.LEADS);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      return [];
+    } catch (e) {
+      console.error("Erro ao carregar leads:", e);
+      return [];
+    }
+  },
+
+  saveLead: (lead) => {
+    try {
+      const leads = dataService.getLeads();
+      const newLead = {
+        id: lead.id || `lead-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        name: lead.name,
+        whatsapp: lead.whatsapp,
+        email: lead.email || '',
+        category: lead.category || 'Geral',
+        date: lead.date || new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        status: lead.status || 'Novo' // 'Novo' | 'Em Atendimento' | 'Fechado' | 'Arquivado'
+      };
+      leads.unshift(newLead);
+      localStorage.setItem(KEYS.LEADS, JSON.stringify(leads));
+      return newLead;
+    } catch (e) {
+      console.error("Erro ao salvar lead:", e);
+      return null;
+    }
+  },
+
+  updateLeadStatus: (leadId, newStatus) => {
+    try {
+      const leads = dataService.getLeads();
+      const updated = leads.map(l => l.id === leadId ? { ...l, status: newStatus } : l);
+      localStorage.setItem(KEYS.LEADS, JSON.stringify(updated));
+      return true;
+    } catch (e) {
+      console.error("Erro ao atualizar status do lead:", e);
+      return false;
+    }
+  },
+
+  deleteLead: (leadId) => {
+    try {
+      const leads = dataService.getLeads();
+      const filtered = leads.filter(l => l.id !== leadId);
+      localStorage.setItem(KEYS.LEADS, JSON.stringify(filtered));
+      return true;
+    } catch (e) {
+      console.error("Erro ao excluir lead:", e);
+      return false;
+    }
+  },
+
   // --- RESTAURAR PADRÕES DE FÁBRICA ---
   resetToDefaults: () => {
     try {
       localStorage.setItem(KEYS.PROJECTS, JSON.stringify(DEFAULT_PROJECTS));
       localStorage.setItem(KEYS.TEAM, JSON.stringify(DEFAULT_TEAM));
       localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(DEFAULT_FICTIVE_SETTINGS));
+      localStorage.setItem(KEYS.LEADS, JSON.stringify([]));
       return true;
     } catch (e) {
       console.error("Erro ao restaurar padrões no localStorage:", e);

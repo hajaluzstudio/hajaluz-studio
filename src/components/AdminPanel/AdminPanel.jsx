@@ -3,10 +3,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Plus, Trash2, Edit2, RotateCcw, User, Cpu, Film, Compass, Target, Sparkles, Monitor, Mic, Play, Award, Paintbrush, Type, Camera, FilmIcon, ShieldAlert, Check, Save, LogOut } from 'lucide-react';
+import { X, Lock, Plus, Trash2, Edit2, RotateCcw, User, Cpu, Film, Compass, Target, Sparkles, Monitor, Mic, Play, Award, Paintbrush, Type, Camera, FilmIcon, ShieldAlert, Check, Save, LogOut, MessageSquare } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { getYouTubeId } from '../../services/youtubeHelper';
 import './AdminPanel.css';
+
+const cleanPhoneForWhatsApp = (num) => {
+  if (!num) return '';
+  return String(num).replace(/[^\d]/g, '');
+};
 
 const compressImage = (base64OrFile) => {
   return new Promise((resolve) => {
@@ -177,6 +182,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   // 2. Estados dos Dados
   const [projects, setProjects] = useState([]);
   const [team, setTeam] = useState([]);
+  const [leads, setLeads] = useState([]);
 
   // 3. Estados dos Formulários
   // 3.1 Portfólio
@@ -233,6 +239,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     if (isOpen) {
       setProjects(dataService.getProjects());
       setTeam(dataService.getTeam());
+      setLeads(dataService.getLeads());
       const allSettings = dataService.getFictiveSettings();
       setFictiveSettings({
         pretitle: allSettings.pretitle || 'Espaços de Co-Criação',
@@ -633,6 +640,12 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 onClick={() => { setEditingMemberId(null); setActiveTab('equipe'); }}
               >
                 👥 Equipe Roster
+              </button>
+              <button 
+                className={`sidebar-tab-btn ${activeTab === 'leads' ? 'active' : ''}`}
+                onClick={() => { setLeads(dataService.getLeads()); setActiveTab('leads'); }}
+              >
+                📥 Leads
               </button>
               <button 
                 className={`sidebar-tab-btn ${activeTab === 'sistema' ? 'active' : ''}`}
@@ -1196,6 +1209,119 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                       <span>Restaurar Padrões de Fábrica (Reset Geral)</span>
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* TAB 4: LEADS CAPTURED */}
+              {activeTab === 'leads' && (
+                <div className="workspace-tab-content" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '72vh', overflowY: 'auto', paddingBottom: '2rem' }}>
+                  <div className="workspace-header-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', textAlign: 'left' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontFamily: 'Space Grotesk, sans-serif' }}>📥 Leads de Clientes Capturados</h3>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                      Controle e acompanhe as solicitações de briefings e contatos de WhatsApp feitos por visitantes do seu site.
+                    </p>
+                  </div>
+
+                  {leads.length === 0 ? (
+                    <div className="no-leads-box glass-panel" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-text-dimmed)', border: '1px dashed rgba(230,173,69,0.2)', borderRadius: '12px', width: '100%' }}>
+                      <p style={{ margin: 0, fontFamily: 'Space Grotesk, monospace', fontSize: '0.88rem' }}>
+                        Nenhum lead de cliente capturado até o momento. As solicitações enviadas através dos briefings e links de WhatsApp aparecerão listadas aqui em tempo real.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="leads-list-container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace' }}>
+                          // LISTAGEM DE CONTATOS ({leads.length} LEADS)
+                        </span>
+                        <button 
+                          onClick={() => {
+                            if (window.confirm("Deseja realmente limpar TODOS os leads?")) {
+                              localStorage.setItem('hajaluz_captured_leads', JSON.stringify([]));
+                              setLeads([]);
+                              showNotification("Todos os leads foram excluídos!");
+                            }
+                          }}
+                          className="action-btn delete-btn" 
+                          style={{ padding: '0.4rem 0.8rem', fontSize: '0.72rem', background: 'rgba(231, 76, 60, 0.1)', color: '#e74c3c', border: '1px solid rgba(231, 76, 60, 0.3)', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Space Grotesk, monospace' }}
+                        >
+                          Limpar Todos
+                        </button>
+                      </div>
+
+                      <div className="admin-leads-table-wrapper" style={{ overflowX: 'auto', background: 'rgba(28, 10, 9, 0.15)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '8px' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(230,173,69,0.15)', background: 'rgba(230,173,69,0.03)' }}>
+                              <th style={{ padding: '1rem', color: 'var(--color-accent-gold)', fontWeight: 600, fontFamily: 'Space Grotesk, monospace' }}>Nome</th>
+                              <th style={{ padding: '1rem', color: 'var(--color-accent-gold)', fontWeight: 600, fontFamily: 'Space Grotesk, monospace' }}>WhatsApp</th>
+                              <th style={{ padding: '1rem', color: 'var(--color-accent-gold)', fontWeight: 600, fontFamily: 'Space Grotesk, monospace' }}>Categoria</th>
+                              <th style={{ padding: '1rem', color: 'var(--color-accent-gold)', fontWeight: 600, fontFamily: 'Space Grotesk, monospace' }}>Data/Hora</th>
+                              <th style={{ padding: '1rem', color: 'var(--color-accent-gold)', fontWeight: 600, fontFamily: 'Space Grotesk, monospace' }}>Status</th>
+                              <th style={{ padding: '1rem', color: 'var(--color-accent-gold)', fontWeight: 600, fontFamily: 'Space Grotesk, monospace', textAlign: 'center' }}>Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {leads.map((l) => (
+                              <tr key={l.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.3s ease' }} className="lead-table-row">
+                                <td style={{ padding: '1rem', color: '#fff', fontWeight: 500 }}>{l.name}</td>
+                                <td style={{ padding: '1rem' }}>
+                                  <a 
+                                    href={`https://wa.me/${cleanPhoneForWhatsApp(l.whatsapp)}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{ color: 'var(--color-accent-cyan)', textDecoration: 'none', borderBottom: '1px dashed rgba(0, 206, 209, 0.4)', paddingBottom: '2px', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}
+                                  >
+                                    <MessageSquare size={11} />
+                                    <span>{l.whatsapp}</span>
+                                  </a>
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                  <span style={{ background: 'rgba(230,173,69,0.06)', border: '1px solid rgba(230,173,69,0.2)', color: 'var(--color-accent-gold)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.03em' }}>
+                                    {l.category}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '1rem', color: 'var(--color-text-dimmed)' }}>{l.date}</td>
+                                <td style={{ padding: '1rem' }}>
+                                  <select 
+                                    value={l.status}
+                                    onChange={(e) => {
+                                      const statusVal = e.target.value;
+                                      dataService.updateLeadStatus(l.id, statusVal);
+                                      setLeads(dataService.getLeads());
+                                      showNotification(`Status do lead alterado para: ${statusVal}`);
+                                    }}
+                                    style={{ padding: '0.3rem 0.5rem', fontSize: '0.75rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '4px', color: l.status === 'Novo' ? 'var(--color-accent-cyan)' : (l.status === 'Fechado' ? 'var(--color-accent-gold)' : '#fff'), outline: 'none', fontWeight: 600 }}
+                                  >
+                                    <option value="Novo">Novo</option>
+                                    <option value="Em Atendimento">Em Atendimento</option>
+                                    <option value="Fechado">Fechado</option>
+                                    <option value="Arquivado">Arquivado</option>
+                                  </select>
+                                </td>
+                                <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                  <button 
+                                    onClick={() => {
+                                      if (window.confirm(`Deseja remover o lead de "${l.name}"?`)) {
+                                        dataService.deleteLead(l.id);
+                                        setLeads(dataService.getLeads());
+                                        showNotification("Lead excluído com sucesso!");
+                                      }
+                                    }}
+                                    className="action-btn delete-btn" 
+                                    style={{ padding: '0.35rem', background: 'rgba(231,76,60,0.06)', border: '1px solid rgba(231,76,60,0.2)', color: '#e74c3c', borderRadius: '4px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                    title="Excluir Lead"
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
