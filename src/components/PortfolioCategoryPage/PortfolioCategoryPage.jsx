@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, Heart, Volume2, VolumeX, Send, X, Trash2, Loader2 } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId } from '../../services/youtubeHelper';
+import { brandConfig } from '../../brandConfig';
 import './PortfolioCategoryPage.css';
 
 const formatViews = (views) => {
@@ -468,6 +469,9 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const [isMuted, setIsMuted] = useState(true);
   const [activeFeaturedIndex, setActiveFeaturedIndex] = useState(0);
   const [isAnyVideoPlaying, setIsAnyVideoPlaying] = useState(false);
+  const [logoViewMode, setLogoViewMode] = useState(() => {
+    return localStorage.getItem('haja_luz_logo_view_mode') || 'backdrop';
+  });
 
   const getCategorizedProjects = () => {
     const activeCatLower = category.toLowerCase();
@@ -1108,8 +1112,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     return slides;
   };
 
-  // 3-column Logo Grid collector helper (requires minimum of 3 spots)
-  const getLogoGridItems = () => {
+  // 3-column Logo Grid collector helper (requires minimum of 3 spots, repeats up to 15 in backdrop mode)
+  const getLogoGridItems = (isBackdropMode = false) => {
     const logos = [];
     matchedProjects.forEach(proj => {
       if (proj.carouselImages && proj.carouselImages.length > 0) {
@@ -1131,20 +1135,42 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
       }
     });
 
-    const gridItems = [...logos];
-    const minGridItems = 3;
-    if (gridItems.length < minGridItems) {
-      const needed = minGridItems - gridItems.length;
-      for (let i = 0; i < needed; i++) {
-        gridItems.push({
-          id: `logo-placeholder-${gridItems.length}`,
-          isPlaceholder: true,
-          title: 'Espaço Disponível',
-          subtitle: 'Bezaleel Grid'
+    if (isBackdropMode) {
+      // In backdrop mode, we want a filled repeating step-and-repeat grid of exactly 15 items (5 rows of 3 columns)
+      const targetSize = 15;
+      const repeatedItems = [];
+      
+      const sourceList = logos.length > 0 ? logos : [
+        { isPlaceholder: true, title: 'Haja Luz Studio', subtitle: 'Design & Code', id: 'def-1' },
+        { isPlaceholder: true, title: 'Bezaleel Grid', subtitle: 'Geometria Sacra', id: 'def-2' },
+        { isPlaceholder: true, title: 'Enoque Flow', subtitle: 'Motion Fático', id: 'def-3' }
+      ];
+
+      for (let i = 0; i < targetSize; i++) {
+        const sourceItem = sourceList[i % sourceList.length];
+        repeatedItems.push({
+          ...sourceItem,
+          id: `${sourceItem.id || sourceItem.title}-repeat-${i}`,
+          repeatIdx: i
         });
       }
+      return repeatedItems;
+    } else {
+      const gridItems = [...logos];
+      const minGridItems = 3;
+      if (gridItems.length < minGridItems) {
+        const needed = minGridItems - gridItems.length;
+        for (let i = 0; i < needed; i++) {
+          gridItems.push({
+            id: `logo-placeholder-${gridItems.length}`,
+            isPlaceholder: true,
+            title: 'Espaço Disponível',
+            subtitle: 'Bezaleel Grid'
+          });
+        }
+      }
+      return gridItems;
     }
-    return gridItems;
   };
 
   const isShowcaseCat = category.toLowerCase() === 'design gráfico' || category.toLowerCase() === 'fotografia';
@@ -1222,63 +1248,95 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               </p>
             </div>
 
-            {/* The 4x8 Grid Container */}
-            <div className="logo-4x8-grid-container">
-              {getLogoGridItems().map((item, idx) => {
-                if (item.isPlaceholder) {
+            {/* --- 8K PRESS CONFERENCE GOLD BACKDROP VIEW (PERMANENT) --- */}
+            <div className="backdrop-8k-screen glass-panel">
+              {/* 8K Brushed Metal Header Panel */}
+              <div className="backdrop-brand-header">
+                <div className="backdrop-stars">
+                  <motion.span animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2, delay: 0 }}>★</motion.span>
+                  <motion.span animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2, delay: 0.3 }}>★</motion.span>
+                  <motion.span animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2, delay: 0.6 }}>★</motion.span>
+                </div>
+                <img src={brandConfig.logoUrl || '/logo_official.png'} alt="Haja Luz Official Crest" className="backdrop-brand-logo" />
+                <span className="backdrop-brand-domain">hajaluz.studio</span>
+              </div>
+
+              {/* Repeating step-and-repeat logo grid */}
+              <div className="logo-4x8-grid-container backdrop-grid">
+                {getLogoGridItems(true).map((item, idx) => {
+                  if (item.isPlaceholder) {
+                    return (
+                      <div key={item.id} className="logo-grid-tile placeholder-tile backdrop-tile">
+                        <div className="placeholder-tile-text">
+                          <span className="placeholder-main-text">{item.title}</span>
+                          <span className="placeholder-sub-text">{item.subtitle}</span>
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
-                    <div key={item.id} className="logo-grid-tile placeholder-tile">
-                      <div className="placeholder-wireframe-svg">
-                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="10" y="10" width="80" height="80" rx="4" stroke="rgba(230,173,69,0.3)" strokeWidth="1" strokeDasharray="4 4"/>
-                          <line x1="10" y1="10" x2="90" y2="90" stroke="rgba(230,173,69,0.18)" strokeWidth="0.5"/>
-                          <line x1="90" y1="10" x2="10" y2="90" stroke="rgba(230,173,69,0.18)" strokeWidth="0.5"/>
-                          <circle cx="50" cy="50" r="25" stroke="rgba(0,206,209,0.25)" strokeWidth="1" strokeDasharray="2 2"/>
-                        </svg>
+                    <div 
+                      key={item.id} 
+                      className="logo-grid-tile active-tile backdrop-tile"
+                      onClick={() => {
+                        const projLikes = item.project?.likes || (Math.abs(item.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 40 + 15);
+                        const projComments = item.project?.comments || [
+                          { id: 1, author: 'Felipe Costa', text: 'Conceito geométrico bem estruturado nas margens.', date: '12/04/2026' }
+                        ];
+                        setLightboxMedia({
+                          type: 'event',
+                          isLogo: true,
+                          title: item.title,
+                          description: item.project?.description || 'Desenho vetorial sob medida com DNA estratégico.',
+                          images: [item.src],
+                          currentIndex: 0,
+                          likes: projLikes,
+                          likedByUser: !!item.project?.likedByUser,
+                          comments: projComments,
+                          views: item.project?.views || '',
+                          originalUrl: item.project?.originalUrl || ''
+                        });
+                      }}
+                    >
+                      <div className="tile-logo-frame">
+                        <img src={item.src} alt={item.title} className="tile-logo-img" />
                       </div>
-                      <div className="placeholder-tile-text">
-                        <span className="placeholder-main-text">{item.title}</span>
-                        <span className="placeholder-sub-text">{item.subtitle}</span>
+                      <div className="tile-hover-overlay">
+                        <span className="tile-hover-title">{item.title}</span>
                       </div>
+                      <div className="tile-border-glow"></div>
                     </div>
                   );
-                }
+                })}
+              </div>
 
-                // Active Logo grid tile
-                return (
-                  <div 
-                    key={item.id} 
-                    className="logo-grid-tile active-tile"
-                    onClick={() => {
-                      const projLikes = item.project?.likes || (Math.abs(item.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 40 + 15);
-                      const projComments = item.project?.comments || [
-                        { id: 1, author: 'Felipe Costa', text: 'Conceito geométrico bem estruturado nas margens.', date: '12/04/2026' }
-                      ];
-                      setLightboxMedia({
-                        type: 'event',
-                        isLogo: true,
-                        title: item.title,
-                        description: item.project?.description || 'Desenho vetorial sob medida com DNA estratégico.',
-                        images: [item.src],
-                        currentIndex: 0,
-                        likes: projLikes,
-                        likedByUser: !!item.project?.likedByUser,
-                        comments: projComments,
-                        views: item.project?.views || '',
-                        originalUrl: item.project?.originalUrl || ''
-                      });
-                    }}
-                  >
-                    <div className="tile-logo-frame">
-                      <img src={item.src} alt={item.title} className="tile-logo-img" />
-                    </div>
-                    <div className="tile-hover-overlay">
-                      <span className="tile-hover-title">{item.title}</span>
-                    </div>
-                    <div className="tile-border-glow"></div>
+              {/* Cyber-wooden executive press conference desk mockup */}
+              <div className="backdrop-mock-desk-area">
+                <div className="mock-desk-chairs">
+                  <div className="mock-chair"></div>
+                  <div className="mock-chair active-center"></div>
+                  <div className="mock-chair"></div>
+                </div>
+                <div className="mock-press-desk">
+                  <div className="desk-top-wood"></div>
+                  <div className="desk-front-panel">
+                    <div className="desk-brand-signature">// HAJA LUZ STUDIO //</div>
+                    <div className="desk-sub-social">f o 📷 /hajaluz.studio</div>
                   </div>
-                );
-              })}
+                  {/* Double cyber gooseneck microphone stems */}
+                  <div className="desk-microphones">
+                    <div className="mock-mic mic-left">
+                      <div className="mic-neck"></div>
+                      <div className="mic-head"></div>
+                    </div>
+                    <div className="mock-mic mic-right">
+                      <div className="mic-neck"></div>
+                      <div className="mic-head"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
