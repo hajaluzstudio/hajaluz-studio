@@ -15,8 +15,34 @@ const cleanPhoneForWhatsApp = (num) => {
 
 const compressImage = (base64OrFile, maxDimension) => {
   return new Promise((resolve) => {
-    const img = new Image();
     const isFile = base64OrFile instanceof File;
+    
+    // 1. Detect SVG (Scalable Vector Graphics)
+    // Pure vector files should NEVER be rasterized through canvas because they are already text-based, 
+    // incredibly lightweight (usually 1KB-5KB), and offer 100% infinite quality.
+    const isSvg = isFile 
+      ? (
+          base64OrFile.type === 'image/svg+xml' || 
+          (base64OrFile.name && base64OrFile.name.toLowerCase().endsWith('.svg'))
+        )
+      : (
+          typeof base64OrFile === 'string' && 
+          (base64OrFile.startsWith('data:image/svg+xml'))
+        );
+
+    if (isSvg) {
+      if (isFile) {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(base64OrFile);
+      } else {
+        resolve(base64OrFile);
+      }
+      return;
+    }
+
+    const img = new Image();
     const url = isFile ? URL.createObjectURL(base64OrFile) : base64OrFile;
     
     // Bulletproof PNG detection: checks MIME types and case-insensitive file extensions
@@ -37,10 +63,11 @@ const compressImage = (base64OrFile, maxDimension) => {
       let width = img.width;
       let height = img.height;
       
-      // Smart and aggressive dimension bounds: logos are max 240px, regular works are max 600px
+      // Upgraded dimension limits: 360px for PNG logos and 720px for covers/carousels
+      // yields flawless crispness on Retina/High-DPI screens while keeping bytes super low.
       let maxDim = maxDimension;
       if (!maxDim) {
-        maxDim = isPng ? 240 : 600;
+        maxDim = isPng ? 360 : 720;
       }
       
       const MAX_WIDTH = maxDim;
@@ -65,15 +92,15 @@ const compressImage = (base64OrFile, maxDimension) => {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Utilizing premium high-compression WebP format for all uploads, saving up to 98% memory!
-      // Uses 0.5 quality for transparent logos and 0.6 quality for regular images.
-      let compressedDataUrl = canvas.toDataURL('image/webp', isPng ? 0.5 : 0.6);
+      // Higher WebP quality parameters (0.85 for logos, 0.8 for photos) 
+      // completely eliminates visual noise or blurriness.
+      let compressedDataUrl = canvas.toDataURL('image/webp', isPng ? 0.85 : 0.8);
 
       // WebP fallback check
       if (!compressedDataUrl.startsWith('data:image/webp')) {
         compressedDataUrl = isPng 
           ? canvas.toDataURL('image/png')
-          : canvas.toDataURL('image/jpeg', 0.65);
+          : canvas.toDataURL('image/jpeg', 0.85);
       }
  
       if (isFile) URL.revokeObjectURL(url);
