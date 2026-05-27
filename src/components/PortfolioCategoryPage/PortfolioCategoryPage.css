@@ -1822,13 +1822,8 @@
   
   .backdrop-grid {
     padding: 2.5rem 2rem !important;
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 1.2rem !important;
-  }
-  
-  /* Show only 10 items instead of 15 on tablets to prevent visual bloating */
-  .backdrop-grid .logo-grid-tile:nth-child(n+11) {
-    display: none !important;
   }
   
   .backdrop-mock-desk-area {
@@ -1869,15 +1864,10 @@
 @media (max-width: 600px) {
   .backdrop-grid {
     padding: 2rem 1.5rem !important;
-    grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
-    max-width: 320px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1rem !important;
+    max-width: 100% !important;
     margin: 0 auto !important;
-  }
-  
-  /* Show only 5 items on smartphone centered backdrop grid */
-  .backdrop-grid .logo-grid-tile:nth-child(n+6) {
-    display: none !important;
   }
   
   .backdrop-brand-header {
@@ -3301,9 +3291,9 @@
     font-size: 0.9rem !important;
   }
 
-  /* The Backdrop 3D sponsor grid - scales to 2 columns on mobile to mimic a real compact press conference wall */
+  /* The Backdrop 3D sponsor grid - 3 columns on all devices including mobile as requested */
   .logo-4x8-grid-container.backdrop-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 0.8rem !important;
     padding: 1.5rem 1rem !important;
   }
@@ -3426,7 +3416,7 @@
   }
 
   .logo-4x8-grid-container.backdrop-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 0.6rem !important;
     padding: 1.2rem 0.6rem !important;
   }
