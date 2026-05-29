@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, X } from 'lucide-react';
+import { ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, X, Heart } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId } from '../../services/youtubeHelper';
 import './Portfolio.css';
@@ -24,12 +24,11 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
     'Podcast\'s',
     'Clipes',
     'Aniversários',
-    'Sites',
+    'Casamentos',
     'Design Gráfico',
     'Motion Design',
     'Logotipo',
     'Fotografia',
-    'Documentário',
     'Produção de Show'
   ];
 
@@ -39,12 +38,11 @@ const Portfolio = ({ selectedCategory = 'Todos', setSelectedCategory, dataUpdate
     'Podcast\'s': Compass,
     'Clipes': Play,
     'Aniversários': Award,
-    'Sites': Monitor,
+    'Casamentos': Heart,
     'Design Gráfico': Paintbrush,
     'Motion Design': Sparkles,
     'Logotipo': Type,
     'Fotografia': Camera,
-    'Documentário': FilmIcon,
     'Produção de Show': Film,
     'Todos': Target
   };

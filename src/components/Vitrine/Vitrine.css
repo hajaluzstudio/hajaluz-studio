@@ -1,0 +1,534 @@
+/* BOUTIQUE DE CRIAÇÕES - STOREFRONT VITRINE SYSTEM */
+
+.vitrine-section {
+  position: relative;
+  padding: 8rem 2rem;
+  background-color: var(--color-bg);
+  background-image: 
+    radial-gradient(circle at 50% 10%, rgba(230, 173, 69, 0.04) 0%, transparent 60%),
+    radial-gradient(circle at 10% 80%, rgba(230, 173, 69, 0.02) 0%, transparent 40%);
+  overflow: hidden;
+  border-bottom: 1px solid rgba(230, 173, 69, 0.08);
+}
+
+/* Ambient Neon Lights */
+.vitrine-ambient-glow-1 {
+  position: absolute;
+  top: -15%;
+  left: 30%;
+  width: 45vw;
+  height: 45vw;
+  background: radial-gradient(circle, rgba(230, 173, 69, 0.05) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.vitrine-ambient-glow-2 {
+  position: absolute;
+  bottom: -10%;
+  right: 15%;
+  width: 35vw;
+  height: 35vw;
+  background: radial-gradient(circle, rgba(230, 173, 69, 0.03) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.vitrine-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* Vitrine Header */
+.vitrine-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 5rem auto;
+}
+
+.vitrine-tag {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-accent-gold);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.8rem;
+  text-shadow: 0 0 10px var(--color-accent-gold-glow);
+}
+
+.vitrine-title {
+  font-size: 2.8rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.02em;
+  text-transform: capitalize;
+}
+
+.vitrine-desc {
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* Triple Glass Expository Shelves Grid */
+.vitrine-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  height: 640px;
+  margin-bottom: 6rem;
+  position: relative;
+}
+
+/* Expository Columns (Storefront Glass cases) */
+.showcase-column {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgba(28, 10, 9, 0.22);
+  border: 1px solid rgba(230, 173, 69, 0.1);
+  box-shadow: 
+    inset 0 0 40px rgba(0, 0, 0, 0.9), 
+    0 25px 60px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  justify-content: center;
+}
+
+.showcase-column::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.85) 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Glass reflection light sweeps on columns */
+.glass-shelf-highlight {
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 1.5px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(230, 173, 69, 0.18), transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glass-shelf-highlight::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -50px;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.06), transparent);
+}
+
+/* Expository Shelf Structure Line */
+.showcase-shelf-structure {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 25px;
+  background: linear-gradient(90deg, #120504, #2c1211, #120504);
+  border-top: 1px solid rgba(230, 173, 69, 0.3);
+  box-shadow: 0 -10px 20px rgba(230, 173, 69, 0.05);
+  z-index: 4;
+}
+
+/* Infinite Vertical Scroll Track */
+.infinite-scroll-track {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+  padding: 3rem 0;
+  width: 82%;
+  z-index: 2;
+}
+
+/* Vertical Animation Keyframes */
+@keyframes scrollUpTrack {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+@keyframes scrollDownTrack {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+.scroll-up {
+  animation: scrollUpTrack 45s linear infinite;
+}
+
+.scroll-down {
+  animation: scrollDownTrack 50s linear infinite;
+}
+
+.scroll-up-alt {
+  animation: scrollUpTrack 38s linear infinite;
+}
+
+/* Pause scroll on hover */
+.showcase-column:hover .infinite-scroll-track {
+  animation-play-state: paused;
+}
+
+/* Expository Boutique Products (Floating Glass Domes) */
+.vitrine-item {
+  position: relative;
+  width: 100%;
+  padding: 2.2rem 1.5rem;
+  border-radius: 14px;
+  text-align: center;
+  background: rgba(18, 5, 4, 0.78);
+  border: 1px solid rgba(230, 173, 69, 0.12);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Glass dome top glow */
+.item-glass-dome {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70%;
+  background: linear-gradient(180deg, rgba(230, 173, 69, 0.03) 0%, transparent 100%);
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  pointer-events: none;
+  transition: background 0.4s ease;
+}
+
+/* Brushed Pedestal Base */
+.item-pedestal {
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  height: 10px;
+  background: linear-gradient(90deg, #1c0a09, #4a1d1b, #1c0a09);
+  border-radius: 4px;
+  border-top: 1.5px solid rgba(230, 173, 69, 0.4);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.vitrine-item:hover {
+  transform: translateY(-8px) scale(1.03);
+  border-color: rgba(230, 173, 69, 0.45);
+  box-shadow: 
+    0 25px 45px rgba(0, 0, 0, 0.8), 
+    0 0 25px rgba(230, 173, 69, 0.15);
+}
+
+.vitrine-item:hover .item-glass-dome {
+  background: linear-gradient(180deg, rgba(230, 173, 69, 0.08) 0%, transparent 100%);
+}
+
+.vitrine-item:hover .item-pedestal {
+  border-top-color: var(--color-accent-gold);
+  box-shadow: 0 5px 25px rgba(230, 173, 69, 0.35);
+}
+
+/* Product Info Content */
+.item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  z-index: 2;
+}
+
+/* Luxurious Label Tag */
+.item-label-tag {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-accent-gold);
+  border: 1px solid rgba(230, 173, 69, 0.25);
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  background: rgba(28, 10, 9, 0.5);
+  letter-spacing: 0.08em;
+  margin-bottom: 1.2rem;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.vitrine-item:hover .item-label-tag {
+  border-color: var(--color-accent-gold);
+  color: #fff;
+  background: var(--color-accent-gold);
+}
+
+/* Glowing Icon Frame */
+.item-icon-glow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(28, 10, 9, 0.6);
+  border: 1px solid rgba(230, 173, 69, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+  transition: all 0.4s ease;
+}
+
+.item-icon {
+  transition: transform 0.4s ease;
+}
+
+.vitrine-item:hover .item-icon-glow {
+  color: var(--color-accent-gold);
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 15px var(--color-accent-gold-glow);
+  background: rgba(28, 10, 9, 0.8);
+}
+
+.vitrine-item:hover .item-icon {
+  transform: rotate(360deg);
+}
+
+.item-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--color-text);
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.item-subtitle {
+  font-size: 0.72rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-dimmed);
+  font-weight: 300;
+}
+
+/* --- THE STOREFRONT ENTRANCE DOOR (DOUBLE GLASS DOOR) --- */
+.vitrine-door-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-top: 4rem;
+}
+
+.door-sign-neon {
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--color-accent-gold);
+  letter-spacing: 0.25em;
+  margin-bottom: 1.8rem;
+  text-shadow: 0 0 10px var(--color-accent-gold-glow);
+  animation: neonPulse 3s infinite alternate;
+}
+
+/* Door interactive frame trigger */
+.vitrine-double-door {
+  display: block;
+  position: relative;
+  width: 250px;
+  height: 340px;
+  background: rgba(18, 5, 4, 0.4);
+  border-radius: 12px 12px 0 0;
+  border: 2.5px solid rgba(230, 173, 69, 0.35);
+  border-bottom: none;
+  cursor: pointer;
+  perspective: 1000px;
+  overflow: hidden;
+  box-shadow: 
+    0 15px 45px rgba(0,0,0,0.9),
+    inset 0 0 25px rgba(0,0,0,0.95);
+  z-index: 50;
+}
+
+/* Door panels (Left & Right halves) */
+.door-panel {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: rgba(28, 10, 9, 0.88);
+  border: 1px solid rgba(230, 173, 69, 0.15);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.95);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+.door-left {
+  left: 0;
+  border-right: 1px solid rgba(230, 173, 69, 0.45);
+  transform-origin: left center;
+}
+
+.door-right {
+  right: 0;
+  border-left: 1px solid rgba(230, 173, 69, 0.45);
+  transform-origin: right center;
+}
+
+/* Gold handles */
+.door-handle {
+  position: absolute;
+  width: 6px;
+  height: 48px;
+  background: linear-gradient(180deg, #ffd700, #b8860b, #ffd700);
+  border: 1px solid #ffffff33;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(230, 173, 69, 0.4);
+  transition: all 0.3s ease;
+}
+
+.left-handle {
+  right: 4px;
+}
+
+.right-handle {
+  left: 4px;
+}
+
+/* Elegant glass borders on door panes */
+.door-frame-accent {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
+  border: 1px solid rgba(230, 173, 69, 0.15);
+  pointer-events: none;
+}
+
+.door-reflection-line {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  width: 15%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+  transform: skewX(-15deg);
+}
+
+/* Glowing path within when door opens */
+.door-entrance-glow {
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(230, 173, 69, 0.48) 0%, rgba(28, 10, 9, 0.8) 50%, transparent 100%);
+  border-radius: 50%;
+  filter: blur(15px);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+
+.door-interactive-label {
+  position: absolute;
+  bottom: 2rem;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--color-accent-gold);
+  letter-spacing: 0.15em;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 3;
+}
+
+/* DOOR INTERACTIVE OPENING HOVER EFFECTS */
+.vitrine-double-door:hover .door-left {
+  transform: rotateY(-65deg) scaleX(0.9);
+  box-shadow: 10px 0 25px rgba(0,0,0,0.85);
+}
+
+.vitrine-double-door:hover .door-right {
+  transform: rotateY(65deg) scaleX(0.9);
+  box-shadow: -10px 0 25px rgba(0,0,0,0.85);
+}
+
+.vitrine-double-door:hover .door-entrance-glow {
+  opacity: 0.95;
+  transform: scale(1.15);
+}
+
+.vitrine-double-door:hover .door-interactive-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vitrine-double-door:hover .door-handle {
+  box-shadow: 0 0 18px var(--color-accent-gold);
+}
+
+/* Neon Pulse Animation keyframes */
+@keyframes neonPulse {
+  0% {
+    text-shadow: 0 0 10px var(--color-accent-gold-glow), 0 0 20px rgba(230, 173, 69, 0.1);
+  }
+  100% {
+    text-shadow: 0 0 15px rgba(230, 173, 69, 0.6), 0 0 30px var(--color-accent-gold-glow);
+  }
+}
+
+/* Responsive Expository display columns */
+@media (max-width: 1024px) {
+  .vitrine-showcase-grid {
+    gap: 1.5rem;
+    height: 560px;
+  }
+  .vitrine-title {
+    font-size: 2.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .vitrine-section {
+    padding: 6rem 1.2rem;
+  }
+  .vitrine-showcase-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 3rem;
+  }
+  .showcase-column {
+    height: 480px;
+  }
+  .scroll-up, .scroll-down, .scroll-up-alt {
+    animation-duration: 25s; /* Speed up a bit for single view mobile screen scrolling */
+  }
+}

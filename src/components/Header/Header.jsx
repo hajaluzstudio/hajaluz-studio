@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { brandConfig } from '../../brandConfig';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Video, Mic, Film, Sparkles, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, Compass, Menu, X } from 'lucide-react';
+import { ChevronDown, Video, Mic, Film, Sparkles, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, Compass, Menu, X, Heart } from 'lucide-react';
 import './Header.css';
 
 const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
@@ -27,12 +27,11 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
     { name: 'Podcast\'s', icon: Compass, desc: 'Gravações em estúdio de alta fidelidade.' },
     { name: 'Clipes', icon: Play, desc: 'Produções musicais cinematográficas.' },
     { name: 'Aniversários', icon: Award, desc: 'Eventos e memórias inesquecíveis.' },
-    { name: 'Sites', icon: Monitor, desc: 'Portais digitais de alta costura.' },
+    { name: 'Casamentos', icon: Heart, desc: 'Filmes de casamento e coberturas completas.' },
     { name: 'Design Gráfico', icon: Paintbrush, desc: 'Identidade visual e peças premium.' },
     { name: 'Motion Design', icon: Sparkles, desc: 'Animações gráficas sofisticadas.' },
     { name: 'Logotipo', icon: Type, desc: 'Marcas fortes com DNA estratégico.' },
     { name: 'Fotografia', icon: Camera, desc: 'Captação fática e lentes de cinema.' },
-    { name: 'Documentário', icon: FilmIcon, desc: 'Histórias reais com peso marrativo.' },
     { name: 'Produção de Show', icon: Film, desc: 'Cobertura de eventos de grande porte.' },
   ];
 
@@ -159,7 +158,6 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
           </AnimatePresence>
         </div>
 
-        <a href="#equipe" onClick={(e) => { e.preventDefault(); onEquipeClick && onEquipeClick(); }}>Equipe</a>
         <a href="#contato" onClick={(e) => { e.preventDefault(); handleScroll('contato'); }}>Contatos</a>
       </nav>
 
@@ -248,18 +246,7 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
                   </div>
                 </div>
 
-                <a 
-                  href="#equipe" 
-                  onClick={(e) => { 
-                    e.preventDefault(); 
-                    setIsMobileMenuOpen(false); 
-                    onEquipeClick && onEquipeClick(); 
-                  }}
-                  className="mobile-nav-link"
-                >
-                  Equipe
-                </a>
-                
+
                 <a 
                   href="#contato" 
                   onClick={(e) => { 

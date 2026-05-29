@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Plus, Trash2, Edit2, RotateCcw, User, Cpu, Film, Compass, Target, Sparkles, Monitor, Mic, Play, Award, Paintbrush, Type, Camera, FilmIcon, ShieldAlert, Check, Save, LogOut, MessageSquare } from 'lucide-react';
+import { X, Lock, Plus, Trash2, Edit2, RotateCcw, User, Cpu, Film, Compass, Target, Sparkles, Monitor, Mic, Play, Award, Paintbrush, Type, Camera, FilmIcon, ShieldAlert, Check, Save, LogOut, MessageSquare, Loader2 } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { getYouTubeId, isGoogleDriveUrl, getGoogleDriveId } from '../../services/youtubeHelper';
 import './AdminPanel.css';
@@ -143,6 +143,10 @@ const generateAiCopy = (title, category) => {
       "Cinematografia de legado familiar run-and-gun, mesclando entrevistas íntimas gravadas com som analógico e uma trilha sonora orquestral comovente que preserva a história entre gerações.",
       "Captura discreta e artística focada nas texturas da luz natural do evento, registrando sorrisos orgânicos e discursos memoráveis sob um color grading dourado atemporal."
     ],
+    casamentos: [
+      "Direção cinematográfica de casamentos com lentes nobres de grande abertura f/1.2, capturando sorrisos e lágrimas com o peso estético de um longa-metragem e o calor dourado das velas.",
+      "Registro documental discreto e emocionante, casando a plasticidade de imagens em câmera lenta com a narrativa comovente dos discursos e a força atemporal do legado do casal."
+    ],
     sites: [
       "Arquitetura digital minimalista desenvolvida com micro-animações dinâmicas de 60 FPS, modularidade de vetores SVG e paleta premium de quatro tons (Preto, Marrom, Ouro e Creme).",
       "Programação de ponta com tempo de resposta neural absoluto e design system minimalista, desenhando portais digitais exclusivos focados em conversão e luxo visual."
@@ -179,6 +183,7 @@ const generateAiCopy = (title, category) => {
     "podcast's": "Gravação premium em estúdio multi-câmera com altíssima fidelidade e dinâmica impecável de áudio e vídeo.",
     clipes: "Videoclipe artístico de vanguarda fundindo narrativa conceitual profunda e fotografia densa de cinema.",
     aniversários: "Filme e memórias eternizadas de um legado familiar inesquecível, registrando as gerações com emoção.",
+    casamentos: "Filme de casamento cinematográfico premium, eternizando cada momento com plasticidade visual luxuosa e narrativa comovente.",
     sites: "Portal digital exclusivo programado com engenharia de ponta, velocidade neural e design system premium.",
     "design gráfico": "Branding de luxo e peças corporativas desenhadas sob rígida proporção geométrica e elegância cromática.",
     "motion design": "Animações tridimensionais complexas e física digital fluida para valorização da identidade de marca.",
@@ -208,6 +213,24 @@ const generateAiCopy = (title, category) => {
   };
 };
 
+const uploadToImgBB = async (file, apiKey) => {
+  const formData = new FormData();
+  formData.append('image', file);
+  
+  const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+    method: 'POST',
+    body: formData
+  });
+  
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || 'Erro desconhecido ao enviar para o ImgBB.');
+  }
+  
+  const data = await response.json();
+  return data.data.url;
+};
+
 const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   const getLocalStorageUsageInKB = () => {
     let total = 0;
@@ -225,6 +248,10 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   const [authError, setAuthError] = useState(false);
   const [activeTab, setActiveTab] = useState('portfolio'); // 'portfolio' | 'equipe' | 'sistema'
   const [successMessage, setSuccessMessage] = useState('');
+  const [imgbbKey, setImgbbKey] = useState('');
+  const [uploadMode, setUploadMode] = useState('cloud');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
 
   // 2. Estados dos Dados
   const [projects, setProjects] = useState([]);
@@ -273,8 +300,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   const [selectedSettingsCategory, setSelectedSettingsCategory] = useState('global');
 
   const allCategories = [
-    'Reels', 'Entrevistas', 'Podcast\'s', 'Clipes', 'Aniversários', 'Sites',
-    'Design Gráfico', 'Motion Design', 'Logotipo', 'Fotografia', 'Documentário', 'Produção de Show'
+    'Reels', 'Entrevistas', 'Podcast\'s', 'Clipes', 'Aniversários', 'Casamentos',
+    'Design Gráfico', 'Motion Design', 'Logotipo', 'Fotografia', 'Produção de Show'
   ];
 
   const specIcons = [
@@ -287,6 +314,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       setProjects(dataService.getProjects());
       setTeam(dataService.getTeam());
       setLeads(dataService.getLeads());
+      setImgbbKey(dataService.getImgbbApiKey());
+      setUploadMode(dataService.getUploadMode());
       const allSettings = dataService.getFictiveSettings();
       setFictiveSettings({
         pretitle: allSettings.pretitle || 'Espaços de Co-Criação',
@@ -467,13 +496,38 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   const handleImageFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      try {
-        const isLogo = projectForm.category.toLowerCase() === 'logotipo';
-        const maxDim = isLogo ? 240 : 600;
-        const compressed = await compressImage(file, maxDim);
-        setProjectForm(prev => ({ ...prev, image: compressed }));
-      } catch (err) {
-        console.error("Erro ao comprimir imagem de capa:", err);
+      if (uploadMode === 'cloud') {
+        setIsUploading(true);
+        setUploadProgress('Enviando capa em qualidade máxima para o servidor...');
+        try {
+          const url = await uploadToImgBB(file, imgbbKey);
+          setProjectForm(prev => ({ ...prev, image: url }));
+          showNotification('Capa enviada em qualidade máxima para o servidor!');
+        } catch (err) {
+          console.error("Erro ao enviar imagem de capa (tentando fallback local):", err);
+          try {
+            const isLogo = projectForm.category.toLowerCase() === 'logotipo';
+            const maxDim = isLogo ? 240 : 600;
+            const compressed = await compressImage(file, maxDim);
+            setProjectForm(prev => ({ ...prev, image: compressed }));
+            alert(`⚠️ DETECTAMOS CHAVE IMGBB INVÁLIDA:\n\nPara que você continue trabalhando sem interrupções, salvamos a imagem localmente de forma otimizada! 💎\n\n(Se desejar qualidade total na nuvem, configure uma nova Chave API grátis na aba 'Sistema').`);
+            showNotification('Capa convertida e salva localmente!');
+          } catch (fallbackErr) {
+            alert(`⚠️ ERRO NO UPLOAD: ${err.message}\n\nE falha crítica ao comprimir localmente: ${fallbackErr.message}`);
+          }
+        } finally {
+          setIsUploading(false);
+          setUploadProgress('');
+        }
+      } else {
+        try {
+          const isLogo = projectForm.category.toLowerCase() === 'logotipo';
+          const maxDim = isLogo ? 240 : 600;
+          const compressed = await compressImage(file, maxDim);
+          setProjectForm(prev => ({ ...prev, image: compressed }));
+        } catch (err) {
+          console.error("Erro ao comprimir imagem de capa:", err);
+        }
       }
       e.target.value = ''; // Reset input value to allow re-uploading the same file
     }
@@ -498,23 +552,67 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    try {
-      const compressedImages = [];
-      const isLogo = projectForm.category.toLowerCase() === 'logotipo';
-      const maxDim = isLogo ? 240 : 600;
-      
-      for (const file of files) {
-        const compressed = await compressImage(file, maxDim);
-        if (compressed) {
-          compressedImages.push(compressed);
+    if (uploadMode === 'cloud') {
+      setIsUploading(true);
+      try {
+        const uploadedUrls = [];
+        for (let i = 0; i < files.length; i++) {
+          setUploadProgress(`Enviando foto ${i + 1} de ${files.length} para o servidor...`);
+          const url = await uploadToImgBB(files[i], imgbbKey);
+          if (url) {
+            uploadedUrls.push(url);
+          }
         }
+        setProjectForm(prev => ({
+          ...prev,
+          carouselImages: [...(prev.carouselImages || []), ...uploadedUrls]
+        }));
+        showNotification(`${files.length} fotos enviadas em qualidade máxima para o servidor!`);
+      } catch (err) {
+        console.error("Erro ao enviar fotos do carrossel (tentando fallback local):", err);
+        try {
+          const compressedImages = [];
+          const isLogo = projectForm.category.toLowerCase() === 'logotipo';
+          const maxDim = isLogo ? 240 : 600;
+          
+          for (const file of files) {
+            const compressed = await compressImage(file, maxDim);
+            if (compressed) {
+              compressedImages.push(compressed);
+            }
+          }
+          setProjectForm(prev => ({
+            ...prev,
+            carouselImages: [...(prev.carouselImages || []), ...compressedImages]
+          }));
+          alert(`⚠️ DETECTAMOS CHAVE IMGBB INVÁLIDA:\n\nPara que você continue trabalhando sem interrupções, convertemos e salvamos as ${files.length} fotos localmente de forma otimizada! 💎\n\n(Se desejar qualidade total na nuvem, configure uma nova Chave API grátis na aba 'Sistema').`);
+          showNotification(`${files.length} fotos salvas localmente!`);
+        } catch (fallbackErr) {
+          alert(`⚠️ ERRO NO UPLOAD: ${err.message}\n\nE falha crítica ao comprimir localmente: ${fallbackErr.message}`);
+        }
+      } finally {
+        setIsUploading(false);
+        setUploadProgress('');
       }
-      setProjectForm(prev => ({
-        ...prev,
-        carouselImages: [...(prev.carouselImages || []), ...compressedImages]
-      }));
-    } catch (err) {
-      console.error("Erro ao comprimir fotos do carrossel:", err);
+    } else {
+      try {
+        const compressedImages = [];
+        const isLogo = projectForm.category.toLowerCase() === 'logotipo';
+        const maxDim = isLogo ? 240 : 600;
+        
+        for (const file of files) {
+          const compressed = await compressImage(file, maxDim);
+          if (compressed) {
+            compressedImages.push(compressed);
+          }
+        }
+        setProjectForm(prev => ({
+          ...prev,
+          carouselImages: [...(prev.carouselImages || []), ...compressedImages]
+        }));
+      } catch (err) {
+        console.error("Erro ao comprimir fotos do carrossel:", err);
+      }
     }
     e.target.value = ''; // Reset input to allow re-uploading the same files
   };
@@ -1228,8 +1326,15 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                           </div>
                         )}
 
+                        {isUploading && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '1rem', margin: '1rem 0', background: 'rgba(230,173,69,0.06)', border: '1px solid rgba(230,173,69,0.2)', borderRadius: '8px', color: 'var(--color-accent-gold)', fontSize: '0.8rem', fontFamily: 'Space Grotesk, monospace' }}>
+                            <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1.2s linear infinite' }} />
+                            <span>{uploadProgress}</span>
+                          </div>
+                        )}
+
                         <div className="form-buttons-row">
-                          <button type="submit" className="form-save-btn">
+                          <button type="submit" className="form-save-btn" disabled={isUploading}>
                             <Save size={14} />
                             <span>{editingProjectIdx !== null ? 'Salvar Edições' : 'Criar e Publicar'}</span>
                           </button>
@@ -1390,6 +1495,73 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
               {activeTab === 'sistema' && (
                 <div className="workspace-tab-content system-reset-tab" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', overflowY: 'auto', maxHeight: '72vh', paddingBottom: '2rem' }}>
                   
+                  {/* Cloud Upload Settings */}
+                  <div className="system-settings-section glass-panel" style={{ padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(230,173,69,0.12)', borderRadius: '12px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
+                    <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', color: 'var(--color-accent-gold)', fontSize: '0.95rem', borderBottom: '1px solid rgba(230,173,69,0.15)', paddingBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                      ☁️ Integração de Nuvem (Upload de Imagens)
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                      Configure o upload de imagens em qualidade máxima direto para a nuvem. Isso evita o limite de armazenamento do navegador (5MB) e permite usar arquivos de alta resolução sem redimensioná-los.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Método de Armazenamento</label>
+                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#fff', cursor: 'pointer' }}>
+                            <input 
+                              type="radio" 
+                              name="uploadMode" 
+                              value="cloud" 
+                              checked={uploadMode === 'cloud'}
+                              onChange={() => {
+                                setUploadMode('cloud');
+                                dataService.saveUploadMode('cloud');
+                                showNotification('Modo de upload alterado para Nuvem!');
+                              }}
+                            />
+                            <span>Nuvem (Qualidade Máxima - ImgBB)</span>
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#fff', cursor: 'pointer' }}>
+                            <input 
+                              type="radio" 
+                              name="uploadMode" 
+                              value="local" 
+                              checked={uploadMode === 'local'}
+                              onChange={() => {
+                                setUploadMode('local');
+                                dataService.saveUploadMode('local');
+                                showNotification('Modo de upload alterado para Armazenamento Local!');
+                              }}
+                            />
+                            <span>Local (Comprimir Base64)</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {uploadMode === 'cloud' && (
+                        <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                          <label style={{ fontSize: '0.72rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Chave API do ImgBB (Gratuita)</label>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input 
+                              type="text" 
+                              value={imgbbKey} 
+                              onChange={(e) => {
+                                setImgbbKey(e.target.value);
+                                dataService.saveImgbbApiKey(e.target.value);
+                              }}
+                              placeholder="Insira sua Chave API do ImgBB"
+                              style={{ flex: 1, padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff', outline: 'none' }}
+                            />
+                          </div>
+                          <span style={{ fontSize: '0.65rem', color: 'var(--color-text-dimmed)', fontStyle: 'italic' }}>
+                            Você pode gerar sua chave grátis em menos de 10 segundos acessando <a href="https://api.imgbb.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-accent-gold)', textDecoration: 'none', borderBottom: '1px dashed rgba(230,173,69,0.5)' }}>api.imgbb.com</a>. Nós fornecemos uma chave padrão de testes caso não possua uma própria.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Fictive Rectangles Settings */}
                   <div className="system-settings-section glass-panel" style={{ padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(230,173,69,0.12)', borderRadius: '12px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
                     <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', color: 'var(--color-accent-gold)', fontSize: '0.95rem', borderBottom: '1px solid rgba(230,173,69,0.15)', paddingBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>

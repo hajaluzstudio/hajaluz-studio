@@ -10,11 +10,21 @@
 export const getYouTubeId = (url) => {
   if (!url) return null;
   
-  // Regex universal do YouTube
+  // 1. Check for standard YouTube patterns
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
+  if (match && match[2].length === 11) {
+    return match[2];
+  }
+
+  // 2. Check for YouTube Shorts patterns: youtube.com/shorts/VIDEO_ID
+  const shortsReg = /\/shorts\/([a-zA-Z0-9_-]{11})/;
+  const shortsMatch = url.match(shortsReg);
+  if (shortsMatch) {
+    return shortsMatch[1];
+  }
   
-  return (match && match[2].length === 11) ? match[2] : null;
+  return null;
 };
 
 /**

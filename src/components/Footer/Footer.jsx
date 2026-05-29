@@ -134,7 +134,6 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
                     window.location.search = '?category=todos';
                   }
                 }}>Portfólio</a></li>
-                <li><a href="#equipe" onClick={(e) => { e.preventDefault(); onEquipeClick && onEquipeClick(); }}>Equipe</a></li>
               </ul>
             </div>
 

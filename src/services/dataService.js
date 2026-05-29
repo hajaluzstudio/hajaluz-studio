@@ -1074,6 +1074,41 @@ export const dataService = {
     }
   },
 
+  // --- CONFIGURAÇÃO IMGBB DE UPLOAD CLOUD ---
+  getImgbbApiKey: () => {
+    try {
+      return localStorage.getItem('hajaluz_imgbb_api_key') || '7e9d89280d56b02660aa3aeae7ff9dcd';
+    } catch (e) {
+      return '7e9d89280d56b02660aa3aeae7ff9dcd';
+    }
+  },
+
+  saveImgbbApiKey: (key) => {
+    try {
+      localStorage.setItem('hajaluz_imgbb_api_key', key);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  getUploadMode: () => {
+    try {
+      return localStorage.getItem('hajaluz_upload_mode') || 'cloud';
+    } catch (e) {
+      return 'cloud';
+    }
+  },
+
+  saveUploadMode: (mode) => {
+    try {
+      localStorage.setItem('hajaluz_upload_mode', mode);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
   // --- RESTAURAR PADRÕES DE FÁBRICA ---
   resetToDefaults: () => {
     try {

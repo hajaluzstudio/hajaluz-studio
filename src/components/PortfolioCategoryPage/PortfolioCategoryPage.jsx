@@ -146,18 +146,10 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
             <div className="social-video-frame">
               {isYt ? (
                 <iframe 
-                  src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&loop=1&playlist=${ytId}&controls=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&vq=hd1080`}
+                  src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&loop=1&playlist=${ytId}&controls=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=0&vq=hd1080`}
                   className="social-video-element"
                   allow="autoplay; encrypted-media; picture-in-picture"
-                  style={{ border: 'none', width: '100%', height: '100%' }}
-                  title={project.title}
-                />
-              ) : isDrive ? (
-                <iframe 
-                  src={`https://drive.google.com/file/d/${getGoogleDriveId(project.video)}/preview`}
-                  className="social-video-element"
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  style={{ border: 'none', width: '100%', height: '100%', background: '#000' }}
+                  style={{ border: 'none', width: '100%', height: '100%', pointerEvents: 'auto' }}
                   title={project.title}
                 />
               ) : (
@@ -165,22 +157,39 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
                   <video 
                     src={videoSource}
                     loop
-                    autoPlay
-                    controls
+                    autoPlay={!isReels}
+                    controls={true}
                     controlsList="nodownload"
-                    muted={localMuted}
+                    muted={isReels ? localMuted : localMuted}
                     playsInline
                     className="social-video-element"
-                    style={{ background: '#000', objectFit: 'contain' }}
+                    style={{ background: '#000', objectFit: isReels ? 'cover' : 'contain' }}
+                    onMouseEnter={(e) => {
+                      if (isReels) {
+                        setLocalMuted(false);
+                        e.target.muted = false;
+                        e.target.play().catch(() => {});
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (isReels) {
+                        e.target.pause();
+                        setLocalMuted(true);
+                        e.target.muted = true;
+                      }
+                    }}
                   />
-                  <button 
-                    type="button" 
-                    onClick={(e) => { e.stopPropagation(); setLocalMuted(!localMuted); }}
-                    className="social-video-mute-btn"
-                    title={localMuted ? "Ativar Áudio" : "Silenciar Áudio"}
-                  >
-                    {localMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                  </button>
+                  {!isReels && (
+                    <button 
+                      type="button" 
+                      onClick={(e) => { e.stopPropagation(); setLocalMuted(!localMuted); }}
+                      className="social-video-mute-btn"
+                      title={localMuted ? "Ativar Áudio" : "Silenciar Áudio"}
+                      style={{ zIndex: 10 }}
+                    >
+                      {localMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                    </button>
+                  )}
                 </>
               )}
             </div>
@@ -480,11 +489,13 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   });
 
   const getCategorizedProjects = () => {
-    const activeCatLower = category.toLowerCase();
-    const activeProjects = realProjects.filter(p => 
-      (p.category && p.category.toLowerCase() === activeCatLower) || 
-      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
-    );
+    const activeCatLower = category.toLowerCase().replace("'", "");
+    const activeProjects = activeCatLower === 'todos'
+      ? realProjects
+      : realProjects.filter(p => 
+          (p.category && p.category.toLowerCase().replace("'", "") === activeCatLower) || 
+          (p.secondaryCategory && p.secondaryCategory.toLowerCase().replace("'", "") === activeCatLower)
+        );
     
     if (activeProjects.length === 0) {
       return {
@@ -512,6 +523,18 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   const { featuredProjs, gridRealProjs } = getCategorizedProjects();
 
+  const activeProjectForLightbox = realProjects.find(p => p.title === lightboxMedia?.title);
+  const isReelsLayout = lightboxMedia && (
+    category.toLowerCase().replace("'", "") === 'reels' ||
+    category.toLowerCase().replace("'", "") === 'motion design' ||
+    (activeProjectForLightbox && (
+      activeProjectForLightbox.category?.toLowerCase().replace("'", "") === 'reels' ||
+      activeProjectForLightbox.category?.toLowerCase().replace("'", "") === 'motion design' ||
+      activeProjectForLightbox.secondaryCategory?.toLowerCase().replace("'", "") === 'reels' ||
+      activeProjectForLightbox.secondaryCategory?.toLowerCase().replace("'", "") === 'motion design'
+    ))
+  );
+
   // Social authentication states
   const [socialUser, setSocialUser] = useState(null);
   const [activeAuthPlatform, setActiveAuthPlatform] = useState(null);
@@ -526,11 +549,13 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   // --- LOGO BACKDROP ROTATION SYSTEM ---
   const getBaseLogosList = () => {
-    const activeCatLower = category.toLowerCase();
-    const activeProjects = realProjects.filter(p => 
-      (p.category && p.category.toLowerCase() === activeCatLower) || 
-      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
-    );
+    const activeCatLower = category.toLowerCase().replace("'", "");
+    const activeProjects = activeCatLower === 'todos'
+      ? realProjects
+      : realProjects.filter(p => 
+          (p.category && p.category.toLowerCase().replace("'", "") === activeCatLower) || 
+          (p.secondaryCategory && p.secondaryCategory.toLowerCase().replace("'", "") === activeCatLower)
+        );
 
     const list = [];
     activeProjects.forEach(proj => {
@@ -712,7 +737,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   useEffect(() => {
     setRealProjects(dataService.getProjects());
     const allSettings = dataService.getFictiveSettings();
-    const catKey = Object.keys(allSettings).find(k => k.toLowerCase() === category.toLowerCase());
+    const catKey = Object.keys(allSettings).find(k => k.toLowerCase().replace("'", "") === category.toLowerCase().replace("'", ""));
     
     if (catKey && allSettings[catKey]) {
       setFictiveSettings({
@@ -808,7 +833,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
       { id: 2, author: 'Salomão', text: 'A narrativa construída e os ganchos neurais aplicados geraram um desejo absoluto na marca.', date: '13/04/2026' }
     ];
 
-    if (proj.category === 'Aniversários' || hasCarousel) {
+    if (proj.category === 'Aniversários' || proj.category === 'Casamentos' || hasCarousel) {
       setLightboxMedia({
         type: 'event',
         title: proj.title,
@@ -863,7 +888,9 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   };
 
   // Capitalize category name for display
-  const displayCategory = category.charAt(0).toUpperCase() + category.slice(1).replace('-', ' ');
+  const displayCategory = category.toLowerCase().replace("'", "") === 'podcasts' 
+    ? "Podcast's" 
+    : category.replace('-', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -878,16 +905,15 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     'podcast\'s': Compass,
     'clipes': Play,
     'aniversários': Award,
-    'sites': Monitor,
+    'casamentos': Heart,
     'design gráfico': Paintbrush,
     'motion design': Sparkles,
     'logotipo': Type,
     'fotografia': Camera,
-    'documentário': FilmIcon,
     'produção de show': Film
   };
 
-  const Icon = categoryIcons[category.toLowerCase()] || Target;
+  const Icon = categoryIcons[Object.keys(categoryIcons).find(k => k.toLowerCase().replace("'", "") === category.toLowerCase().replace("'", ""))] || Target;
 
   // Custom data for each category to show beautiful real/fictive videos and rich strategical texts
   const categoryData = {
@@ -941,6 +967,19 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         team: 'Felipe Costa (Direção) & Bezaleel (Direção de Arte)',
         strategy: 'Paleta cromática focada em tons quentes de marrom e ouro, combinando iluminação de neon de estúdio com efeitos de grão de filme 35mm.',
         desc: 'Uma obra de vanguarda que mescla a alma da música clássica instrumental com o beat urbano sintético.'
+      }
+    },
+    casamentos: {
+      subtitle: 'Filmes de casamento cinematográficos',
+      intro: 'Direção cinematográfica sensível e registro documental sofisticado. Capturamos a pureza dos sentimentos e a grandiosidade do seu momento mais sagrado.',
+      featured: {
+        title: 'O Legado de Amor de Felipe & Sarah',
+        video: 'https://assets.mixkit.co/videos/preview/mixkit-misty-mountains-and-pine-trees-43224-large.mp4',
+        client: 'Felipe & Sarah Costa',
+        role: 'Filme de Casamento / Cinema',
+        team: 'Felipe Costa (Direção de Cena) & Bezaleel (Direção de Arte)',
+        strategy: 'Uso de iluminação natural dourada atrativa e captação multi-câmera com lentes ultra-nitidas de cinema, gerando uma narrativa emocionante de alta costura.',
+        desc: 'Registro oficial de casamento cinematográfico premium, eternizando cada momento com plasticidade visual luxuosa e narrativa comovente.'
       }
     },
     aniversários: {
@@ -1049,7 +1088,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     }
   };
 
-  const activeData = categoryData[category.toLowerCase()] || {
+  const activeDataKey = Object.keys(categoryData).find(k => k.toLowerCase().replace("'", "") === category.toLowerCase().replace("'", ""));
+  const activeData = categoryData[activeDataKey] || {
     subtitle: 'Galeria Exclusiva de Produções',
     intro: 'Explore as obras e a engenharia criativa por trás do ecossistema híbrido da Haja Luz Studio.',
     featured: {
@@ -1065,13 +1105,13 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   // Dynamic project filtering
   const getFilteredProjects = () => {
-    const activeCatLower = category.toLowerCase();
+    const activeCatLower = category.toLowerCase().replace("'", "");
     if (activeCatLower === 'todos') {
       return realProjects;
     }
     return realProjects.filter(p => 
-      (p.category && p.category.toLowerCase() === activeCatLower) || 
-      (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
+      (p.category && p.category.toLowerCase().replace("'", "") === activeCatLower) || 
+      (p.secondaryCategory && p.secondaryCategory.toLowerCase().replace("'", "") === activeCatLower)
     );
   };
 
@@ -1079,11 +1119,19 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   // Find custom featured project for this category
   const getCustomFeaturedProject = () => {
-    const activeCatLower = category.toLowerCase();
+    const activeCatLower = category.toLowerCase().replace("'", "");
+    
+    if (activeCatLower === 'todos') {
+      const markedFeatured = realProjects.find(p => p.featured);
+      if (markedFeatured) return markedFeatured;
+      if (realProjects.length > 0) return realProjects[0];
+      return null;
+    }
+
     const markedFeatured = realProjects.find(p => 
       p.featured && (
-        (p.category && p.category.toLowerCase() === activeCatLower) || 
-        (p.secondaryCategory && p.secondaryCategory.toLowerCase() === activeCatLower)
+        (p.category && p.category.toLowerCase().replace("'", "") === activeCatLower) || 
+        (p.secondaryCategory && p.secondaryCategory.toLowerCase().replace("'", "") === activeCatLower)
       )
     );
     if (markedFeatured) return markedFeatured;
@@ -1278,8 +1326,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
     }
   };
 
-  const isShowcaseCat = category.toLowerCase() === 'design gráfico' || category.toLowerCase() === 'fotografia';
-  const isLogoCat = category.toLowerCase() === 'logotipo';
+  const isShowcaseCat = category.toLowerCase().replace("'", "") === 'design gráfico' || category.toLowerCase().replace("'", "") === 'fotografia';
+  const isLogoCat = category.toLowerCase().replace("'", "") === 'logotipo';
 
   return (
     <div className="portfolio-subpage-root">
@@ -1321,7 +1369,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
             <div className="subpage-categories-tabs-scroll">
               {Object.keys(categoryIcons).map((catName) => {
                 const CatIcon = categoryIcons[catName];
-                const isSelected = catName.toLowerCase() === category.toLowerCase();
+                const isSelected = catName.toLowerCase().replace("'", "") === category.toLowerCase().replace("'", "");
                 return (
                   <button
                     key={catName}
@@ -1556,38 +1604,74 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                     : (item.video ? getYouTubeThumbnail(item.video) : '/favicon.png');
 
                   return (
-                    <motion.div
-                      key={item.title}
-                      className={`real-project-subcard glass-panel ${isReels ? 'reels-vertical' : ''}`}
-                      onClick={() => handleCardClick(item)}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: '-80px' }}
-                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
-                    >
-                      {coverImg && <img src={coverImg} alt={item.title} className="subcard-image-bg" />}
-                      <div className="subcard-gradient-overlay"></div>
-                      <div className="subcard-badge">
-                        <span>★ Produção Real</span>
-                      </div>
-                      {item.video && (
-                        <div className="subcard-play-overlay">
-                          <div className="subcard-play-btn-glow">
-                            <Play size={18} fill="currentColor" />
-                          </div>
-                        </div>
-                      )}
-                      <div className="subcard-content">
-                        <span className="subcard-client">{item.client || 'HAJA LUZ STUDIO'}</span>
-                        <h3 className="subcard-title">{item.title}</h3>
-                        <div className="subcard-footer">
-                          <span className="subcard-role">{item.role || item.category}</span>
-                          {item.views && (
-                            <span className="subcard-views">{formatViews(item.views)} views</span>
+                    (() => {
+                      const isReelsCard = isReels || 
+                        (item.category && (item.category.toLowerCase().replace("'", "") === 'reels' || item.category.toLowerCase().replace("'", "") === 'motion design')) ||
+                        (item.secondaryCategory && (item.secondaryCategory.toLowerCase().replace("'", "") === 'reels' || item.secondaryCategory.toLowerCase().replace("'", "") === 'motion design'));
+
+                      return (
+                        <motion.div
+                          key={item.title}
+                          className={`real-project-subcard glass-panel ${isReelsCard ? 'reels-vertical' : ''}`}
+                          onClick={() => handleCardClick(item)}
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, margin: '-80px' }}
+                          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
+                        >
+                          {isReelsCard && item.video ? (
+                            getYouTubeId(item.video) ? (
+                              <iframe 
+                                src={`https://www.youtube.com/embed/${getYouTubeId(item.video)}?autoplay=1&mute=1&loop=1&playlist=${getYouTubeId(item.video)}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=1&vq=medium`}
+                                className="subcard-image-bg"
+                                style={{ border: 'none', pointerEvents: 'none', objectFit: 'cover', opacity: 0.65, width: '100%', height: '100%' }}
+                                title={item.title}
+                              />
+                            ) : (
+                              <video 
+                                src={isGoogleDriveUrl(item.video) ? getGoogleDriveDirectLink(item.video) : item.video}
+                                loop
+                                autoPlay
+                                muted
+                                playsInline
+                                className="subcard-image-bg"
+                                style={{ objectFit: 'cover', opacity: 0.65, width: '100%', height: '100%', background: '#000' }}
+                                onMouseEnter={(e) => {
+                                  e.target.muted = false;
+                                  e.target.play().catch(() => {});
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.muted = true;
+                                }}
+                              />
+                            )
+                          ) : (
+                            coverImg && <img src={coverImg} alt={item.title} className="subcard-image-bg" />
                           )}
-                        </div>
-                      </div>
-                    </motion.div>
+                          <div className="subcard-gradient-overlay"></div>
+                          <div className="subcard-badge">
+                            <span>★ Produção Real</span>
+                          </div>
+                          {!isReelsCard && item.video && (
+                            <div className="subcard-play-overlay">
+                              <div className="subcard-play-btn-glow">
+                                <Play size={18} fill="currentColor" />
+                              </div>
+                            </div>
+                          )}
+                          <div className="subcard-content">
+                            <span className="subcard-client">{item.client || 'HAJA LUZ STUDIO'}</span>
+                            <h3 className="subcard-title">{item.title}</h3>
+                            <div className="subcard-footer">
+                              <span className="subcard-role">{item.role || item.category}</span>
+                              {item.views && (
+                                <span className="subcard-views">{formatViews(item.views)} views</span>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })()
                   );
                 }
               })}
@@ -1650,7 +1734,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               exit={{ scale: 0.95, y: 15 }}
               transition={{ type: 'spring', stiffness: 280, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: lightboxMedia.type === 'event' ? '1100px' : '980px', width: '100%' }}
+              style={{ maxWidth: lightboxMedia.type === 'event' ? '1100px' : (isReelsLayout ? '760px' : '980px'), width: '100%' }}
             >
               {lightboxMedia.type === 'event' ? (
                 /* EVENT SLIDESHOW AND DETAILS MODE */
@@ -1669,12 +1753,14 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                             title="Event Video Player"
                           />
                         ) : lightboxMedia.video.type === 'drive' ? (
-                          <iframe 
-                            src={`https://drive.google.com/file/d/${lightboxMedia.video.src}/preview`}
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', background: '#000' }}
-                            allow="autoplay; encrypted-media; picture-in-picture"
-                            allowFullScreen
-                            title="Event Video Player"
+                          <video 
+                            src={`https://drive.google.com/uc?export=download&id=${lightboxMedia.video.src}`}
+                            controls
+                            autoPlay
+                            loop
+                            playsInline
+                            muted={isMuted}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
                           />
                         ) : (
                           <video 
@@ -1901,25 +1987,26 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                 </div>
               ) : (
                 /* REGULAR VIDEO SINGLE PLAYER MODE (SPLIT CINEMA INTERACTIVE) */
-                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '2rem', width: '100%', padding: '1rem' }}>
+                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: isReelsLayout ? '0.75fr 1.25fr' : '1.15fr 0.85fr', gap: '2rem', width: '100%', padding: '1rem' }}>
                   
                   {/* Left Column: Video Frame */}
-                  <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
+                  <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: isReelsLayout ? '9 / 16' : '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
                     {lightboxMedia.type === 'youtube' ? (
                       <iframe 
                         src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0&vq=hd1080`}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', objectFit: isReelsLayout ? 'cover' : 'contain' }}
                         allow="autoplay; encrypted-media; picture-in-picture"
                         allowFullScreen
                         title="Cinema Player"
                       />
                     ) : lightboxMedia.type === 'drive' ? (
-                      <iframe 
-                        src={`https://drive.google.com/file/d/${lightboxMedia.src}/preview`}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', background: '#000' }}
-                        allow="autoplay; encrypted-media; picture-in-picture"
-                        allowFullScreen
-                        title="Cinema Player"
+                      <video 
+                        src={`https://drive.google.com/uc?export=download&id=${lightboxMedia.src}`}
+                        controls
+                        autoPlay
+                        loop
+                        playsInline
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: isReelsLayout ? 'cover' : 'contain' }}
                       />
                     ) : (
                       <video 
@@ -1928,7 +2015,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         autoPlay
                         loop
                         playsInline
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: isReelsLayout ? 'cover' : 'contain' }}
                       />
                     )}
                   </div>
@@ -1981,7 +2068,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         // Comentários ({lightboxMedia.comments?.length || 0})
                       </span>
                       
-                      <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '140px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
+                      <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: isReelsLayout ? '220px' : '140px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
                         {(lightboxMedia.comments || []).map((c) => {
                           const isAuthor = socialUser && socialUser.name === c.author;
                           const canDelete = (localStorage.getItem('haja_luz_admin_logged') === 'true') || isAuthor;
