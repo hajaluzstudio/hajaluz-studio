@@ -631,8 +631,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   const handleAddCarouselLink = () => {
     if (!carouselLinkInput) return;
     
-    // Suporta múltiplos links separados por vírgula
-    const urls = carouselLinkInput.split(',').map(u => u.trim()).filter(Boolean);
+    // Suporta múltiplos links separados por vírgula, espaço, tab ou quebra de linha
+    const urls = carouselLinkInput.split(/[\s,\n\t\r]+/).map(u => u.trim()).filter(u => u.startsWith('http'));
     const resolvedUrls = urls.map(url => {
       let resolved = url;
       if (isGoogleDriveUrl(resolved)) {
@@ -966,10 +966,13 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     setIsCloudSyncing(true);
     showNotification("Puxando dados do Firestore Cloud...");
     try {
-      // Forçar recarga da página irá acionar a inicialização do onSnapshot que atualizará o cache local com os dados da nuvem.
+      await dataService.pullAllFromCloudForce();
+      showNotification("Dados baixados com sucesso!");
+      alert("📥 SUCESSO!\n\nOs dados da nuvem foram baixados e substituíram com sucesso as informações locais deste navegador.\n\nA página será recarregada agora.");
       window.location.reload();
     } catch (err) {
       console.error(err);
+      alert(`⚠️ ERRO AO PUXAR DADOS DA NUVEM:\n\nDetalhe: ${err.message}\n\nVerifique se o seu Firestore Database está ativo e configurado com permissão de leitura pública temporária ou permanente.`);
     } finally {
       setIsCloudSyncing(false);
     }
@@ -1666,49 +1669,33 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                     </p>
                     
                     <form onSubmit={handleSaveFictiveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', width: '100%', marginBottom: '0.5rem' }}>
-                        <label style={{ fontSize: '0.72rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Página para Ajuste de Texto</label>
-                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.2)', padding: '0.8rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleSettingsCategoryChange('global')}
-                            style={{
-                              padding: '0.4rem 0.9rem',
-                              fontSize: '0.75rem',
-                              borderRadius: '20px',
-                              border: selectedSettingsCategory === 'global' ? '1px solid var(--color-accent-gold)' : '1px solid rgba(255,255,255,0.08)',
-                              background: selectedSettingsCategory === 'global' ? 'rgba(230,173,69,0.1)' : 'transparent',
-                              color: selectedSettingsCategory === 'global' ? 'var(--color-accent-gold)' : 'var(--color-text-dimmed)',
-                              cursor: 'pointer',
-                              fontFamily: 'Space Grotesk, sans-serif',
-                              fontWeight: 600,
-                              transition: 'all 0.2s ease'
-                            }}
-                          >
-                            🌐 Padrão Geral (Global)
-                          </button>
+                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', marginBottom: '0.5rem' }}>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Selecionar Categoria para Ajustar Texto</label>
+                        <select 
+                          value={selectedSettingsCategory}
+                          onChange={(e) => handleSettingsCategoryChange(e.target.value)}
+                          style={{
+                            padding: '0.7rem 0.9rem',
+                            fontSize: '0.82rem',
+                            borderRadius: '6px',
+                            border: '1px solid rgba(230, 173, 69, 0.4)',
+                            background: '#080808',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            fontFamily: 'Space Grotesk, sans-serif',
+                            fontWeight: 600,
+                            outline: 'none',
+                            transition: 'all 0.3s ease',
+                            width: '100%',
+                            boxShadow: '0 0 10px rgba(230, 173, 69, 0.05)'
+                          }}
+                          className="admin-category-select"
+                        >
+                          <option value="global">🌐 Padrão Geral (Global)</option>
                           {allCategories.map(cat => (
-                            <button
-                              key={cat}
-                              type="button"
-                              onClick={() => handleSettingsCategoryChange(cat)}
-                              style={{
-                                padding: '0.4rem 0.9rem',
-                                fontSize: '0.75rem',
-                                borderRadius: '20px',
-                                border: selectedSettingsCategory === cat ? '1px solid var(--color-accent-gold)' : '1px solid rgba(255,255,255,0.08)',
-                                background: selectedSettingsCategory === cat ? 'rgba(230,173,69,0.1)' : 'transparent',
-                                color: selectedSettingsCategory === cat ? 'var(--color-accent-gold)' : 'var(--color-text-dimmed)',
-                                cursor: 'pointer',
-                                fontFamily: 'Space Grotesk, sans-serif',
-                                fontWeight: 500,
-                                transition: 'all 0.2s ease'
-                              }}
-                            >
-                              {cat}
-                            </button>
+                            <option key={cat} value={cat}>{cat}</option>
                           ))}
-                        </div>
+                        </select>
                       </div>
 
                       <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>

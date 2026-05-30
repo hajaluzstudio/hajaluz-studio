@@ -1023,131 +1023,60 @@ function getLocalFictiveSettings() {
   return DEFAULT_FICTIVE_SETTINGS;
 }
 
-async function syncFictiveSettingsFromCloud() {
+async function syncFromCloudOnStartup() {
   try {
-    const docRef = doc(db, KEYS.FICTIVE_SETTINGS, "global_settings");
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      const cloudSettings = docSnap.data();
-      const isAdmin = localStorage.getItem('haja_luz_admin_logged') === 'true';
-      
-      if (isAdmin) {
-        // Se o administrador está logado na sessão ativa, não sobrescrevemos seu localStorage
-        if (!localStorage.getItem(KEYS.FICTIVE_SETTINGS)) {
-          localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(cloudSettings));
-        }
-      } else {
-        localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(cloudSettings));
-        window.dispatchEvent(new CustomEvent("hajaluz_data_updated"));
-      }
-    } else {
-      // Se a nuvem estiver vazia, inicializa com o local
-      const localSettings = getLocalFictiveSettings();
-      await uploadFictiveSettingsToCloud(localSettings);
+    const isAdmin = localStorage.getItem('haja_luz_admin_logged') === 'true';
+    if (isAdmin) {
+      console.log("[CLOUD SYNC] Administrador ativo detectado no startup. Mantendo cache local para evitar sobrescrita de rascunhos.");
+      return;
     }
-  } catch (e) {
-    console.error("Erro ao sincronizar fictive settings estáticas do Firestore:", e);
-  }
-}
 
-let isListening = false;
-function startFirestoreListeners() {
-  if (isListening) return;
-  isListening = true;
+    console.log("[CLOUD SYNC] Visitante comum detectado. Carregando dados live da nuvem...");
 
-  try {
-    // Listener de Projetos (Coleção)
-    const projsColRef = collection(db, KEYS.PROJECTS);
-    onSnapshot(projsColRef, (snap) => {
-      const projectsList = [];
-      snap.forEach(docSnap => {
-        projectsList.push(docSnap.data());
-      });
+    // 1. Carregar Fictive Settings da nuvem
+    const settingsDocRef = doc(db, KEYS.FICTIVE_SETTINGS, "global_settings");
+    const settingsSnap = await getDoc(settingsDocRef);
+    if (settingsSnap.exists()) {
+      localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(settingsSnap.data()));
+    }
 
-      // Ordena de volta pela ordem original do Desktop
+    // 2. Carregar Projetos da nuvem
+    const projsCol = collection(db, KEYS.PROJECTS);
+    const projsSnap = await getDocs(projsCol);
+    const projectsList = [];
+    projsSnap.forEach(docSnap => {
+      projectsList.push(docSnap.data());
+    });
+    if (projectsList.length > 0) {
       projectsList.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+      const cleaned = projectsList.map(({ orderIndex, ...rest }) => rest);
+      projectsCache = cleaned;
+      localStorage.setItem(KEYS.PROJECTS, JSON.stringify(cleaned));
+    }
 
-      if (projectsList.length > 0) {
-        // Remove orderIndex para manter compatibilidade com localStorage original
-        const cleanedList = projectsList.map(({ orderIndex, ...rest }) => rest);
-        
-        // DETECÇÃO INTELIGENTE DE COLISÃO:
-        const localProjs = getLocalProjects();
-        const isAdmin = localStorage.getItem('haja_luz_admin_logged') === 'true';
-        
-        if (localProjs.length > cleanedList.length) {
-          console.log("[CLOUD SYNC] Local possui mais projetos que a nuvem. Sincronizando com a nuvem...");
-          uploadProjectsToCloud(localProjs).catch(e => console.error(e));
-          projectsCache = localProjs;
-        } else if (isAdmin) {
-          // Se o administrador está ativamente logado e editando o painel,
-          // ele é a autoridade de escrita. Não sobrescrevemos seu localStorage com
-          // a nuvem desatualizada (ou falha de rede) para evitar perdas!
-          projectsCache = localProjs;
-          if (cleanedList.length === 0) {
-            uploadProjectsToCloud(localProjs).catch(e => console.error(e));
-          }
-        } else {
-          // Para visitantes comuns (leitores), a nuvem é a fonte da verdade.
-          projectsCache = cleanedList;
-          localStorage.setItem(KEYS.PROJECTS, JSON.stringify(cleanedList));
-          window.dispatchEvent(new CustomEvent("hajaluz_data_updated"));
-        }
-      } else {
-        // Se a nuvem estiver vazia, cria a estrutura com o cache local
-        uploadProjectsToCloud(getLocalProjects()).catch(e => console.error(e));
-      }
-    }, (error) => {
-      console.error("Erro no listener de projetos do Firestore:", error);
+    // 3. Carregar Equipe da nuvem
+    const teamCol = collection(db, KEYS.TEAM);
+    const teamSnap = await getDocs(teamCol);
+    const teamList = [];
+    teamSnap.forEach(docSnap => {
+      teamList.push(docSnap.data());
     });
-
-    // Listener de Equipe (Coleção)
-    const teamColRef = collection(db, KEYS.TEAM);
-    onSnapshot(teamColRef, (snap) => {
-      const teamList = [];
-      snap.forEach(docSnap => {
-        teamList.push(docSnap.data());
-      });
-      
+    if (teamList.length > 0) {
       teamList.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+      const cleaned = teamList.map(({ orderIndex, ...rest }) => rest);
+      teamCache = cleaned;
+      localStorage.setItem(KEYS.TEAM, JSON.stringify(cleaned));
+    }
 
-      if (teamList.length > 0) {
-        const cleanedList = teamList.map(({ orderIndex, ...rest }) => rest);
-        
-        const localTeam = getLocalTeam();
-        const isAdmin = localStorage.getItem('haja_luz_admin_logged') === 'true';
-        
-        if (localTeam.length > cleanedList.length) {
-          console.log("[CLOUD SYNC] Local possui mais membros de equipe. Sincronizando com a nuvem...");
-          uploadTeamToCloud(localTeam).catch(e => console.error(e));
-          teamCache = localTeam;
-        } else if (isAdmin) {
-          // Se o administrador está ativamente logado e editando o painel,
-          // ele é a autoridade de escrita. Não sobrescrevemos seu localStorage com a nuvem.
-          teamCache = localTeam;
-          if (cleanedList.length === 0) {
-            uploadTeamToCloud(localTeam).catch(e => console.error(e));
-          }
-        } else {
-          teamCache = cleanedList;
-          localStorage.setItem(KEYS.TEAM, JSON.stringify(cleanedList));
-          window.dispatchEvent(new CustomEvent("hajaluz_data_updated"));
-        }
-      } else {
-        uploadTeamToCloud(getLocalTeam()).catch(e => console.error(e));
-      }
-    }, (error) => {
-      console.error("Erro no listener de equipe do Firestore:", error);
-    });
+    console.log("[CLOUD SYNC] Sincronização automática de startup finalizada.");
+    window.dispatchEvent(new CustomEvent("hajaluz_data_updated"));
   } catch (e) {
-    console.error("Erro ao iniciar listeners do Firestore:", e);
+    console.warn("[CLOUD SYNC] Falha na sincronização silenciosa de startup (usando dados locais):", e);
   }
 }
 
-// Inicia imediatamente ao carregar o módulo
-startFirestoreListeners();
-syncFictiveSettingsFromCloud();
+// Chamar uma vez de forma não bloqueante ao carregar o arquivo
+syncFromCloudOnStartup().catch(e => console.error(e));
 
 export const dataService = {
   // --- VERSIONAMENTO AUTOMÁTICO DO BANCO DE DADOS ---
@@ -1397,6 +1326,44 @@ export const dataService = {
   uploadFictiveSettingsToCloudActive: async (settingsObj) => {
     const docRef = doc(db, KEYS.FICTIVE_SETTINGS, "global_settings");
     await promiseTimeout(setDoc(docRef, settingsObj), 5000);
+    return true;
+  },
+
+  pullAllFromCloudForce: async () => {
+    // 1. Puxar Fictive Settings
+    const settingsDocRef = doc(db, KEYS.FICTIVE_SETTINGS, "global_settings");
+    const settingsSnap = await promiseTimeout(getDoc(settingsDocRef), 5000);
+    if (settingsSnap.exists()) {
+      localStorage.setItem(KEYS.FICTIVE_SETTINGS, JSON.stringify(settingsSnap.data()));
+    }
+
+    // 2. Puxar Projetos
+    const projsCol = collection(db, KEYS.PROJECTS);
+    const projsSnap = await promiseTimeout(getDocs(projsCol), 5000);
+    const projectsList = [];
+    projsSnap.forEach(docSnap => {
+      projectsList.push(docSnap.data());
+    });
+    if (projectsList.length > 0) {
+      projectsList.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+      const cleaned = projectsList.map(({ orderIndex, ...rest }) => rest);
+      projectsCache = cleaned;
+      localStorage.setItem(KEYS.PROJECTS, JSON.stringify(cleaned));
+    }
+
+    // 3. Puxar Equipe
+    const teamCol = collection(db, KEYS.TEAM);
+    const teamSnap = await promiseTimeout(getDocs(teamCol), 5000);
+    const teamList = [];
+    teamSnap.forEach(docSnap => {
+      teamList.push(docSnap.data());
+    });
+    if (teamList.length > 0) {
+      teamList.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+      const cleaned = teamList.map(({ orderIndex, ...rest }) => rest);
+      teamCache = cleaned;
+      localStorage.setItem(KEYS.TEAM, JSON.stringify(cleaned));
+    }
     return true;
   }
 };
