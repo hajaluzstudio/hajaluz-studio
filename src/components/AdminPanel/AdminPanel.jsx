@@ -1666,18 +1666,49 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                     </p>
                     
                     <form onSubmit={handleSaveFictiveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', width: '100%', marginBottom: '0.5rem' }}>
                         <label style={{ fontSize: '0.72rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Página para Ajuste de Texto</label>
-                        <select
-                          value={selectedSettingsCategory}
-                          onChange={(e) => handleSettingsCategoryChange(e.target.value)}
-                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(230,173,69,0.3)', borderRadius: '6px', color: '#fff', outline: 'none' }}
-                        >
-                          <option value="global">Todas as Páginas (Padrão Geral)</option>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.2)', padding: '0.8rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleSettingsCategoryChange('global')}
+                            style={{
+                              padding: '0.4rem 0.9rem',
+                              fontSize: '0.75rem',
+                              borderRadius: '20px',
+                              border: selectedSettingsCategory === 'global' ? '1px solid var(--color-accent-gold)' : '1px solid rgba(255,255,255,0.08)',
+                              background: selectedSettingsCategory === 'global' ? 'rgba(230,173,69,0.1)' : 'transparent',
+                              color: selectedSettingsCategory === 'global' ? 'var(--color-accent-gold)' : 'var(--color-text-dimmed)',
+                              cursor: 'pointer',
+                              fontFamily: 'Space Grotesk, sans-serif',
+                              fontWeight: 600,
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            🌐 Padrão Geral (Global)
+                          </button>
                           {allCategories.map(cat => (
-                            <option key={cat} value={cat}>Página: {cat}</option>
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => handleSettingsCategoryChange(cat)}
+                              style={{
+                                padding: '0.4rem 0.9rem',
+                                fontSize: '0.75rem',
+                                borderRadius: '20px',
+                                border: selectedSettingsCategory === cat ? '1px solid var(--color-accent-gold)' : '1px solid rgba(255,255,255,0.08)',
+                                background: selectedSettingsCategory === cat ? 'rgba(230,173,69,0.1)' : 'transparent',
+                                color: selectedSettingsCategory === cat ? 'var(--color-accent-gold)' : 'var(--color-text-dimmed)',
+                                cursor: 'pointer',
+                                fontFamily: 'Space Grotesk, sans-serif',
+                                fontWeight: 500,
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              {cat}
+                            </button>
                           ))}
-                        </select>
+                        </div>
                       </div>
 
                       <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
