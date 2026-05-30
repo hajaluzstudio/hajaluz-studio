@@ -704,22 +704,24 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(3, 3, 3, 0.95);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background-color: rgba(3, 3, 3, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* aligns to top to prevent vertical cropping on small viewports */
   z-index: 99999;
-  padding: 2rem;
+  padding: 4rem 2rem;
+  overflow-y: auto; /* enable native smooth scrolling within the modal */
+  -webkit-overflow-scrolling: touch;
 }
 
 .lightbox-close-btn {
-  position: absolute;
+  position: fixed; /* fixed position so it is always pinned to screen while scrolling details */
   top: 2rem;
   right: 2rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   width: 44px;
   height: 44px;
@@ -730,13 +732,15 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 100000;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .lightbox-close-btn:hover {
-  background: rgba(231, 76, 60, 0.15);
-  border-color: rgba(231, 76, 60, 0.4);
+  background: rgba(231, 76, 60, 0.25);
+  border-color: rgba(231, 76, 60, 0.5);
   color: #e74c3c;
-  transform: scale(1.05) rotate(90deg);
+  transform: scale(1.08) rotate(90deg);
 }
 
 .lightbox-content-box {
@@ -746,6 +750,128 @@
   flex-direction: column;
   align-items: center;
   gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+/* Structural Lightbox Grid and Layout Container */
+.event-lightbox-container {
+  display: grid;
+  width: 100%;
+  padding: 1rem;
+  gap: 2rem;
+}
+
+/* Event layout column splits (uses minmax(0, ...) to prevent fractional grid column collapse) */
+.event-lightbox-container.event-layout.has-media {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+.event-lightbox-container.event-layout.no-media {
+  grid-template-columns: 1fr;
+}
+
+/* Video layout column splits (uses minmax(0, ...) to prevent fractional grid column collapse) */
+.event-lightbox-container.video-layout.reels-layout {
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+}
+.event-lightbox-container.video-layout.standard-layout {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+}
+
+/* Video Player Aspect Ratio and Border Wrappers */
+.video-player-aspect-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid rgba(230, 173, 69, 0.25);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+  background-color: #000;
+}
+
+.video-player-aspect-wrapper.standard-aspect {
+  aspect-ratio: 16 / 9;
+}
+
+.video-player-aspect-wrapper.reels-aspect {
+  aspect-ratio: 9 / 16;
+}
+
+/* Comments List Scroll Panel inside Lightbox details */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding-right: 0.4rem;
+}
+
+/* Reels layout comments can be slightly taller on desktop */
+.reels-layout .comments-list {
+  max-height: 240px;
+}
+
+/* Mobile responsive constraints for all Lightbox Modal UI elements */
+@media (max-width: 768px) {
+  .lightbox-overlay {
+    padding: 1.2rem 1rem !important;
+    padding-bottom: 8rem !important; /* extra bottom padding ensures input form is fully scrollable above mobile keyboard */
+  }
+
+  .lightbox-close-btn {
+    top: 1rem !important;
+    right: 1rem !important;
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .lightbox-content-box {
+    margin-top: 3.5rem !important;
+  }
+
+  .event-lightbox-container.event-layout.has-media,
+  .event-lightbox-container.video-layout.reels-layout,
+  .event-lightbox-container.video-layout.standard-layout {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    padding: 0 !important;
+  }
+
+  .video-player-aspect-wrapper.reels-aspect {
+    height: 48vh !important;
+    width: auto !important;
+    aspect-ratio: 9 / 16 !important;
+    margin: 0 auto !important; /* centered and clean */
+    max-width: 100% !important;
+  }
+
+  /* Photo slideshow constraint on mobile screens */
+  .active-slide-frame {
+    height: 32vh !important;
+    aspect-ratio: 4 / 3 !important;
+    width: auto !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Event Details Typography Constraints on Mobile (prevents large description text from blowing out the screen size) */
+  .event-lightbox-title {
+    font-size: 1.35rem !important;
+  }
+
+  .event-lightbox-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.5 !important;
+    max-height: 105px !important; /* elegant limit */
+    overflow-y: auto !important; /* scrollable description block if it is too long */
+    padding-right: 0.3rem;
+  }
+
+  .comments-list,
+  .reels-layout .comments-list {
+    max-height: 185px !important; /* prevents comment panel from expanding and breaking layout */
+  }
 }
 
 .real-project-subcard {

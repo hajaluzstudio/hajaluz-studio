@@ -86,3 +86,29 @@ export const getGoogleDriveDirectLink = (url) => {
   const id = getGoogleDriveId(url);
   return id ? `https://drive.google.com/uc?export=download&id=${id}` : url;
 };
+
+/**
+ * Extrai o ID único de um Reel ou Post do Instagram.
+ * Funciona para: instagram.com/reel/ID ou instagram.com/p/ID
+ * @param {string} url - A URL do Instagram
+ * @returns {string|null} - O ID do post/reel ou null se inválido
+ */
+export const getInstagramId = (url) => {
+  if (!url) return null;
+  const regExp = /(?:instagram\.com\/)(?:p|reel|tv)\/([^/?#&\s]+)/i;
+  const match = url.match(regExp);
+  if (match) {
+    return match[1];
+  }
+  return null;
+};
+
+/**
+ * Retorna se uma dada URL é um link do Instagram Reel ou Post.
+ * @param {string} url - A URL a ser testada
+ * @returns {boolean}
+ */
+export const isInstagramUrl = (url) => {
+  if (!url) return false;
+  return getInstagramId(url) !== null;
+};

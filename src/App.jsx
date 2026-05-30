@@ -32,7 +32,17 @@ function App() {
 
     // Listen to browser forward/backward buttons
     window.addEventListener('popstate', handleUrlChange);
-    return () => window.removeEventListener('popstate', handleUrlChange);
+
+    // Listen to Firestore real-time background cache updates
+    const handleGlobalUpdate = () => {
+      setDataUpdateTrigger(prev => prev + 1);
+    };
+    window.addEventListener("hajaluz_data_updated", handleGlobalUpdate);
+
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener("hajaluz_data_updated", handleGlobalUpdate);
+    };
   }, []);
 
   const openTeamModal = (agentId = 'felipe') => {

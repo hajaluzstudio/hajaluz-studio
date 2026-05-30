@@ -252,6 +252,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
   const [uploadMode, setUploadMode] = useState('cloud');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
 
   // 2. Estados dos Dados
   const [projects, setProjects] = useState([]);
@@ -277,6 +278,8 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     views: '',
     originalUrl: ''
   });
+
+  const [carouselLinkInput, setCarouselLinkInput] = useState('');
 
   // 3.2 Equipe
   const [editingMemberId, setEditingMemberId] = useState(null);
@@ -490,6 +493,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       // If saving failed due to QuotaExceededError, we do NOT clear the form or state.
       // This allows the user to see what failed, keeps their inputs intact, and keeps
       // React state from getting out-of-sync with localStorage.
+      alert("❌ ERRO DE ARMAZENAMENTO:\n\nNão foi possível salvar o projeto. O limite de espaço de armazenamento do seu navegador (LocalStorage) foi excedido ou há uma falha de gravação local.\n\nPor favor, limpe o cache do painel na aba 'Sistema & Reset' ou use imagens hospedadas em links externos (nuvem) em vez de carregar arquivos muito pesados.");
     }
   };
 
@@ -624,6 +628,29 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     }));
   };
 
+  const handleAddCarouselLink = () => {
+    if (!carouselLinkInput) return;
+    
+    // Suporta múltiplos links separados por vírgula
+    const urls = carouselLinkInput.split(',').map(u => u.trim()).filter(Boolean);
+    const resolvedUrls = urls.map(url => {
+      let resolved = url;
+      if (isGoogleDriveUrl(resolved)) {
+        const driveId = getGoogleDriveId(resolved);
+        if (driveId) resolved = `https://lh3.googleusercontent.com/d/${driveId}`;
+      }
+      return resolved;
+    });
+    
+    setProjectForm(prev => ({
+      ...prev,
+      carouselImages: [...(prev.carouselImages || []), ...resolvedUrls]
+    }));
+    
+    setCarouselLinkInput('');
+    showNotification(`${resolvedUrls.length} link(s) adicionado(s) à galeria!`);
+  };
+
   const handleAiGenerateTexts = () => {
     if (!projectForm.title) {
       alert("Por favor, preencha o Título do Projeto primeiro para que a IA possa analisar e sugerir os textos correspondentes.");
@@ -711,11 +738,15 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       return member;
     });
 
-    setTeam(updatedTeam);
-    dataService.saveTeam(updatedTeam);
-    onDataChange && onDataChange();
-    setEditingMemberId(null);
-    showNotification('Perfil do Agente Atualizado!');
+    const saveSuccess = dataService.saveTeam(updatedTeam);
+    if (saveSuccess) {
+      setTeam(updatedTeam);
+      onDataChange && onDataChange();
+      setEditingMemberId(null);
+      showNotification('Perfil do Agente Atualizado!');
+    } else {
+      alert("❌ ERRO DE ARMAZENAMENTO:\n\nNão foi possível salvar a alteração do membro da equipe. O limite de espaço de armazenamento do seu navegador (LocalStorage) foi excedido.\n\nPor favor, reduza o tamanho das imagens de perfil ou limpe o cache na aba 'Sistema & Reset'.");
+    }
   };
 
   const startEditMember = (member) => {
@@ -897,6 +928,51 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
       }
     };
     reader.readAsText(file);
+  };
+
+  const handlePushToCloud = async () => {
+    if (!window.confirm("Isso irá publicar todo o portfólio e equipe cadastrados NESTE computador diretamente no Firestore Cloud, atualizando instantaneamente seu celular e outros dispositivos. Deseja prosseguir?")) {
+      return;
+    }
+
+    setIsCloudSyncing(true);
+    showNotification("Enviando dados para a nuvem...");
+    try {
+      const currentProjects = dataService.getProjects();
+      const currentTeam = dataService.getTeam();
+      const currentSettings = dataService.getFictiveSettings();
+
+      // Executa o upload e aguarda o resultado real da nuvem (lança erro se falhar no Firestore)
+      await dataService.uploadProjectsToCloudActive(currentProjects);
+      await dataService.uploadTeamToCloudActive(currentTeam);
+      await dataService.uploadFictiveSettingsToCloudActive(currentSettings);
+
+      showNotification("Nuvem atualizada em tempo real! 💎");
+      alert("💎 SUCESSO ABSOLUTO!\n\nSeu portfólio completo, equipe e configurações das páginas foram publicados no Firestore Cloud.\n\nAgora você pode abrir o site no seu celular e ele estará 100% atualizado e idêntico a este computador!");
+    } catch (err) {
+      console.error("Erro na sincronização de nuvem:", err);
+      // Alerta explicativo cirúrgico para resolver regras de segurança expiradas no console do Firebase
+      alert(`⚠️ IMPEDIMENTO DE PERMISSÃO / CONEXÃO NA NUVEM:\n\nDetalhe Técnico: ${err.message}\n\nO que fazer para liberar seu Firestore em 10 segundos:\n\n1. Acesse o console do Firebase do seu projeto (site-haja-luz).\n2. Vá em Firestore Database -> guia Regras (Rules).\n3. Altere a regra padrão para permitir leitura e escrita pública temporária ou permanente:\n\nrules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}\n\n4. Clique em "Publicar" no console do Firebase e depois repita este processo de sincronização!`);
+    } finally {
+      setIsCloudSyncing(false);
+    }
+  };
+
+  const handlePullFromCloud = async () => {
+    if (!window.confirm("ATENÇÃO: Isso irá puxar a versão do Firestore Cloud e substituirá os dados salvos NESTE navegador. Dica: faça um Backup local (.json) antes se desejar garantir. Deseja prosseguir?")) {
+      return;
+    }
+
+    setIsCloudSyncing(true);
+    showNotification("Puxando dados do Firestore Cloud...");
+    try {
+      // Forçar recarga da página irá acionar a inicialização do onSnapshot que atualizará o cache local com os dados da nuvem.
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCloudSyncing(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -1155,13 +1231,13 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </div>
 
                         <div className="form-row">
-                          <label>Vídeo do Projeto (YouTube, Drive ou PC)</label>
+                          <label>Vídeo do Projeto (YouTube, Drive, Instagram ou PC)</label>
                           <div className="media-input-group">
                             <input 
                               type="text" 
                               value={projectForm.video}
                               onChange={(e) => setProjectForm({ ...projectForm, video: e.target.value })}
-                              placeholder="Cole o link do YouTube, Google Drive ou link MP4..."
+                              placeholder="Cole o link do YouTube, Google Drive, Instagram ou link MP4..."
                               style={{ flex: 1 }}
                             />
                             <label className="file-upload-label glass-panel">
@@ -1174,7 +1250,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                               />
                             </label>
                           </div>
-                          <span className="input-hint">Suporta links do YouTube, Google Drive (links de compartilhamento padrão), CDN MP4 direto ou arquivos do PC (&lt; 4.5MB).</span>
+                          <span className="input-hint">Suporta links do YouTube, Google Drive, Instagram Reels/Posts, CDN MP4 direto ou arquivos do PC (&lt; 4.5MB).</span>
                         </div>
 
                         <div className="form-row">
@@ -1301,6 +1377,24 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                 />
                               </label>
                             </label>
+
+                            <div className="media-input-group" style={{ marginBottom: '1rem' }}>
+                              <input 
+                                type="text" 
+                                value={carouselLinkInput}
+                                onChange={(e) => setCarouselLinkInput(e.target.value)}
+                                placeholder="Cole links do Google Drive separados por vírgula..."
+                                style={{ flex: 1, padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                              />
+                              <button 
+                                type="button" 
+                                onClick={handleAddCarouselLink}
+                                className="sidebar-tab-btn"
+                                style={{ padding: '0.4rem 0.8rem', margin: 0, fontSize: '0.75rem', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', height: '100%' }}
+                              >
+                                🔗 Inserir Links
+                              </button>
+                            </div>
                             
                             {projectForm.carouselImages && projectForm.carouselImages.length > 0 ? (
                               <div className="admin-carousel-grid">
@@ -1667,6 +1761,47 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </span>
                       </div>
                     )}
+                  </div>
+
+                  {/* Cloud Real-Time Sync Section */}
+                  <div className="system-settings-section glass-panel" style={{ padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(230,173,69,0.2)', borderRadius: '12px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
+                    <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', color: 'var(--color-accent-gold)', fontSize: '0.95rem', borderBottom: '1px solid rgba(230,173,69,0.15)', paddingBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                      ☁️ Sincronização Cloud em Tempo Real (Firestore)
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                      Para que a versão móvel (celular) exiba exatamente os mesmos projetos e equipe que você cadastrou ou editou neste computador, você pode sincronizar tudo diretamente com o banco de dados em nuvem.
+                    </p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+                      <button 
+                        type="button"
+                        onClick={handlePushToCloud}
+                        className="form-save-btn" 
+                        disabled={isCloudSyncing}
+                        style={{ padding: '0.75rem 1.6rem', fontSize: '0.78rem', background: 'var(--color-accent-gold)', color: '#000', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', fontWeight: 700 }}
+                      >
+                        {isCloudSyncing ? (
+                          <>
+                            <Loader2 size={16} className="animate-spin" />
+                            <span>Publicando na Nuvem...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>📤 Publicar Dados Deste Computador na Nuvem (Sincronizar Celular)</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={handlePullFromCloud}
+                        className="form-save-btn" 
+                        disabled={isCloudSyncing}
+                        style={{ padding: '0.65rem 1.4rem', fontSize: '0.75rem', background: 'transparent', color: 'var(--color-accent-cyan)', border: '1px solid rgba(0, 206, 209, 0.4)', cursor: 'pointer', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <span>📥 Puxar Dados Mais Recentes da Nuvem para Este Computador</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Backup & Sync Section */}

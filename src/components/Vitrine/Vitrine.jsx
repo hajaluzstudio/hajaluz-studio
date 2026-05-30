@@ -127,30 +127,7 @@ const Vitrine = () => {
 
         </div>
 
-        {/* Majestic Storefront Door (Double Glass Entrance) */}
-        <div className="vitrine-door-area">
-          <div className="door-sign-neon">// ENTRE E CONFIRA NOSSOS PRODUTOS //</div>
-          
-          <a href="#portfolio" className="vitrine-double-door glass-panel" onClick={(e) => { e.preventDefault(); handleEnterStore(); }}>
-            {/* Left Glass Door Panel */}
-            <div className="door-panel door-left">
-              <div className="door-frame-accent"></div>
-              <div className="door-reflection-line"></div>
-              <div className="door-handle left-handle"></div>
-            </div>
 
-            {/* Right Glass Door Panel */}
-            <div className="door-panel door-right">
-              <div className="door-frame-accent"></div>
-              <div className="door-reflection-line"></div>
-              <div className="door-handle right-handle"></div>
-            </div>
-
-            {/* Glowing inner golden light sweep */}
-            <div className="door-entrance-glow"></div>
-            <div className="door-interactive-label">CLIQUE PARA ENTRAR</div>
-          </a>
-        </div>
 
       </div>
     </section>

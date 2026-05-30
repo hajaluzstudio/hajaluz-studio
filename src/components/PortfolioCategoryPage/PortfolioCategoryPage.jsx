@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, Monitor, Paintbrush, Play, Type, Camera, FilmIcon, Award, MessageSquare, Heart, Volume2, VolumeX, Send, X, Trash2, Loader2 } from 'lucide-react';
 import { dataService } from '../../services/dataService';
-import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId } from '../../services/youtubeHelper';
+import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId, isInstagramUrl, getInstagramId } from '../../services/youtubeHelper';
 import { brandConfig } from '../../brandConfig';
 import './PortfolioCategoryPage.css';
 
@@ -73,6 +73,8 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
   const isYt = !!ytId;
   const isDrive = project.video ? isGoogleDriveUrl(project.video) : false;
   const videoSource = isDrive ? getGoogleDriveDirectLink(project.video) : project.video;
+  const instaId = project.video ? getInstagramId(project.video) : null;
+  const isInstagram = !!instaId;
   const hasVideo = !!project.video;
   const isReels = (category?.toLowerCase() === 'reels') || (category?.toLowerCase() === 'motion design') || (project.category?.toLowerCase() === 'reels') || (project.category?.toLowerCase() === 'motion design') || (project.secondaryCategory?.toLowerCase() === 'reels') || (project.secondaryCategory?.toLowerCase() === 'motion design');
 
@@ -150,6 +152,14 @@ const ProjectShowcaseBlock = ({ project, images, onImageClick, onLikeClick, onAd
                   className="social-video-element"
                   allow="autoplay; encrypted-media; picture-in-picture"
                   style={{ border: 'none', width: '100%', height: '100%', pointerEvents: 'auto' }}
+                  title={project.title}
+                />
+              ) : isInstagram ? (
+                <iframe 
+                  src={`https://www.instagram.com/reel/${instaId}/embed`}
+                  className="social-video-element"
+                  allowtransparency="true"
+                  style={{ border: 'none', width: '100%', height: '100%', pointerEvents: 'auto', minHeight: '440px' }}
                   title={project.title}
                 />
               ) : (
@@ -527,11 +537,14 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
   const isReelsLayout = lightboxMedia && (
     category.toLowerCase().replace("'", "") === 'reels' ||
     category.toLowerCase().replace("'", "") === 'motion design' ||
+    lightboxMedia.type === 'instagram' ||
+    (lightboxMedia.video && (lightboxMedia.video.type === 'instagram' || (typeof lightboxMedia.video === 'string' && isInstagramUrl(lightboxMedia.video)))) ||
     (activeProjectForLightbox && (
       activeProjectForLightbox.category?.toLowerCase().replace("'", "") === 'reels' ||
       activeProjectForLightbox.category?.toLowerCase().replace("'", "") === 'motion design' ||
       activeProjectForLightbox.secondaryCategory?.toLowerCase().replace("'", "") === 'reels' ||
-      activeProjectForLightbox.secondaryCategory?.toLowerCase().replace("'", "") === 'motion design'
+      activeProjectForLightbox.secondaryCategory?.toLowerCase().replace("'", "") === 'motion design' ||
+      (activeProjectForLightbox.video && isInstagramUrl(activeProjectForLightbox.video))
     ))
   );
 
@@ -636,6 +649,18 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
       }
     }
   }, []);
+
+  // Scroll Lock when any modal/lightbox is active (fixes mobile background scrolling issues)
+  useEffect(() => {
+    if (lightboxMedia || expandedImage || leadModalOpen || activeAuthPlatform) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [lightboxMedia, expandedImage, leadModalOpen, activeAuthPlatform]);
 
   const handleSocialLogin = (platform, username) => {
     setIsAuthenticating(true);
@@ -838,7 +863,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         type: 'event',
         title: proj.title,
         description: proj.description || '',
-        video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : isGoogleDriveUrl(proj.video) ? { type: 'drive', src: getGoogleDriveId(proj.video) } : { type: 'direct', src: proj.video }) : null,
+        video: proj.video ? (getYouTubeId(proj.video) ? { type: 'youtube', src: getYouTubeId(proj.video) } : isInstagramUrl(proj.video) ? { type: 'instagram', src: getInstagramId(proj.video) } : isGoogleDriveUrl(proj.video) ? { type: 'drive', src: getGoogleDriveId(proj.video) } : { type: 'direct', src: proj.video }) : null,
         images: proj.carouselImages || [],
         currentIndex: 0,
         likes: projectLikes,
@@ -862,6 +887,8 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
     if (ytId) {
       setLightboxMedia({ ...boxMedia, type: 'youtube', src: ytId });
+    } else if (isInstagramUrl(proj.video)) {
+      setLightboxMedia({ ...boxMedia, type: 'instagram', src: getInstagramId(proj.video) });
     } else if (isGoogleDriveUrl(proj.video)) {
       setLightboxMedia({ ...boxMedia, type: 'drive', src: getGoogleDriveId(proj.video) });
     } else if (proj.video && (proj.video.startsWith('data:video') || proj.video.endsWith('.mp4') || proj.video.includes('mixkit.co'))) {
@@ -1737,19 +1764,45 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
               style={{ maxWidth: lightboxMedia.type === 'event' ? '1100px' : (isReelsLayout ? '760px' : '980px'), width: '100%' }}
             >
               {lightboxMedia.type === 'event' ? (
-                /* EVENT SLIDESHOW AND DETAILS MODE */
-                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: (lightboxMedia.video || lightboxMedia.isLogo) ? '1.1fr 0.9fr' : '1fr', gap: '2rem', width: '100%', padding: '1rem' }}>
+                <div 
+                  className={`event-lightbox-container event-layout ${(lightboxMedia.video || lightboxMedia.isLogo) ? 'has-media' : 'no-media'}`}
+                  style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: (lightboxMedia.video || lightboxMedia.isLogo) ? '1.1fr 0.9fr' : '1fr', 
+                    gap: '2rem', 
+                    width: '100%', 
+                    padding: '1rem' 
+                  }}
+                >
                   
                   {/* Left Column: Event Video (or Info block if no video) */}
                   <div className="event-left-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                     {lightboxMedia.video && (
-                      <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
+                      <div 
+                        className="video-player-aspect-wrapper standard-aspect"
+                        style={{ 
+                          position: 'relative', 
+                          width: '100%', 
+                          aspectRatio: '16 / 9', 
+                          borderRadius: '12px', 
+                          overflow: 'hidden', 
+                          border: '1.5px solid rgba(230, 173, 69, 0.25)', 
+                          boxShadow: '0 15px 30px rgba(0,0,0,0.8)' 
+                        }}
+                      >
                         {lightboxMedia.video.type === 'youtube' ? (
                           <iframe 
                             src={`https://www.youtube.com/embed/${lightboxMedia.video.src}?autoplay=1&loop=1&playlist=${lightboxMedia.video.src}&controls=1&modestbranding=1&rel=0&vq=hd1080`}
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                             allow="autoplay; encrypted-media; picture-in-picture"
                             allowFullScreen
+                            title="Event Video Player"
+                          />
+                        ) : lightboxMedia.video.type === 'instagram' ? (
+                          <iframe 
+                            src={`https://www.instagram.com/reel/${lightboxMedia.video.src}/embed`}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', background: '#000' }}
+                            allowtransparency="true"
                             title="Event Video Player"
                           />
                         ) : lightboxMedia.video.type === 'drive' ? (
@@ -1832,7 +1885,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                           // Comentários ({lightboxMedia.comments?.length || 0})
                         </span>
                         
-                        <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '140px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
+                        <div className="comments-list">
                           {(lightboxMedia.comments || []).map((c) => {
                             const isAuthor = socialUser && socialUser.name === c.author;
                             const canDelete = (localStorage.getItem('haja_luz_admin_logged') === 'true') || isAuthor;
@@ -1986,17 +2039,43 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
                 </div>
               ) : (
-                /* REGULAR VIDEO SINGLE PLAYER MODE (SPLIT CINEMA INTERACTIVE) */
-                <div className="event-lightbox-container" style={{ display: 'grid', gridTemplateColumns: isReelsLayout ? '0.75fr 1.25fr' : '1.15fr 0.85fr', gap: '2rem', width: '100%', padding: '1rem' }}>
+                <div 
+                  className={`event-lightbox-container video-layout ${isReelsLayout ? 'reels-layout' : 'standard-layout'} has-media`}
+                  style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: isReelsLayout ? '0.75fr 1.25fr' : '1.15fr 0.85fr', 
+                    gap: '2rem', 
+                    width: '100%', 
+                    padding: '1rem' 
+                  }}
+                >
                   
                   {/* Left Column: Video Frame */}
-                  <div className="video-player-aspect-wrapper" style={{ position: 'relative', width: '100%', aspectRatio: isReelsLayout ? '9 / 16' : '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(230, 173, 69, 0.25)', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
+                  <div 
+                    className={`video-player-aspect-wrapper ${isReelsLayout ? 'reels-aspect' : 'standard-aspect'}`}
+                    style={{ 
+                      position: 'relative', 
+                      width: '100%', 
+                      aspectRatio: isReelsLayout ? '9 / 16' : '16 / 9', 
+                      borderRadius: '12px', 
+                      overflow: 'hidden', 
+                      border: '1.5px solid rgba(230, 173, 69, 0.25)', 
+                      boxShadow: '0 15px 30px rgba(0,0,0,0.8)' 
+                    }}
+                  >
                     {lightboxMedia.type === 'youtube' ? (
                       <iframe 
                         src={`https://www.youtube.com/embed/${lightboxMedia.src}?autoplay=1&loop=1&playlist=${lightboxMedia.src}&controls=1&modestbranding=1&rel=0&vq=hd1080`}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', objectFit: isReelsLayout ? 'cover' : 'contain' }}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', objectFit: 'contain' }}
                         allow="autoplay; encrypted-media; picture-in-picture"
                         allowFullScreen
+                        title="Cinema Player"
+                      />
+                    ) : lightboxMedia.type === 'instagram' ? (
+                      <iframe 
+                        src={`https://www.instagram.com/reel/${lightboxMedia.src}/embed`}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', background: '#000' }}
+                        allowtransparency="true"
                         title="Cinema Player"
                       />
                     ) : lightboxMedia.type === 'drive' ? (
@@ -2006,7 +2085,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         autoPlay
                         loop
                         playsInline
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: isReelsLayout ? 'cover' : 'contain' }}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
                       />
                     ) : (
                       <video 
@@ -2015,7 +2094,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         autoPlay
                         loop
                         playsInline
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: isReelsLayout ? 'cover' : 'contain' }}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: '#000', border: 'none', objectFit: 'contain' }}
                       />
                     )}
                   </div>
@@ -2068,7 +2147,7 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         // Comentários ({lightboxMedia.comments?.length || 0})
                       </span>
                       
-                      <div className="comments-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: isReelsLayout ? '220px' : '140px', overflowY: 'auto', marginBottom: '1rem', paddingRight: '0.4rem' }}>
+                      <div className="comments-list">
                         {(lightboxMedia.comments || []).map((c) => {
                           const isAuthor = socialUser && socialUser.name === c.author;
                           const canDelete = (localStorage.getItem('haja_luz_admin_logged') === 'true') || isAuthor;
