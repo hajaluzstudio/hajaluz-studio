@@ -147,107 +147,79 @@ const CartoonAnimation = () => {
           <circle cx="200" cy="180" r="280" className={`ambient-neon-glow ${activeState.id} glow-left`} />
           <circle cx="700" cy="180" r="280" className={`ambient-neon-glow ${activeState.id} glow-right`} />
 
-          {/* B. DETAILED GLASS NEON SIGN "HAJA LUZ STUDIO" */}
+          {/* B. DETAILED GLASS NEON SIGN "HAJA LUZ" */}
           <g className={`neon-sign-group state-${activeState.id}`}>
             {/* Outline grey glass tubes (inactive filaments) */}
             <g className="neon-tubes-off" stroke="#141110" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.8">
-              {/* "Haja" */}
-              <path d="M 180 80 L 180 140 M 210 80 L 210 140 M 180 110 L 210 110" /> {/* H */}
-              <path d="M 230 120 Q 230 105, 245 105 Q 260 105, 260 120 L 260 140 Q 260 145, 265 140" /> {/* a1 */}
-              <path d="M 285 110 Q 285 95, 305 95 L 305 145 Q 305 165, 275 165" /> {/* j */}
-              <path d="M 325 120 Q 325 105, 340 105 Q 355 105, 355 120 L 355 140 Q 355 145, 360 140" /> {/* a2 */}
-              {/* "Luz" */}
-              <path d="M 395 70 L 395 140 Q 395 145, 405 140" /> {/* L */}
-              <path d="M 425 110 L 425 130 Q 425 145, 450 145 L 450 110" /> {/* u1 */}
-              <path d="M 470 110 L 500 110 L 470 140 L 500 140" /> {/* z */}
-              {/* "Studio" */}
-              <path d="M 545 100 Q 545 85, 530 85 Q 515 85, 515 100 Q 515 115, 545 120 Q 545 135, 530 135 Q 515 135, 515 120" /> {/* S */}
-              <path d="M 565 75 L 565 135 Q 565 140, 572 138 M 555 95 L 575 95" /> {/* t */}
-              <path d="M 590 110 L 590 130 Q 590 145, 615 145 L 615 110" /> {/* u2 */}
-              <path d="M 645 120 Q 645 105, 630 105 Q 615 105, 615 120 L 615 140 Q 615 145, 620 140 M 645 75 L 645 140" /> {/* d */}
-              <path d="M 665 110 L 665 140 M 665 95 L 665 92" /> {/* i */}
-              <path d="M 685 120 Q 685 105, 705 105 Q 725 105, 725 120 Q 725 135, 705 135 Q 685 135, 685 120 Z" /> {/* o */}
+              {/* "לה" */}
+              <path d="M 215 80 L 255 80 L 255 140 M 215 105 L 215 140" /> {/* He */}
+              <path d="M 295 110 Q 295 65, 280 75 Q 265 85, 272 110 Q 278 140, 305 140" /> {/* Lamed */}
+              {/* "haja" */}
+              <path d="M 360 65 L 360 140 M 360 100 Q 375 90, 385 102 L 385 140" /> {/* h */}
+              <path d="M 430 100 Q 410 90, 410 120 Q 410 140, 430 140 Z M 430 100 L 430 140" /> {/* a1 */}
+              <path d="M 470 100 L 470 145 Q 470 165, 450 165 M 470 82 A 3 3 0 1 1 470 81.9" /> {/* j */}
+              <path d="M 520 100 Q 500 90, 500 120 Q 500 140, 520 140 Z M 520 100 L 520 140" /> {/* a2 */}
+              {/* "luz" */}
+              <path d="M 570 65 L 570 140 Q 570 144, 578 140" /> {/* l */}
+              <path d="M 610 100 L 610 128 Q 610 140, 630 140 M 630 100 L 630 140" /> {/* u */}
+              <path d="M 658 100 L 682 100 L 658 140 L 682 140" /> {/* z */}
             </g>
 
             {/* Glowing Active Neon letter elements */}
             <g fill="none" strokeLinecap="round" strokeLinejoin="round">
               
-              {/* Letter H */}
+              {/* Letter He (H) */}
               <g className={`letter letter-H ${letterStatus.H ? 'on' : 'off'}`}>
-                <path d="M 180 80 L 180 140 M 210 80 L 210 140 M 180 110 L 210 110" className="neon-core" />
-                <path d="M 180 80 L 180 140 M 210 80 L 210 140 M 180 110 L 210 110" className="neon-glow" />
+                <path d="M 215 80 L 255 80 L 255 140 M 215 105 L 215 140" className="neon-core" />
+                <path d="M 215 80 L 255 80 L 255 140 M 215 105 L 215 140" className="neon-glow" />
               </g>
               
+              {/* Letter Lamed (L) */}
+              <g className={`letter letter-L ${letterStatus.L ? 'on' : 'off'}`}>
+                <path d="M 295 110 Q 295 65, 280 75 Q 265 85, 272 110 Q 278 140, 305 140" className="neon-core" />
+                <path d="M 295 110 Q 295 65, 280 75 Q 265 85, 272 110 Q 278 140, 305 140" className="neon-glow" />
+              </g>
+
+              {/* Letter h (S) */}
+              <g className={`letter letter-S ${letterStatus.S ? 'on' : 'off'}`}>
+                <path d="M 360 65 L 360 140 M 360 100 Q 375 90, 385 102 L 385 140" className="neon-core" />
+                <path d="M 360 65 L 360 140 M 360 100 Q 375 90, 385 102 L 385 140" className="neon-glow" />
+              </g>
+
               {/* Letter a1 */}
               <g className={`letter letter-a1 ${letterStatus.a1 ? 'on' : 'off'}`}>
-                <path d="M 230 120 Q 230 105, 245 105 Q 260 105, 260 120 L 260 140 Q 260 145, 265 140" className="neon-core" />
-                <path d="M 230 120 Q 230 105, 245 105 Q 260 105, 260 120 L 260 140 Q 260 145, 265 140" className="neon-glow" />
+                <path d="M 430 100 Q 410 90, 410 120 Q 410 140, 430 140 Z M 430 100 L 430 140" className="neon-core" />
+                <path d="M 430 100 Q 410 90, 410 120 Q 410 140, 430 140 Z M 430 100 L 430 140" className="neon-glow" />
               </g>
 
               {/* Letter j */}
               <g className={`letter letter-j ${letterStatus.j ? 'on' : 'off'}`}>
-                <path d="M 285 110 Q 285 95, 305 95 L 305 145 Q 305 165, 275 165" className="neon-core" />
-                <path d="M 285 110 Q 285 95, 305 95 L 305 145 Q 305 165, 275 165" className="neon-glow" />
+                <path d="M 470 100 L 470 145 Q 470 165, 450 165 M 470 82 A 3 3 0 1 1 470 81.9" className="neon-core" />
+                <path d="M 470 100 L 470 145 Q 470 165, 450 165 M 470 82 A 3 3 0 1 1 470 81.9" className="neon-glow" />
               </g>
 
               {/* Letter a2 */}
               <g className={`letter letter-a2 ${letterStatus.a2 ? 'on' : 'off'}`}>
-                <path d="M 325 120 Q 325 105, 340 105 Q 355 105, 355 120 L 355 140 Q 355 145, 360 140" className="neon-core" />
-                <path d="M 325 120 Q 325 105, 340 105 Q 355 105, 355 120 L 355 140 Q 355 145, 360 140" className="neon-glow" />
+                <path d="M 520 100 Q 500 90, 500 120 Q 500 140, 520 140 Z M 520 100 L 520 140" className="neon-core" />
+                <path d="M 520 100 Q 500 90, 500 120 Q 500 140, 520 140 Z M 520 100 L 520 140" className="neon-glow" />
               </g>
 
-              {/* Letter L */}
-              <g className={`letter letter-L ${letterStatus.L ? 'on' : 'off'}`}>
-                <path d="M 395 70 L 395 140 Q 395 145, 405 140" className="neon-core" />
-                <path d="M 395 70 L 395 140 Q 395 145, 405 140" className="neon-glow" />
+              {/* Letter l (t) */}
+              <g className={`letter letter-t ${letterStatus.t ? 'on' : 'off'}`}>
+                <path d="M 570 65 L 570 140 Q 570 144, 578 140" className="neon-core" />
+                <path d="M 570 65 L 570 140 Q 570 144, 578 140" className="neon-glow" />
               </g>
 
-              {/* Letter u1 */}
-              <g className={`letter letter-u1 ${letterStatus.u1 ? 'on' : 'off'}`}>
-                <path d="M 425 110 L 425 130 Q 425 145, 450 145 L 450 110" className="neon-core" />
-                <path d="M 425 110 L 425 130 Q 425 145, 450 145 L 450 110" className="neon-glow" />
+              {/* Letter u (u2) */}
+              <g className={`letter letter-u2 ${letterStatus.u2 ? 'on' : 'off'}`}>
+                <path d="M 610 100 L 610 128 Q 610 140, 630 140 M 630 100 L 630 140" className="neon-core" />
+                <path d="M 610 100 L 610 128 Q 610 140, 630 140 M 630 100 L 630 140" className="neon-glow" />
               </g>
 
               {/* Letter z */}
               <g className={`letter letter-z ${letterStatus.z ? 'on' : 'off'}`}>
-                <path d="M 470 110 L 500 110 L 470 140 L 500 140" className="neon-core" />
-                <path d="M 470 110 L 500 110 L 470 140 L 500 140" className="neon-glow" />
-              </g>
-
-              {/* Letter S */}
-              <g className={`letter letter-S ${letterStatus.S ? 'on' : 'off'}`}>
-                <path d="M 545 100 Q 545 85, 530 85 Q 515 85, 515 100 Q 515 115, 545 120 Q 545 135, 530 135 Q 515 135, 515 120" className="neon-core" />
-                <path d="M 545 100 Q 545 85, 530 85 Q 515 85, 515 100 Q 515 115, 545 120 Q 545 135, 530 135 Q 515 135, 515 120" className="neon-glow" />
-              </g>
-
-              {/* Letter t */}
-              <g className={`letter letter-t ${letterStatus.t ? 'on' : 'off'}`}>
-                <path d="M 565 75 L 565 135 Q 565 140, 572 138 M 555 95 L 575 95" className="neon-core" />
-                <path d="M 565 75 L 565 135 Q 565 140, 572 138 M 555 95 L 575 95" className="neon-glow" />
-              </g>
-
-              {/* Letter u2 */}
-              <g className={`letter letter-u2 ${letterStatus.u2 ? 'on' : 'off'}`}>
-                <path d="M 590 110 L 590 130 Q 590 145, 615 145 L 615 110" className="neon-core" />
-                <path d="M 590 110 L 590 130 Q 590 145, 615 145 L 615 110" className="neon-glow" />
-              </g>
-
-              {/* Letter d */}
-              <g className={`letter letter-d ${letterStatus.d ? 'on' : 'off'}`}>
-                <path d="M 645 120 Q 645 105, 630 105 Q 615 105, 615 120 L 615 140 Q 615 145, 620 140 M 645 75 L 645 140" className="neon-core" />
-                <path d="M 645 120 Q 645 105, 630 105 Q 615 105, 615 120 L 615 140 Q 615 145, 620 140 M 645 75 L 645 140" className="neon-glow" />
-              </g>
-
-              {/* Letter i */}
-              <g className={`letter letter-i ${letterStatus.i ? 'on' : 'off'}`}>
-                <path d="M 665 110 L 665 140 M 665 95 L 665 92" className="neon-core" />
-                <path d="M 665 110 L 665 140 M 665 95 L 665 92" className="neon-glow" />
-              </g>
-
-              {/* Letter o */}
-              <g className={`letter letter-o ${letterStatus.o ? 'on' : 'off'}`}>
-                <path d="M 685 120 Q 685 105, 705 105 Q 725 105, 725 120 Q 725 135, 705 135 Q 685 135, 685 120 Z" className="neon-core" />
-                <path d="M 685 120 Q 685 105, 705 105 Q 725 105, 725 120 Q 725 135, 705 135 Q 685 135, 685 120 Z" className="neon-glow" />
+                <path d="M 658 100 L 682 100 L 658 140 L 682 140" className="neon-core" />
+                <path d="M 658 100 L 682 100 L 658 140 L 682 140" className="neon-glow" />
               </g>
 
             </g>
@@ -268,43 +240,45 @@ const CartoonAnimation = () => {
 
           {/* D. GLOWING EDITING MONITORS */}
           <g className="studio-monitors">
-            {/* Left Screen (Timeline) */}
+            {/* Left Screen (Timeline) - Angled Inward towards the operator */}
             <rect x="175" y="290" width="15" height="70" fill="#1b1716" /> {/* stand */}
             <ellipse cx="182" cy="355" rx="28" ry="7" fill="#0b0807" />
-            <rect x="80" y="200" width="200" height="110" rx="7" fill="#0e0a0a" stroke="#251f1e" strokeWidth="3.5" /> {/* bezel */}
-            <rect x="85" y="205" width="190" height="100" rx="4" fill="#030303" /> {/* screen panel */}
+            {/* 3D Perspective bezel (trapezoid angled inward) */}
+            <polygon points="80,212 270,197 270,317 80,302" fill="#0e0a0a" stroke="#251f1e" strokeWidth="3.5" />
+            <polygon points="85,216 265,202 265,312 85,297" fill="#030303" /> {/* screen panel */}
             
-            {/* Editing Timeline lines */}
-            <g className={`timeline-screen-graphics active-${activeState.id}`}>
-              <line x1="90" y1="220" x2="270" y2="220" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-              <line x1="90" y1="240" x2="270" y2="240" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-              <line x1="90" y1="260" x2="270" y2="260" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            {/* Editing Timeline lines (perspective skewed) */}
+            <g className={`timeline-screen-graphics active-${activeState.id}`} transform="translate(85, 202) skewY(-4.5) scale(0.92)">
+              <line x1="10" y1="20" x2="190" y2="20" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+              <line x1="10" y1="40" x2="190" y2="40" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+              <line x1="10" y1="60" x2="190" y2="60" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
               {/* timeline video blocks */}
-              <rect x="95" y="223" width="70" height="14" rx="2.5" fill="rgba(230,173,69,0.25)" stroke="var(--color-accent-gold)" strokeWidth="1" />
-              <rect x="170" y="223" width="90" height="14" rx="2.5" fill="rgba(230,173,69,0.45)" stroke="var(--color-accent-gold)" strokeWidth="1" />
-              <rect x="115" y="243" width="130" height="14" rx="2.5" fill="rgba(0,242,254,0.12)" stroke="#00f2fe" strokeWidth="1" className="audio-track-block" />
+              <rect x="15" y="23" width="70" height="14" rx="2.5" fill="rgba(230,173,69,0.25)" stroke="var(--color-accent-gold)" strokeWidth="1" />
+              <rect x="90" y="23" width="90" height="14" rx="2.5" fill="rgba(230,173,69,0.45)" stroke="var(--color-accent-gold)" strokeWidth="1" />
+              <rect x="35" y="43" width="130" height="14" rx="2.5" fill="rgba(0,242,254,0.12)" stroke="#00f2fe" strokeWidth="1" className="audio-track-block" />
               {/* moving playhead line */}
-              <line x1="160" y1="208" x2="160" y2="302" stroke="#ff3333" strokeWidth="1.5" className="playhead-anim" />
-              <polygon points="156,208 164,208 160,214" fill="#ff3333" />
+              <line x1="80" y1="8" x2="80" y2="102" stroke="#ff3333" strokeWidth="1.5" className="playhead-anim" />
+              <polygon points="76,8 84,8 80,14" fill="#ff3333" />
             </g>
 
-            {/* Right Screen (Waveforms / Audio levels) */}
+            {/* Right Screen (Waveforms / Audio levels) - Angled Inward towards the operator */}
             <rect x="710" y="290" width="15" height="70" fill="#1b1716" /> {/* stand */}
             <ellipse cx="717" cy="355" rx="28" ry="7" fill="#0b0807" />
-            <rect x="620" y="200" width="200" height="110" rx="7" fill="#0e0a0a" stroke="#251f1e" strokeWidth="3.5" />
-            <rect x="625" y="205" width="190" height="100" rx="4" fill="#030303" />
+            {/* 3D Perspective bezel (trapezoid angled inward) */}
+            <polygon points="630,197 820,212 820,302 630,317" fill="#0e0a0a" stroke="#251f1e" strokeWidth="3.5" />
+            <polygon points="635,202 815,216 815,297 635,312" fill="#030303" /> {/* screen panel */}
 
-            {/* Glowing audio bars */}
-            <g className={`waveform-screen-graphics active-${activeState.id}`}>
+            {/* Glowing audio bars (perspective skewed) */}
+            <g className={`waveform-screen-graphics active-${activeState.id}`} transform="translate(635, 205) skewY(4.5) scale(0.92)">
               {Array.from({ length: 26 }).map((_, i) => {
                 const heightVal = Math.abs(Math.sin(i * 0.38)) * 40 + 8;
                 return (
                   <line 
                     key={`wave-${i}`}
-                    x1="638" 
-                    y1="250" 
-                    x2="638" 
-                    y2="250" 
+                    x1="12" 
+                    y1="50" 
+                    x2="12" 
+                    y2="50" 
                     transform={`translate(${i * 6.5}, 0)`}
                     stroke="var(--color-accent-gold)" 
                     strokeWidth="4" 
@@ -319,7 +293,7 @@ const CartoonAnimation = () => {
                   />
                 );
               })}
-              <line x1="632" y1="250" x2="808" y2="250" stroke="rgba(230,173,69,0.12)" strokeWidth="1" />
+              <line x1="6" y1="50" x2="182" y2="50" stroke="rgba(230,173,69,0.12)" strokeWidth="1" />
             </g>
           </g>
 
@@ -516,17 +490,17 @@ const CartoonAnimation = () => {
             {/* Table gold support pillars */}
             <path d="M 85 365 L 110 480 M 815 365 L 790 480" stroke="var(--color-accent-gold)" strokeWidth="4.5" strokeLinecap="round" opacity="0.65" />
 
-            {/* Glowing neon Haja Luz Logo (ל ה) exactly on the desk! */}
+            {/* Glowing neon Haja Luz Logo (לה) exactly on the desk! */}
             <g className="desk-neon-logo">
-              {/* Lamed (ל) outline and core */}
-              <path d="M 436 415 Q 436 395, 424 402 Q 410 409, 416 429 Q 422 455, 442 455" fill="none" stroke="#222" strokeWidth="3" />
-              <path d="M 436 415 Q 436 395, 424 402 Q 410 409, 416 429 Q 422 455, 442 455" fill="none" stroke="var(--color-accent-gold)" strokeWidth="1.8" className="desk-logo-core" />
-              <path d="M 436 415 Q 436 395, 424 402 Q 410 409, 416 429 Q 422 455, 442 455" fill="none" stroke="var(--color-accent-gold)" strokeWidth="5.5" className="desk-logo-glow" />
+              {/* He (ה) outline and core on the left */}
+              <path d="M 422 415 L 442 415 L 442 452 M 422 425 L 422 452" fill="none" stroke="#222" strokeWidth="3" />
+              <path d="M 422 415 L 442 415 L 442 452 M 422 425 L 422 452" fill="none" stroke="var(--color-accent-gold)" strokeWidth="1.8" className="desk-logo-core" />
+              <path d="M 422 415 L 442 415 L 442 452 M 422 425 L 422 452" fill="none" stroke="var(--color-accent-gold)" strokeWidth="5.5" className="desk-logo-glow" />
 
-              {/* He (ה) outline and core */}
-              <path d="M 456 422 L 476 422 L 476 455 M 456 429 L 456 455 M 456 439 L 466 439" fill="none" stroke="#222" strokeWidth="3" />
-              <path d="M 456 422 L 476 422 L 476 455 M 456 429 L 456 455 M 456 439 L 466 439" fill="none" stroke="var(--color-accent-gold)" strokeWidth="1.8" className="desk-logo-core" />
-              <path d="M 456 422 L 476 422 L 476 455 M 456 429 L 456 455 M 456 439 L 466 439" fill="none" stroke="var(--color-accent-gold)" strokeWidth="5.5" className="desk-logo-glow" />
+              {/* Lamed (ל) outline and core on the right */}
+              <path d="M 470 412 Q 470 388, 460 395 Q 450 402, 454 422 Q 458 452, 478 452" fill="none" stroke="#222" strokeWidth="3" />
+              <path d="M 470 412 Q 470 388, 460 395 Q 450 402, 454 422 Q 458 452, 478 452" fill="none" stroke="var(--color-accent-gold)" strokeWidth="1.8" className="desk-logo-core" />
+              <path d="M 470 412 Q 470 388, 460 395 Q 450 402, 454 422 Q 458 452, 478 452" fill="none" stroke="var(--color-accent-gold)" strokeWidth="5.5" className="desk-logo-glow" />
             </g>
           </g>
 
