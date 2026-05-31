@@ -29,7 +29,6 @@ const SobreModal = ({ isOpen, onClose }) => {
   ];
 
   const instagramPosts = [
-    { src: '/shark.png', title: 'Produção Comercial de Luxo // Shark' },
     { src: '/felipe_costa.jpg', title: 'Felipe Costa // Diretor Criativo & Fundador' },
     { src: '/felipe_costa_collage.jpg', title: 'Direção de Cena // Ensaios e Expressões' },
     { src: '/felipe_tv_studio.jpg', title: 'Produção em Estúdio // TV e Bastidores' },
