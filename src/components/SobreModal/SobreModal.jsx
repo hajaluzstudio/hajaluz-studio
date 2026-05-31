@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Camera, BarChart2, Terminal, Maximize2 } from 'lucide-react';
+import { X, Terminal, Maximize2 } from 'lucide-react';
 import './SobreModal.css';
 
 const SobreModal = ({ isOpen, onClose }) => {
@@ -18,27 +18,6 @@ const SobreModal = ({ isOpen, onClose }) => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
-
-  const pillars = [
-    {
-      title: 'Estratégia',
-      desc: 'Planejamento e direção para transformar ideias em mensagens que fazem sentido no mercado.',
-      icon: Sparkles,
-      color: '#00f2fe'
-    },
-    {
-      title: 'Criação',
-      desc: 'Design, conteúdo e produção com estética refinada e intenção em cada detalhe criativo.',
-      icon: Camera,
-      color: '#e6ad45'
-    },
-    {
-      title: 'Posicionamento',
-      desc: 'Mais do que entregar, criamos conexões fáticas que geram impacto real para marcas e pessoas.',
-      icon: BarChart2,
-      color: '#9d4edd'
-    }
-  ];
 
   const backstagePhotos = [
     { src: '/destino_de_peao.png', title: 'Destino de Peão // Bastidores' },
@@ -184,7 +163,7 @@ const SobreModal = ({ isOpen, onClose }) => {
                 </motion.div>
 
                 <motion.span className="sobre-modal-tag" style={{ color: 'var(--color-accent-gold)', marginBottom: '0.5rem' }} variants={itemVariants}>
-                  Maestro Criativo
+                  Diretor Criativo
                 </motion.span>
                 
                 <motion.h2 className="book-title-gold" variants={itemVariants}>
@@ -192,7 +171,7 @@ const SobreModal = ({ isOpen, onClose }) => {
                 </motion.h2>
                 
                 <motion.div className="book-subtitle-spaced" variants={itemVariants}>
-                  Criatividade com Propósito
+                  Criação Híbrida
                 </motion.div>
 
                 <motion.div className="book-bio-paragraphs" variants={containerVariants}>
@@ -242,38 +221,6 @@ const SobreModal = ({ isOpen, onClose }) => {
                       <Maximize2 size={16} />
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* --- BLOCK 2.5: PROPÓSITO & PILARES --- */}
-            <div className="sobre-modal-block block-proposito">
-              <div className="sobre-modal-grid split-35-65">
-                <div className="proposito-manifesto">
-                  <span className="sobre-modal-tag">Nosso Propósito</span>
-                  <h3 className="sobre-modal-heading">Comunicação também é identidade.</h3>
-                  <p className="sobre-modal-body-text">
-                    A Haja Luz nasceu da união entre criatividade, direção e propósito. Cada projeto é pensado para comunicar com verdade, estética e impacto real.
-                  </p>
-                </div>
-
-                <div className="proposito-pillars-grid">
-                  {pillars.map((pillar, idx) => {
-                    const Icon = pillar.icon;
-                    return (
-                      <div 
-                        key={pillar.title}
-                        className="pillar-card glass-panel"
-                        style={{ '--pillar-color': pillar.color }}
-                      >
-                        <div className="pillar-icon-wrapper">
-                          <Icon size={20} style={{ color: pillar.color }} />
-                        </div>
-                        <h4 className="pillar-title">{pillar.title}</h4>
-                        <p className="pillar-desc">{pillar.desc}</p>
-                      </div>
-                    );
-                  })}
                 </div>
               </div>
             </div>
