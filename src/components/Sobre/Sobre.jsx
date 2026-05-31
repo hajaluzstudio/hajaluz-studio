@@ -24,16 +24,16 @@ const Sobre = ({ onOpenManifesto }) => {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="essencia-text-col"
             >
-              <span className="sobre-tag">Sobre a Haja Luz</span>
-              <h2 className="sobre-heading-large">Criatividade<br />com propósito.</h2>
+              <span className="sobre-tag">Diretor Criativo & CEO</span>
+              <h2 className="sobre-heading-large">Felipe Costa</h2>
               <p className="sobre-lead-text">
-                A Haja Luz Studio transforma ideias em presença, estratégia e conexão.
+                Lidera a Haja Luz Studio como uma verdadeira "casa de ideias", focada em transformar conceitos em presença, estratégia e conexão de alto impacto.
               </p>
               
               <div className="concept-scripture-box">
-                <span className="scripture-heading">// A Alquimia Híbrida: O Antigo & O Novo</span>
+                <span className="scripture-heading">// Criação Híbrida: O Humano & O Algoritmo</span>
                 <p className="scripture-paragraph">
-                  Projetamos a mescla perfeita entre a alma da artesania orgânica e o poder matemático da inteligência artificial. Nossos agentes autônomos são inspirados no rigor estético, sabedoria e capacidade de reconstrução de grandes personagens da história — de Bezaleel a Salomão. Unimos o peso fático da direção humana clássica com a velocidade neural do amanhã, criando uma identidade única e inconfundível.
+                  Com formação em Design Gráfico, pós-graduação em Produção Audiovisual e passagem de destaque pela RBS TV, Felipe atua de forma híbrida. Ele une a sensibilidade da direção humana clássica, motion design e VFX à potência estratégica da inteligência artificial. "A IA é uma aliada; ela faz o que direcionamos, mas o storytelling e a alma da obra continuam sendo 100% humanos."
                 </p>
               </div>
 
