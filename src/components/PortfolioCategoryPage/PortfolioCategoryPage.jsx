@@ -605,7 +605,23 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
 
   useEffect(() => {
     const baseLogos = getBaseLogosList();
-    setTileLogoIndices(Array.from({ length: 15 }, (_, i) => i % baseLogos.length));
+    if (baseLogos.length === 0) return;
+    
+    // Generates a fully randomized sequence avoiding sequential duplicates
+    const initialIndices = [];
+    let pool = [];
+    for (let i = 0; i < 15; i++) {
+      if (pool.length === 0) {
+        pool = Array.from({ length: baseLogos.length }, (_, idx) => idx);
+        // Shuffle pool (Fisher-Yates)
+        for (let j = pool.length - 1; j > 0; j--) {
+          const k = Math.floor(Math.random() * (j + 1));
+          [pool[j], pool[k]] = [pool[k], pool[j]];
+        }
+      }
+      initialIndices.push(pool.pop());
+    }
+    setTileLogoIndices(initialIndices);
   }, [realProjects, category]);
 
   useEffect(() => {
@@ -627,12 +643,17 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         }
         
         chosenTiles.forEach(tileIdx => {
-          nextIndices[tileIdx] = (nextIndices[tileIdx] + 1) % baseLogos.length;
+          // Choose a random index completely different from the current one to maximize shuffle!
+          let newLogoIdx = Math.floor(Math.random() * baseLogos.length);
+          if (baseLogos.length > 1 && newLogoIdx === nextIndices[tileIdx]) {
+            newLogoIdx = (newLogoIdx + 1) % baseLogos.length;
+          }
+          nextIndices[tileIdx] = newLogoIdx;
         });
         
         return nextIndices;
       });
-    }, 4000); // Smooth rotation every 4 seconds
+    }, 2000); // 2000ms (2s) swap interval for faster rotation!
 
     return () => clearInterval(timer);
   }, [isHoveredBackdrop, realProjects, category]);
@@ -1421,7 +1442,6 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
         {isLogoCat && (
           <div className="logo-grid-4x8-section">
             <div className="subpage-block-heading-wrapper">
-              <span className="block-pretitle">Bezaleel Grid</span>
               <h2 className="block-title">Identidades Corporativas & Simbologia</h2>
               <p className="block-desc">
                 Um Backdrop digital de altíssima fidelidade. Passe o mouse sobre os painéis para uma projeção holográfica em 8K ou clique para conferir a estratégia conceitual da arte.
