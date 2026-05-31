@@ -492,10 +492,10 @@ const CartoonAnimation = () => {
 
             {/* Glowing neon Haja Luz Logo (לה) exactly on the desk! */}
             <g className="desk-neon-logo">
-              {/* He (ה) outline and core on the left */}
-              <path d="M 422 415 L 442 415 L 442 452 M 422 425 L 422 452" fill="none" stroke="#222" strokeWidth="3" />
-              <path d="M 422 415 L 442 415 L 442 452 M 422 425 L 422 452" fill="none" stroke="var(--color-accent-gold)" strokeWidth="1.8" className="desk-logo-core" />
-              <path d="M 422 415 L 442 415 L 442 452 M 422 425 L 422 452" fill="none" stroke="var(--color-accent-gold)" strokeWidth="5.5" className="desk-logo-glow" />
+              {/* He (ה) outline and core on the left - continuous (second image style) */}
+              <path d="M 422 452 L 422 415 L 442 415 L 442 452" fill="none" stroke="#222" strokeWidth="3" />
+              <path d="M 422 452 L 422 415 L 442 415 L 442 452" fill="none" stroke="var(--color-accent-gold)" strokeWidth="1.8" className="desk-logo-core" />
+              <path d="M 422 452 L 422 415 L 442 415 L 442 452" fill="none" stroke="var(--color-accent-gold)" strokeWidth="5.5" className="desk-logo-glow" />
 
               {/* Lamed (ל) outline and core on the right */}
               <path d="M 470 412 Q 470 388, 460 395 Q 450 402, 454 422 Q 458 452, 478 452" fill="none" stroke="#222" strokeWidth="3" />
