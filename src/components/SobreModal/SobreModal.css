@@ -920,6 +920,7 @@
   pointer-events: none;
   z-index: 10;
   opacity: 0.8;
+  display: none; /* Desativado para deixar o layout 100% clean, removendo o risco preto vertical */
 }
 
 /* Page 1 Cover - Imposing full viewport height for CEO Felipe Costa profile */
