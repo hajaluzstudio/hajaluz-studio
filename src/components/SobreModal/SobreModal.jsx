@@ -24,7 +24,7 @@ const SobreModal = ({ isOpen, onClose }) => {
     { src: '/felipe_tv_studio.jpg', title: 'Estúdio de TV // Gravações e Entrevistas' },
     { src: '/galo_felipe.jpg', title: 'Felipe Costa & Neto Fagundes // Galpão Crioulo' },
     { src: '/joel_marques_felipe.jpg', title: 'Felipe Costa & Joel Marques // Parceria de Legado' },
-    { src: '/borghetti_felipe.jpg', title: 'Felipe Costa & Renato Borghetti // O Grande Encontro' },
+    { src: '/borghetti_felipe.jpg', title: 'Felipe Costa & Gaúcho da Fronteira // O Grande Encontro' },
     { src: '/oswaldir_felipe.jpg', title: 'Felipe Costa & Oswaldir // Direção & Legado' }
   ];
 
@@ -35,7 +35,7 @@ const SobreModal = ({ isOpen, onClose }) => {
     { src: '/felipe_tv_studio.jpg', title: 'Produção em Estúdio // TV e Bastidores' },
     { src: '/galo_felipe.jpg', title: 'Felipe Costa & Neto Fagundes // Gravação no Galpão Crioulo' },
     { src: '/joel_marques_felipe.jpg', title: 'Felipe Costa & Joel Marques // Parceria Histórica' },
-    { src: '/borghetti_felipe.jpg', title: 'Felipe Costa & Renato Borghetti // O Grande Encontro' },
+    { src: '/borghetti_felipe.jpg', title: 'Felipe Costa & Gaúcho da Fronteira // O Grande Encontro' },
     { src: '/oswaldir_felipe.jpg', title: 'Felipe Costa & Oswaldir // Direção de Clipes' }
   ];
 
