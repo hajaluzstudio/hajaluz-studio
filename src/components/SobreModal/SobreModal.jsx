@@ -20,10 +20,6 @@ const SobreModal = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   const backstagePhotos = [
-    { src: '/destino_de_peao.png', title: 'Destino de Peão // Bastidores' },
-    { src: '/piquezin_do_sul.png', title: 'Piquezin do Sul // Captação de Cinema' },
-    { src: '/traco_e_tom.png', title: 'Traço e Tom // Direção de Fotografia' },
-    { src: '/terra_concreto_flyer.jpg', title: 'Terra Concreto Imóveis // Campanha Comercial' },
     { src: '/felipe_costa_collage.jpg', title: 'Felipe Costa // Ensaios de Direção Criativa' },
     { src: '/felipe_tv_studio.jpg', title: 'Estúdio de TV // Gravações e Entrevistas' },
     { src: '/galo_felipe.jpg', title: 'Felipe Costa & Neto Fagundes // Galpão Crioulo' },
@@ -33,12 +29,8 @@ const SobreModal = ({ isOpen, onClose }) => {
   ];
 
   const instagramPosts = [
-    { src: '/destino_de_peao.png', title: 'Bastidores Cinematográficos // Destino de Peão' },
-    { src: '/piquezin_do_sul.png', title: 'Captação de Clipes em Passo Fundo // Piquezin do Sul' },
-    { src: '/traco_e_tom.png', title: 'Documentário Comercial // Traço e Tom' },
     { src: '/shark.png', title: 'Produção Comercial de Luxo // Shark' },
     { src: '/felipe_costa.jpg', title: 'Felipe Costa // Diretor Criativo & Fundador' },
-    { src: '/terra_concreto_flyer.jpg', title: 'Terra Concreto Imóveis // Lançamento de Campanha' },
     { src: '/felipe_costa_collage.jpg', title: 'Direção de Cena // Ensaios e Expressões' },
     { src: '/felipe_tv_studio.jpg', title: 'Produção em Estúdio // TV e Bastidores' },
     { src: '/galo_felipe.jpg', title: 'Felipe Costa & Neto Fagundes // Gravação no Galpão Crioulo' },
