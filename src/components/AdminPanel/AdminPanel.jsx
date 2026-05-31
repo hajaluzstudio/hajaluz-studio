@@ -1590,7 +1590,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
               {/* TAB 3: SYSTEM RESET */}
               {activeTab === 'sistema' && (
-                <div className="workspace-tab-content system-reset-tab" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', overflowY: 'auto', maxHeight: '72vh', paddingBottom: '2rem' }}>
+                <div className="workspace-tab-content system-reset-tab" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', paddingBottom: '2rem' }}>
                   
                   {/* Cloud Upload Settings */}
                   <div className="system-settings-section glass-panel" style={{ padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(230,173,69,0.12)', borderRadius: '12px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
@@ -1698,36 +1698,63 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </select>
                       </div>
 
+                      {/* Visual Editor Status Badge */}
+                      <div style={{
+                        background: 'rgba(230, 173, 69, 0.05)',
+                        border: '1px solid rgba(230, 173, 69, 0.2)',
+                        borderRadius: '8px',
+                        padding: '1rem',
+                        marginBottom: '0.5rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.4rem',
+                        boxShadow: 'inset 0 0 10px rgba(230, 173, 69, 0.03)'
+                      }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          📌 PAINEL DE EDIÇÃO ATUAL:
+                        </span>
+                        <span style={{ fontSize: '0.88rem', color: '#fff', fontWeight: 600 }}>
+                          {selectedSettingsCategory === 'global' 
+                            ? '🌐 Editando Padrão Geral (Global)' 
+                            : `✨ Editando Subpágina: ${selectedSettingsCategory}`}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.6)', lineHeight: 1.4 }}>
+                          {selectedSettingsCategory === 'global'
+                            ? 'As alterações feitas abaixo serão aplicadas como o padrão de todas as subpáginas que não possuírem textos customizados.'
+                            : `As alterações feitas abaixo serão exclusivas para a subpágina de ${selectedSettingsCategory}, substituindo o padrão geral.`}
+                        </span>
+                      </div>
+
                       <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                        <label style={{ fontSize: '0.72rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pré-Título (Ex: Espaços de Co-Criação)</label>
+                        <label style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.85)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Pré-Título (Ex: Espaços de Co-Criação)</label>
                         <input 
                           type="text" 
                           value={fictiveSettings.pretitle || ''} 
                           onChange={(e) => setFictiveSettings({ ...fictiveSettings, pretitle: e.target.value })}
                           placeholder="Ex: Espaços de Co-Criação"
-                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff' }}
+                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#fff', outline: 'none' }}
                         />
                       </div>
 
                       <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                        <label style={{ fontSize: '0.72rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Título Principal</label>
+                        <label style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.85)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Título Principal</label>
                         <input 
                           type="text" 
                           value={fictiveSettings.title || ''} 
                           onChange={(e) => setFictiveSettings({ ...fictiveSettings, title: e.target.value })}
                           placeholder="Ex: Retângulos Fictícios (Rascunhos)"
-                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff' }}
+                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: '#fff', outline: 'none' }}
                         />
                       </div>
 
                       <div className="form-row" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                        <label style={{ fontSize: '0.72rem', color: 'var(--color-text-dimmed)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Descrição Explicativa</label>
+                        <label style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.85)', fontFamily: 'Space Grotesk, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Descrição Explicativa</label>
                         <textarea 
                           rows={3} 
                           value={fictiveSettings.description || ''} 
                           onChange={(e) => setFictiveSettings({ ...fictiveSettings, description: e.target.value })}
                           placeholder="Ex: Abaixo estão posicionados os retângulos de layout fictícios..."
-                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', color: '#fff', outline: 'none', resize: 'vertical' }}
+                          style={{ padding: '0.65rem 0.8rem', fontSize: '0.82rem', background: '#080808', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: '#fff', outline: 'none', resize: 'vertical' }}
                         />
                       </div>
 
