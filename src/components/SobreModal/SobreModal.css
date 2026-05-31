@@ -1120,4 +1120,68 @@
   transform: scale(1.1) rotate(-5deg);
 }
 
+/* Mobile Optimizations for Museum Book Layout (CEO Felipe Costa Profile) */
+@media (max-width: 768px) {
+  /* Fix the flexbox center bug pushing content off-screen */
+  .book-page-first {
+    min-height: auto !important;
+    justify-content: flex-start !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 3rem !important;
+  }
+
+  /* Make the portrait smaller and fit perfectly on all mobile screens */
+  .director-museum-portrait-wrapper {
+    width: 190px !important;
+    aspect-ratio: 3 / 4;
+    margin-bottom: 1.5rem !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.85), 
+                0 0 25px rgba(230, 173, 69, 0.2) !important;
+  }
+
+  /* Adjust title size for perfect readability */
+  .book-title-gold {
+    font-size: 2.1rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  .book-subtitle-spaced {
+    margin-bottom: 2rem !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.25em !important;
+  }
+
+  /* Fix text readability: no justify gaps, smaller size, and high contrast on touch screens */
+  .book-bio-paragraph {
+    text-align: left !important;
+    font-size: 0.96rem !important;
+    line-height: 1.65 !important;
+    color: rgba(247, 244, 235, 0.95) !important; /* Rich readable cream white on mobile (no hover) */
+  }
+
+  /* Adjust the blockquote to fit beautifully without squishing text */
+  .book-bio-quote {
+    padding: 1.2rem 1.4rem !important;
+    font-size: 1.02rem !important;
+    line-height: 1.55 !important;
+    margin: 1rem 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Shrink blockquote quote marks for better alignment */
+  .book-bio-quote::before {
+    font-size: 2.5rem !important;
+    top: -0.4rem !important;
+    left: 0.4rem !important;
+  }
+
+  .book-bio-quote::after {
+    font-size: 2.5rem !important;
+    bottom: -1.2rem !important;
+    right: 0.4rem !important;
+    content: "”";
+  }
+}
+
+
 
