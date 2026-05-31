@@ -1082,3 +1082,40 @@
   }
 }
 
+/* Custom Portfolio Access Button on museum page */
+.museum-portfolio-access-btn {
+  background: rgba(230, 173, 69, 0.03);
+  border: 1px solid rgba(230, 173, 69, 0.25);
+  color: var(--color-accent-gold, #e6ad45);
+  padding: 0.8rem 1.8rem;
+  font-family: var(--font-display, 'Space Grotesk', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  margin-top: 0.5rem;
+}
+
+.museum-portfolio-access-btn:hover {
+  background: rgba(230, 173, 69, 0.12);
+  border-color: var(--color-accent-gold, #e6ad45);
+  box-shadow: 0 8px 30px rgba(230, 173, 69, 0.15), 0 0 15px rgba(230, 173, 69, 0.1);
+  transform: translateY(-2px);
+}
+
+.museum-portfolio-access-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.museum-portfolio-access-btn:hover svg {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+

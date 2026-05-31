@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Terminal, Maximize2 } from 'lucide-react';
+import { X, Terminal, Maximize2, FolderOpen } from 'lucide-react';
 import './SobreModal.css';
 
 const SobreModal = ({ isOpen, onClose }) => {
@@ -204,18 +204,27 @@ const SobreModal = ({ isOpen, onClose }) => {
                 <div className="historias-text-col">
                   <span className="sobre-modal-tag">Experiência que conecta</span>
                   <h3 className="sobre-modal-heading">Histórias que ganham forma.</h3>
-                  <p className="sobre-modal-body-text" style={{ marginBottom: '2rem' }}>
+                  <p className="sobre-modal-body-text" style={{ marginBottom: '1.5rem' }}>
                     Produções, campanhas e projetos de alta fidelidade que conectam pessoas, marcas e cultura. Cada parceria da Haja Luz Studio é construída sobre bases sólidas de confiança, criatividade fática e excelência técnica.
                   </p>
+                  <button 
+                    onClick={() => {
+                      window.location.search = '?category=todos';
+                    }} 
+                    className="museum-portfolio-access-btn"
+                  >
+                    <FolderOpen size={15} />
+                    <span>Acessar Portfólio Completo</span>
+                  </button>
                 </div>
 
                 <div className="historias-image-col">
                   <div 
                     className="cinematic-photo-wrapper"
-                    onClick={() => setActiveZoomImage({ src: '/destino_de_peao.png', title: 'Histórias que Ganham Forma // Destino de Peão' })}
+                    onClick={() => setActiveZoomImage({ src: '/sergio_reis_felipe.jpg', title: 'Felipe Costa & Sergio Reis // Parceria de Sucesso' })}
                     style={{ cursor: 'pointer' }}
                   >
-                    <img src="/destino_de_peao.png" alt="Histórias cinematográficas" className="cinematic-photo" />
+                    <img src="/sergio_reis_felipe.jpg" alt="Felipe Costa & Sergio Reis" className="cinematic-photo" />
                     <div className="cinematic-photo-glow"></div>
                     <div className="cinematic-photo-zoom-icon">
                       <Maximize2 size={16} />
