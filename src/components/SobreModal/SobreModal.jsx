@@ -107,6 +107,26 @@ const SobreModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: 'spring', stiffness: 90, damping: 14 }
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -120,7 +140,7 @@ const SobreModal = ({ isOpen, onClose }) => {
         onClick={onClose}
       >
         <motion.div 
-          className="sobre-modal-container glass-panel"
+          className="sobre-modal-container glass-panel museum-book-style"
           variants={dashboardVariants}
           initial="hidden"
           animate="visible"
@@ -140,9 +160,93 @@ const SobreModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Modal Scrollable Workspace */}
-          <div className="sobre-modal-body">
+          <div className="sobre-modal-body museum-book-body">
             
-            {/* --- BLOCK 2: PROPÓSITO & PILARES --- */}
+            {/* --- PAGE 1: DIREÇÃO DE CRIAÇÃO (CEO - FELIPE COSTA) --- */}
+            <div className="book-page-first">
+              <motion.div 
+                className="book-page-first-content"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <motion.div className="director-museum-portrait-wrapper" variants={itemVariants}>
+                  <img 
+                    src="/felipe_costa.jpg" 
+                    alt="Felipe Costa // Diretor Criativo" 
+                    className="director-museum-portrait"
+                    onClick={() => setActiveZoomImage({ src: '/felipe_costa.jpg', title: 'Felipe Costa // Diretor Criativo & Fundador' })}
+                    style={{ cursor: 'zoom-in' }}
+                  />
+                  <div className="cinematic-photo-zoom-icon" style={{ bottom: '15px', right: '15px', opacity: 1, transform: 'scale(1)' }}>
+                    <Maximize2 size={12} />
+                  </div>
+                </motion.div>
+
+                <motion.span className="sobre-modal-tag" style={{ color: 'var(--color-accent-gold)', marginBottom: '0.5rem' }} variants={itemVariants}>
+                  Maestro Criativo
+                </motion.span>
+                
+                <motion.h2 className="book-title-gold" variants={itemVariants}>
+                  Felipe Costa
+                </motion.h2>
+                
+                <motion.div className="book-subtitle-spaced" variants={itemVariants}>
+                  Criatividade com Propósito
+                </motion.div>
+
+                <motion.div className="book-bio-paragraphs" variants={containerVariants}>
+                  <motion.p className="book-bio-paragraph" variants={itemVariants}>
+                    Como CEO da Haja Luz Studio, Felipe Costa lidera uma verdadeira "casa de ideias" focada em transformar conceitos em presença, estratégia e conexão. Com formação em Design Gráfico e pós-graduação em Produção Audiovisual, Felipe possui uma longa trajetória no mercado, incluindo uma passagem de destaque pelo Grupo RBS TV.
+                  </motion.p>
+                  
+                  <motion.p className="book-bio-paragraph" variants={itemVariants}>
+                    Atuando como diretor criativo com especialização em motion design e VFX, Felipe construiu um portfólio robusto, tendo colaborado com nomes como o cantor Sergio Reis e prestando assessoria contínua ao cantor Oswaldir.
+                  </motion.p>
+
+                  <motion.div className="book-bio-quote" variants={itemVariants}>
+                    "Muitas pessoas criticam a criação com IA, mas ela é uma ferramenta, assim como o Adobe After Effects ou Illustrator. Ela não faz por você; ela faz o que você direciona. A automação de agentes de IA ajuda muito, mas o storytelling e o briefing continuam sendo humanos, assim como a execução final."
+                  </motion.div>
+
+                  <motion.p className="book-bio-paragraph" variants={itemVariants}>
+                    Sua abordagem diferencia-se pela atuação híbrida, unindo a sensibilidade da direção humana clássica à potência da inteligência artificial. Para Felipe, a IA é uma aliada estratégica: ela automatiza o workflow enquanto o storytelling e o briefing permanecem sob absoluto controle humano, garantindo um resultado final único.
+                  </motion.p>
+
+                  <motion.p className="book-bio-paragraph" variants={itemVariants}>
+                    Sob sua liderança, a Haja Luz Studio consolida-se como uma produtora híbrida de referência, onde a alma da artesania orgânica encontra a velocidade neural do amanhã para criar identidades únicas e inconfundíveis.
+                  </motion.p>
+                </motion.div>
+              </motion.div>
+            </div>
+
+            {/* --- BLOCK 2: HISTÓRIAS EM FORMA & PROPÓSITO --- */}
+            <div className="sobre-modal-block block-historias" style={{ paddingTop: '2rem' }}>
+              <div className="sobre-modal-grid reversed">
+                <div className="historias-text-col">
+                  <span className="sobre-modal-tag">Experiência que conecta</span>
+                  <h3 className="sobre-modal-heading">Histórias que ganham forma.</h3>
+                  <p className="sobre-modal-body-text" style={{ marginBottom: '2rem' }}>
+                    Produções, campanhas e projetos de alta fidelidade que conectam pessoas, marcas e cultura. Cada parceria da Haja Luz Studio é construída sobre bases sólidas de confiança, criatividade fática e excelência técnica.
+                  </p>
+                </div>
+
+                <div className="historias-image-col">
+                  <div 
+                    className="cinematic-photo-wrapper"
+                    onClick={() => setActiveZoomImage({ src: '/destino_de_peao.png', title: 'Histórias que Ganham Forma // Destino de Peão' })}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <img src="/destino_de_peao.png" alt="Histórias cinematográficas" className="cinematic-photo" />
+                    <div className="cinematic-photo-glow"></div>
+                    <div className="cinematic-photo-zoom-icon">
+                      <Maximize2 size={16} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* --- BLOCK 2.5: PROPÓSITO & PILARES --- */}
             <div className="sobre-modal-block block-proposito">
               <div className="sobre-modal-grid split-35-65">
                 <div className="proposito-manifesto">
@@ -174,92 +278,7 @@ const SobreModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* --- BLOCK 3: HISTÓRIAS EM FORMA --- */}
-            <div className="sobre-modal-block block-historias">
-              <div className="sobre-modal-grid reversed">
-                <div className="historias-text-col">
-                  <span className="sobre-modal-tag">Experiência que conecta</span>
-                  <h3 className="sobre-modal-heading">Histórias que ganham forma.</h3>
-                  <p className="sobre-modal-body-text" style={{ marginBottom: '2rem' }}>
-                    Produções, campanhas e projetos de alta fidelidade que conectam pessoas, marcas e cultura. Cada parceria da Haja Luz Studio é construída sobre bases sólidas de confiança, criatividade fática e excelência técnica.
-                  </p>
-                </div>
-
-                <div className="historias-image-col">
-                  <div 
-                    className="cinematic-photo-wrapper"
-                    onClick={() => setActiveZoomImage({ src: '/destino_de_peao.png', title: 'Histórias que Ganham Forma // Destino de Peão' })}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <img src="/destino_de_peao.png" alt="Histórias cinematográficas" className="cinematic-photo" />
-                    <div className="cinematic-photo-glow"></div>
-                    <div className="cinematic-photo-zoom-icon">
-                      <Maximize2 size={16} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* --- BLOCK 3.5: FELIPE COSTA BIO --- */}
-            <div className="sobre-modal-block block-director-profile" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.04)', paddingTop: '4rem' }}>
-              <div className="sobre-modal-grid">
-                <div className="director-image-col" style={{ display: 'flex', justifyContent: 'center' }}>
-                  <div 
-                    className="cinematic-photo-wrapper"
-                    onClick={() => setActiveZoomImage({ src: '/felipe_costa.jpg', title: 'Felipe Costa // Diretor Criativo & Fundador' })}
-                    style={{ cursor: 'pointer', maxWidth: '380px', borderRadius: '16px', border: '1.5px solid rgba(230, 173, 69, 0.2)', boxShadow: '0 25px 50px rgba(0,0,0,0.8), 0 0 30px rgba(230, 173, 69, 0.05)' }}
-                  >
-                    <img src="/felipe_costa.jpg" alt="Felipe Costa" className="cinematic-photo" style={{ aspectRatio: '1 / 1', objectFit: 'cover' }} />
-                    <div className="cinematic-photo-glow"></div>
-                    <div className="cinematic-photo-zoom-icon">
-                      <Maximize2 size={16} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="director-text-col" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'left' }}>
-                  <span className="sobre-modal-tag" style={{ color: 'var(--color-accent-gold)' }}>Maestro Criativo</span>
-                  <h3 className="sobre-modal-heading" style={{ fontSize: '1.9rem', marginBottom: '1.2rem', fontFamily: 'Space Grotesk, sans-serif' }}>
-                    Felipe Costa: Criatividade com Propósito
-                  </h3>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <p className="sobre-modal-body-text" style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: 1.6 }}>
-                      Como CEO da Haja Luz Studio, Felipe Costa lidera uma verdadeira "casa de ideias" focada em transformar conceitos em presença, estratégia e conexão. Com formação em Design Gráfico e pós-graduação em Produção Audiovisual, Felipe possui uma longa trajetória no mercado, incluindo uma passagem de destaque pelo Grupo RBS TV.
-                    </p>
-                    
-                    <p className="sobre-modal-body-text" style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: 1.6 }}>
-                      Atuando como diretor criativo com especialização em motion design e VFX, Felipe construiu um portfólio robusto, tendo colaborado com nomes como o cantor Sergio Reis e prestando assessoria contínua ao cantor Oswaldir.
-                    </p>
-
-                    <div style={{
-                      borderLeft: '3px solid var(--color-accent-gold)',
-                      paddingLeft: '1.2rem',
-                      margin: '0.5rem 0',
-                      background: 'rgba(230, 173, 69, 0.02)',
-                      paddingTop: '0.6rem',
-                      paddingBottom: '0.6rem',
-                      borderRadius: '0 8px 8px 0'
-                    }}>
-                      <p className="sobre-modal-body-text" style={{ fontSize: '0.88rem', color: 'var(--color-accent-gold)', fontStyle: 'italic', lineHeight: 1.5 }}>
-                        "Muitas pessoas criticam a criação com IA, mas ela é uma ferramenta, assim como o Adobe After Effects ou Illustrator. Ela não faz por você; ela faz o que você direciona. A automação de agentes de IA ajuda muito, mas o storytelling e o briefing continuam sendo humanos, assim como a execução final."
-                      </p>
-                    </div>
-
-                    <p className="sobre-modal-body-text" style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: 1.6 }}>
-                      Sua abordagem diferencia-se pela atuação híbrida, unindo a sensibilidade da direção humana clássica à potência da inteligência artificial. Para Felipe, a IA é uma aliada estratégica de alta performance.
-                    </p>
-
-                    <p className="sobre-modal-body-text" style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: 1.6 }}>
-                      Sob sua liderança, a Haja Luz Studio consolida-se como uma produtora híbrida de referência, onde a alma da artesania orgânica encontra a velocidade neural do amanhã para criar identidades únicas e inconfundíveis.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* --- BLOCK 4: POETIC QUOTE --- */}
+            {/* --- BLOCK 3: POETIC QUOTE --- */}
             <div className="sobre-modal-quote-section">
               <div className="quote-gold-divider"></div>
               <p className="poetic-quote-text">
@@ -269,7 +288,7 @@ const SobreModal = ({ isOpen, onClose }) => {
               <div className="quote-gold-divider"></div>
             </div>
 
-            {/* --- BLOCK 5: CONEXÕES & INSTAGRAM --- */}
+            {/* --- BLOCK 4: CONEXÕES & INSTAGRAM --- */}
             <div className="sobre-modal-block block-conexoes">
               <div className="sobre-modal-grid">
                 

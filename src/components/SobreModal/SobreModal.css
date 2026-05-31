@@ -880,3 +880,205 @@
     height: 520px;
   }
 }
+
+/* ==========================================================================
+   MUSEUM BOOK PREMIUM STYLING (GRANDE LIVRO DE MUSEU DE LUXO)
+   ========================================================================== */
+
+/* Double golden frame wrapping the book portfolio modal */
+.sobre-modal-container.museum-book-style {
+  border: 3px double rgba(230, 173, 69, 0.45) !important;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.98), 
+              0 0 50px rgba(230, 173, 69, 0.05),
+              inset 0 0 100px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Historical museum paper backing with radial light vignette */
+.sobre-modal-body.museum-book-body {
+  background: radial-gradient(circle at 50% 25%, #140d0a 0%, #060403 100%) !important;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Open physical book crease shadow divider */
+.sobre-modal-body.museum-book-body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(0, 0, 0, 0.65) 45%, 
+    rgba(0, 0, 0, 0.85) 50%, 
+    rgba(0, 0, 0, 0.65) 55%, 
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.8;
+}
+
+/* Page 1 Cover - Imposing full viewport height for CEO Felipe Costa profile */
+.book-page-first {
+  min-height: 74vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  padding-bottom: 5rem;
+  border-bottom: 1px dashed rgba(230, 173, 69, 0.12);
+  z-index: 2;
+}
+
+.book-page-first-content {
+  width: 100%;
+  max-width: 840px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Circular/Oval Portrait Museum Gold Frame with double borders and glow */
+.director-museum-portrait-wrapper {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  margin-bottom: 2.2rem;
+  border-radius: 50%;
+  padding: 6px;
+  background: linear-gradient(135deg, #e6ad45 0%, #a87f2a 50%, #61440f 100%);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), 
+              0 0 35px rgba(230, 173, 69, 0.25);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.director-museum-portrait-wrapper:hover {
+  transform: scale(1.03) rotate(1deg);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.95), 
+              0 0 45px rgba(230, 173, 69, 0.35);
+}
+
+.director-museum-portrait {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #060403;
+}
+
+/* Large and Imposing Gold Book Serif Title */
+.book-title-gold {
+  font-family: 'Cinzel', 'Playfair Display', 'Georgia', serif;
+  color: var(--color-accent-gold) !important;
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  margin: 0.3rem 0 0.5rem 0 !important;
+  text-shadow: 0 0 20px rgba(230, 173, 69, 0.4) !important;
+  line-height: 1.1 !important;
+}
+
+/* Spacious luxury sub-header */
+.book-subtitle-spaced {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  margin-bottom: 3.5rem;
+  font-weight: 600;
+}
+
+/* Paragraph layout */
+.book-bio-paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+/* Text reveal-on-hover paragraph logic: start muted, light up beautifully on hover */
+.book-bio-paragraph {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: rgba(247, 244, 235, 0.45) !important; /* Elegant muted ivory */
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: justify;
+  text-justify: inter-word;
+  font-weight: 300;
+  margin: 0;
+}
+
+.book-bio-paragraph:hover {
+  color: #f7f4eb !important;
+  text-shadow: 0 0 10px rgba(230, 173, 69, 0.25);
+  transform: scale(1.01);
+}
+
+/* Golden Double-Bordered Quote inside book profile */
+.book-bio-quote {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.15rem;
+  line-height: 1.65;
+  color: var(--color-accent-gold) !important;
+  border-top: 1.5px solid rgba(230, 173, 69, 0.3);
+  border-bottom: 1.5px solid rgba(230, 173, 69, 0.3);
+  border-left: none !important;
+  padding: 1.6rem 2.2rem;
+  background: rgba(230, 173, 69, 0.02);
+  border-radius: 6px;
+  font-style: italic;
+  text-align: center;
+  text-shadow: 0 0 15px rgba(230, 173, 69, 0.2);
+  margin: 1.2rem auto;
+  max-width: 760px;
+  position: relative;
+}
+
+.book-bio-quote::before,
+.book-bio-quote::after {
+  content: "“";
+  position: absolute;
+  font-size: 3.5rem;
+  color: rgba(230, 173, 69, 0.15);
+  font-family: serif;
+  line-height: 1;
+}
+
+.book-bio-quote::before {
+  top: -0.2rem;
+  left: 0.6rem;
+}
+
+.book-bio-quote::after {
+  bottom: -1.6rem;
+  right: 0.6rem;
+  content: "”";
+}
+
+/* Custom layout adjustments for other subpage grids */
+.sobre-modal-block {
+  position: relative;
+  z-index: 5;
+}
+
+.poetic-quote-text {
+  font-family: 'Playfair Display', 'Georgia', serif !important;
+}
+
+/* Hide center shadow line inside standard interactive grids (phone and collage) to prevent overlays */
+@media (max-width: 1024px) {
+  .sobre-modal-body.museum-book-body::before {
+    display: none;
+  }
+}
+
