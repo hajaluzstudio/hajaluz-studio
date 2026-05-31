@@ -25,7 +25,11 @@ const SobreModal = ({ isOpen, onClose }) => {
     { src: '/piquezin_do_sul.png', title: 'Piquezin do Sul // Captação de Cinema' },
     { src: '/agente_visual.png', title: 'Estética Tridimensional // Bezaleel' },
     { src: '/traco_e_tom.png', title: 'Traço e Tom // Direção de Fotografia' },
-    { src: '/davi_ai.png', title: 'DNA Estratégico & Telemetria // Davi AI' }
+    { src: '/davi_ai.png', title: 'DNA Estratégico & Telemetria // Davi AI' },
+    { src: '/galo_felipe.jpg', title: 'Felipe Costa & Neto Fagundes // Galpão Crioulo' },
+    { src: '/joel_marques_felipe.jpg', title: 'Felipe Costa & Joel Marques // Parceria de Legado' },
+    { src: '/borghetti_felipe.jpg', title: 'Felipe Costa & Renato Borghetti // O Grande Encontro' },
+    { src: '/oswaldir_felipe.jpg', title: 'Felipe Costa & Oswaldir // Direção & Legado' }
   ];
 
   const instagramPosts = [
@@ -37,7 +41,11 @@ const SobreModal = ({ isOpen, onClose }) => {
     { src: '/agente_visual.png', title: 'Estética Premium // Bezaleel AI' },
     { src: '/davi_ai.png', title: 'Telemetria Digital // Davi AI' },
     { src: '/messias.png', title: 'Escala de Workflows // O Messias AI' },
-    { src: '/felipe_costa.jpg', title: 'Felipe Costa // Diretor Criativo & Fundador' }
+    { src: '/felipe_costa.jpg', title: 'Felipe Costa // Diretor Criativo & Fundador' },
+    { src: '/galo_felipe.jpg', title: 'Felipe Costa & Neto Fagundes // Gravação no Galpão Crioulo' },
+    { src: '/joel_marques_felipe.jpg', title: 'Felipe Costa & Joel Marques // Parceria Histórica' },
+    { src: '/borghetti_felipe.jpg', title: 'Felipe Costa & Renato Borghetti // O Grande Encontro' },
+    { src: '/oswaldir_felipe.jpg', title: 'Felipe Costa & Oswaldir // Direção de Clipes' }
   ];
 
   // 3D Parallax Tilt Effect for smartphone mockup
