@@ -201,6 +201,64 @@ const SobreModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
+            {/* --- BLOCK 3.5: FELIPE COSTA BIO --- */}
+            <div className="sobre-modal-block block-director-profile" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.04)', paddingTop: '4rem' }}>
+              <div className="sobre-modal-grid">
+                <div className="director-image-col" style={{ display: 'flex', justifyContent: 'center' }}>
+                  <div 
+                    className="cinematic-photo-wrapper"
+                    onClick={() => setActiveZoomImage({ src: '/felipe_costa.jpg', title: 'Felipe Costa // Diretor Criativo & Fundador' })}
+                    style={{ cursor: 'pointer', maxWidth: '380px', borderRadius: '16px', border: '1.5px solid rgba(230, 173, 69, 0.2)', boxShadow: '0 25px 50px rgba(0,0,0,0.8), 0 0 30px rgba(230, 173, 69, 0.05)' }}
+                  >
+                    <img src="/felipe_costa.jpg" alt="Felipe Costa" className="cinematic-photo" style={{ aspectRatio: '1 / 1', objectFit: 'cover' }} />
+                    <div className="cinematic-photo-glow"></div>
+                    <div className="cinematic-photo-zoom-icon">
+                      <Maximize2 size={16} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="director-text-col" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'left' }}>
+                  <span className="sobre-modal-tag" style={{ color: 'var(--color-accent-gold)' }}>Maestro Criativo</span>
+                  <h3 className="sobre-modal-heading" style={{ fontSize: '1.9rem', marginBottom: '1.2rem', fontFamily: 'Space Grotesk, sans-serif' }}>
+                    Felipe Costa: Criatividade com Propósito
+                  </h3>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <p className="sobre-modal-body-text" style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: 1.6 }}>
+                      Como CEO da Haja Luz Studio, Felipe Costa lidera uma verdadeira "casa de ideias" focada em transformar conceitos em presença, estratégia e conexão. Com formação em Design Gráfico e pós-graduação em Produção Audiovisual, Felipe possui uma longa trajetória no mercado, incluindo uma passagem de destaque pelo Grupo RBS TV.
+                    </p>
+                    
+                    <p className="sobre-modal-body-text" style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: 1.6 }}>
+                      Atuando como diretor criativo com especialização em motion design e VFX, Felipe construiu um portfólio robusto, tendo colaborado com nomes como o cantor Sergio Reis e prestando assessoria contínua ao cantor Oswaldir.
+                    </p>
+
+                    <div style={{
+                      borderLeft: '3px solid var(--color-accent-gold)',
+                      paddingLeft: '1.2rem',
+                      margin: '0.5rem 0',
+                      background: 'rgba(230, 173, 69, 0.02)',
+                      paddingTop: '0.6rem',
+                      paddingBottom: '0.6rem',
+                      borderRadius: '0 8px 8px 0'
+                    }}>
+                      <p className="sobre-modal-body-text" style={{ fontSize: '0.88rem', color: 'var(--color-accent-gold)', fontStyle: 'italic', lineHeight: 1.5 }}>
+                        "Muitas pessoas criticam a criação com IA, mas ela é uma ferramenta, assim como o Adobe After Effects ou Illustrator. Ela não faz por você; ela faz o que você direciona. A automação de agentes de IA ajuda muito, mas o storytelling e o briefing continuam sendo humanos, assim como a execução final."
+                      </p>
+                    </div>
+
+                    <p className="sobre-modal-body-text" style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: 1.6 }}>
+                      Sua abordagem diferencia-se pela atuação híbrida, unindo a sensibilidade da direção humana clássica à potência da inteligência artificial. Para Felipe, a IA é uma aliada estratégica de alta performance.
+                    </p>
+
+                    <p className="sobre-modal-body-text" style={{ fontSize: '0.9rem', color: '#ccc', lineHeight: 1.6 }}>
+                      Sob sua liderança, a Haja Luz Studio consolida-se como uma produtora híbrida de referência, onde a alma da artesania orgânica encontra a velocidade neural do amanhã para criar identidades únicas e inconfundíveis.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* --- BLOCK 4: POETIC QUOTE --- */}
             <div className="sobre-modal-quote-section">
               <div className="quote-gold-divider"></div>
