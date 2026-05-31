@@ -127,10 +127,11 @@ const CartoonAnimation = () => {
       <div className="cartoon-illustration-canvas">
         
         {/* SVG Drawing Canvas */}
-        <svg viewBox="0 0 900 560" className="cartoon-svg" preserveAspectRatio="xMidYMid slice">
+        <svg viewBox="0 0 900 560" className="cartoon-svg" preserveAspectRatio="xMidYMid meet">
           
           {/* A. Cyber-Studio Wall Background */}
           <rect width="900" height="560" fill="#030303" />
+
           
           {/* Detailed dark bricks panel grid */}
           <g className="cyber-grid" stroke="rgba(230, 173, 69, 0.02)" strokeWidth="1">
@@ -398,8 +399,8 @@ const CartoonAnimation = () => {
                   {/* TYPING */}
                   {activeState.id === 'typing' && (
                     <g className="expression-typing">
-                      <circle cx="436" cy="230" r="3.2" fill="#111" />
-                      <circle cx="464" cy="230" r="3.2" fill="#111" />
+                      <circle cx="436" cy="230" r="3.2" fill="#111" className="char-eye-left" />
+                      <circle cx="464" cy="230" r="3.2" fill="#111" className="char-eye-right" />
                       <path d="M 442 242 Q 450 249, 458 242" fill="none" stroke="#111" strokeWidth="3.2" strokeLinecap="round" />
                     </g>
                   )}

@@ -2,15 +2,16 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   max-width: none;
-  background: #000;
+  background: #030303;
   border: none;
   border-radius: 0;
   box-shadow: none;
   overflow: hidden;
   position: relative;
 }
+
 
 
 /* 1. Terminal Header Style */
@@ -589,3 +590,103 @@
     display: none; /* Hide on small mobiles to avoid overlay clutter */
   }
 }
+
+/* ==========================================================================
+   ANIMAÇÃO VIVA - PERSONAGEM CARTOON REALISTA E PISCADA DE OLHOS
+   ========================================================================== */
+
+/* 1. Efeito de Respiração Suave no Personagem Sentado */
+.char-sitting-group {
+  transform-origin: 450px 380px;
+  animation: char-breathing 3.5s infinite ease-in-out;
+}
+
+@keyframes char-breathing {
+  0%, 100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-2.5px) scaleY(1.008);
+  }
+}
+
+/* 2. Animação de Piscar de Olhos Realista */
+.char-eye-left {
+  transform-origin: 436px 230px;
+  animation: eye-blink 3.8s infinite ease-in-out;
+}
+
+.char-eye-right {
+  transform-origin: 464px 230px;
+  animation: eye-blink 3.8s infinite ease-in-out;
+}
+
+@keyframes eye-blink {
+  0%, 90%, 100% {
+    transform: scaleY(1);
+  }
+  93%, 95% {
+    transform: scaleY(0.08);
+  }
+}
+
+/* 3. Ritmo de Digitação/Cabeça Feliz ao Editar */
+.char-head-group.state-typing {
+  transform-origin: 450px 235px;
+  animation: head-groove 2.4s infinite ease-in-out alternate;
+}
+
+@keyframes head-groove {
+  0% {
+    transform: rotate(-1.2deg) translateY(0);
+  }
+  100% {
+    transform: rotate(1.2deg) translateY(-1px);
+  }
+}
+
+/* 4. Reflexo Neon no Personagem (Rim Light) Sincronizado */
+.char-sitting-group,
+.char-pacing-group {
+  filter: drop-shadow(0 0 3px rgba(230, 173, 69, 0.15));
+  transition: filter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.state-typing .char-sitting-group,
+.state-recovery .char-sitting-group {
+  filter: drop-shadow(0 0 10px rgba(230, 173, 69, 0.38));
+}
+
+.state-flicker .char-sitting-group {
+  animation: char-rim-glow-flicker 2.5s infinite;
+}
+
+@keyframes char-rim-glow-flicker {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(230, 173, 69, 0.38));
+  }
+  10%, 12%, 35%, 38%, 42%, 43%, 70%, 72% {
+    filter: drop-shadow(0 0 1px rgba(230, 173, 69, 0.05));
+  }
+  11%, 36%, 44%, 71% {
+    filter: drop-shadow(0 0 12px rgba(230, 173, 69, 0.48));
+  }
+}
+
+/* ==========================================================================
+   ESTILOS DE CURTO-CIRCUITO - DESLIGAMENTO REALISTA DAS LETRAS NEON
+   ========================================================================== */
+
+/* Regras robustas para apagar o neon nas letras inativas */
+.letter.off .neon-glow {
+  opacity: 0 !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+.letter.off .neon-core {
+  stroke: #161312 !important;
+  opacity: 0.2 !important;
+  animation: none !important;
+}
+
