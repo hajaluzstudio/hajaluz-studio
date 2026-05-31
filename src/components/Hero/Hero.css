@@ -5,78 +5,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5%;
+  padding: 0;
   overflow: hidden;
   background: #000;
 }
 
-/* Hero Two Column Split Grid Layout */
-.hero-split-grid {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 1300px;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 4rem;
-  align-items: center;
-  margin-top: -2rem; /* balance scroll indicator */
-}
-
-.hero-left-col {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
-
-.hero-right-col {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-/* OTIMIZAÇÃO DE PERFORMANCE (Efeito Vapor de Chuva e Aceleração por GPU) */
+/* OTIMIZAÇÃO DE PERFORMANCE (Aceleração por GPU) */
 .hero-container {
   position: relative;
   overflow: hidden;
 }
 
-/* A camada de vapor/chuva */
-.hero-container::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  
-  /* Mantém o fundo visível, mas aplica o desfoque do vapor */
-  backdrop-filter: blur(20px) saturate(120%);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
-  
-  /* Textura sutil de gotas/vapor misturada com o fundo escuro */
-  background-color: rgba(0, 0, 0, 0.45);
-  background-image: url('https://www.transparenttextures.com/patterns/rain.png');
-  
-  /* Suavidade na hora de limpar */
-  transition: backdrop-filter 1.2s ease, -webkit-backdrop-filter 1.2s ease, opacity 1.2s ease;
-  pointer-events: none;
-  z-index: 2;
-  
-  /* Aceleração de hardware para não travar celulares */
-  will-change: backdrop-filter, opacity;
-  transform: translateZ(0);
-}
-
-/* Quando passa o mouse (PC) ou toca (Mobile) - O vapor dissipa */
-.hero-container:hover::after,
-.hero-container:active::after {
-  backdrop-filter: blur(2px) saturate(100%);
-  -webkit-backdrop-filter: blur(2px) saturate(100%);
-  opacity: 0.15; /* O vapor quase some, revelando o vídeo cristalino por trás */
-}
 
 /* Ambient glows */
 .hero-neon-light {

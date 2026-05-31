@@ -1,23 +1,17 @@
-/* CARTOON STUDIO ANIMATION STYLING - HAJA LUZ STUDIO */
-
 .cartoon-studio-container {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 680px;
-  background: var(--color-bg-panel);
-  border: 1px solid rgba(230, 173, 69, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(230, 173, 69, 0.03);
+  height: 100%;
+  max-width: none;
+  background: #000;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
   position: relative;
-  transition: all 0.5s ease;
 }
 
-.cartoon-studio-container:hover {
-  border-color: rgba(230, 173, 69, 0.25);
-  box-shadow: 0 35px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(230, 173, 69, 0.08);
-}
 
 /* 1. Terminal Header Style */
 .cartoon-terminal-header {
@@ -93,16 +87,18 @@
 .cartoon-illustration-canvas {
   position: relative;
   width: 100%;
-  background: #080808;
-  cursor: pointer;
+  height: 100%;
+  background: #030303;
+  cursor: default;
   overflow: hidden;
 }
 
 .cartoon-svg {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
 }
+
 
 /* Floating interactive info badge */
 .cartoon-interactive-badge {
