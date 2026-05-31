@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, MessageSquare } from 'lucide-react';
 import MagneticButton from '../MagneticButton/MagneticButton';
+import CartoonAnimation from '../CartoonAnimation/CartoonAnimation';
 import './Hero.css';
 
 const Hero = () => {
@@ -20,68 +21,67 @@ const Hero = () => {
 
   return (
     <section className="hero-section hero-container" id="home">
-      {/* Background Video Layer */}
-      <div className="hero-video-wrapper">
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          className="hero-video"
-        >
-          <source 
-            src="https://assets.mixkit.co/videos/preview/mixkit-photographer-taking-photos-with-his-camera-42581-large.mp4" 
-            type="video/mp4" 
-          />
-        </video>
-      </div>
-
       {/* Ambient Neon lights */}
       <div className="hero-neon-light hero-neon-cyan"></div>
       <div className="hero-neon-light hero-neon-violet"></div>
 
-      {/* Foreground Content */}
-      <div className="hero-content">
+      {/* Two Column Split Grid */}
+      <div className="hero-split-grid">
+        
+        {/* Left Column: Branding Copy and CTA */}
+        <div className="hero-left-col">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="hero-brand"
+          >
+            // Artesania Física & Potência Neural
+          </motion.div>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="hero-title-main"
+          >
+            {titleText}
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="hero-subtitle-main"
+          >
+            {subtitleText}
+          </motion.p>
+          
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="hero-cta"
+          >
+            <MagneticButton onClick={handleWhatsAppRedirect}>
+              <span className="hero-cta-btn-content">
+                <MessageSquare size={18} className="cta-icon" />
+                Falar no WhatsApp
+              </span>
+            </MagneticButton>
+          </motion.div>
+        </div>
+
+        {/* Right Column: Cartoon Animation */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="hero-brand"
+          initial={{ opacity: 0, x: 45 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+          className="hero-right-col"
         >
-          Artesania Física & Potência Neural
+          <CartoonAnimation />
         </motion.div>
-        
-        <motion.h1 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="hero-title-main"
-        >
-          {titleText}
-        </motion.h1>
-        
-        <motion.p 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4 }}
-          className="hero-subtitle-main"
-        >
-          {subtitleText}
-        </motion.p>
-        
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="hero-cta"
-        >
-          <MagneticButton onClick={handleWhatsAppRedirect}>
-            <span className="hero-cta-btn-content">
-              <MessageSquare size={18} className="cta-icon" />
-              Falar no WhatsApp
-            </span>
-          </MagneticButton>
-        </motion.div>
+
       </div>
 
       {/* Scroll indicator */}

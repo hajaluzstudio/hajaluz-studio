@@ -1,0 +1,595 @@
+/* CARTOON STUDIO ANIMATION STYLING - HAJA LUZ STUDIO */
+
+.cartoon-studio-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 680px;
+  background: var(--color-bg-panel);
+  border: 1px solid rgba(230, 173, 69, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(230, 173, 69, 0.03);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.5s ease;
+}
+
+.cartoon-studio-container:hover {
+  border-color: rgba(230, 173, 69, 0.25);
+  box-shadow: 0 35px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(230, 173, 69, 0.08);
+}
+
+/* 1. Terminal Header Style */
+.cartoon-terminal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.2rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.terminal-status-light {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.4;
+  animation: pulse-dot 1.5s infinite ease-in-out;
+}
+
+.active-green {
+  background-color: #2ecc71;
+  color: #2ecc71;
+}
+
+.active-orange {
+  background-color: #f39c12;
+  color: #f39c12;
+}
+
+.active-red {
+  background-color: #e74c3c;
+  color: #e74c3c;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.terminal-status-lbl {
+  color: var(--color-text-dimmed);
+}
+
+.terminal-status-value {
+  color: var(--color-accent-gold);
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(230, 173, 69, 0.2);
+}
+
+/* 2. Main Illustration Canvas */
+.cartoon-illustration-canvas {
+  position: relative;
+  width: 100%;
+  background: #080808;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.cartoon-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Floating interactive info badge */
+.cartoon-interactive-badge {
+  position: absolute;
+  bottom: 0.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(8, 8, 8, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+  opacity: 0.85;
+}
+
+.cartoon-illustration-canvas:hover .cartoon-interactive-badge {
+  opacity: 1;
+  border-color: rgba(230, 173, 69, 0.2);
+}
+
+.badge-logo-icon {
+  font-size: 0.75rem;
+  animation: float-badge 2s infinite ease-in-out;
+}
+
+@keyframes float-badge {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+
+/* C. NEON GLOW PROPERTIES */
+
+/* Base values */
+.neon-core {
+  stroke: #ffffff;
+  stroke-width: 1.8px;
+  transition: stroke 0.3s ease;
+}
+
+.neon-glow {
+  stroke: var(--color-accent-gold);
+  stroke-width: 7px;
+  opacity: 0.8;
+  filter: blur(2.5px);
+  transition: all 0.3s ease;
+}
+
+/* Ambient glow ball in background */
+.ambient-neon-glow {
+  fill: var(--color-accent-gold);
+  opacity: 0.015;
+  filter: blur(30px);
+  mix-blend-mode: color-dodge;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ambient-neon-glow.typing { opacity: 0.02; fill: var(--color-accent-gold); }
+.ambient-neon-glow.suspicious { opacity: 0.015; fill: var(--color-accent-gold); }
+.ambient-neon-glow.annoyed { opacity: 0.01; fill: #ff3838; }
+.ambient-neon-glow.crying { opacity: 0.005; fill: #00f2fe; }
+.ambient-neon-glow.pacing { opacity: 0.003; }
+.ambient-neon-glow.cheering { opacity: 0.04; fill: var(--color-accent-gold); }
+
+
+/* D. STATE ANIMATIONS FOR NEON SIGN */
+
+/* 1. STATE: TYPING (Perfectly glowing sign) */
+.neon-sign-group.state-typing .neon-glow {
+  opacity: 0.9;
+  animation: neon-sign-vibrate 4s infinite linear;
+}
+
+@keyframes neon-sign-vibrate {
+  0%, 100% { filter: blur(2.5px); opacity: 0.9; }
+  50% { filter: blur(3.2px); opacity: 0.82; }
+}
+
+/* 2. STATE: SUSPICIOUS (Whole sign flickering randomly) */
+.neon-sign-group.state-suspicious .neon-glow {
+  animation: neon-sign-flicker-full 2.5s infinite;
+}
+.neon-sign-group.state-suspicious .neon-core {
+  animation: neon-core-flicker-full 2.5s infinite;
+}
+
+@keyframes neon-sign-flicker-full {
+  0%, 100% { opacity: 0.9; filter: blur(2.5px); }
+  10%, 12%, 35%, 38%, 42%, 43%, 70%, 72% { opacity: 0.15; filter: blur(1px); }
+  11%, 36%, 44%, 71% { opacity: 0.8; filter: blur(3px); }
+}
+
+@keyframes neon-core-flicker-full {
+  0%, 100% { opacity: 1; }
+  10%, 12%, 35%, 38%, 42%, 43%, 70%, 72% { opacity: 0.2; }
+  11%, 36%, 44%, 71% { opacity: 0.9; }
+}
+
+/* 3. STATE: ANNOYED (h and z are failed/dead, others hum) */
+.neon-sign-group.state-annoyed .letter-h .neon-glow,
+.neon-sign-group.state-annoyed .letter-z .neon-glow {
+  opacity: 0.02;
+  filter: blur(0.5px);
+  animation: neon-broken-buzz 3s infinite;
+}
+.neon-sign-group.state-annoyed .letter-h .neon-core,
+.neon-sign-group.state-annoyed .letter-z .neon-core {
+  stroke: #252221;
+  opacity: 0.5;
+  animation: neon-broken-buzz-core 3s infinite;
+}
+
+@keyframes neon-broken-buzz {
+  0%, 100%, 12%, 24%, 60%, 70%, 80%, 90% { opacity: 0.02; filter: blur(0.5px); }
+  10%, 25%, 72%, 82% { opacity: 0.45; filter: blur(2px); stroke: var(--color-accent-gold); }
+}
+@keyframes neon-broken-buzz-core {
+  0%, 100%, 12%, 24%, 60%, 70%, 80%, 90% { stroke: #252221; opacity: 0.5; }
+  10%, 25%, 72%, 82% { stroke: #fff; opacity: 0.95; }
+}
+
+/* 4. STATE: CRYING (Complete blackout of the sign) */
+.neon-sign-group.state-crying .neon-glow,
+.neon-sign-group.state-pacing .neon-glow {
+  opacity: 0;
+}
+.neon-sign-group.state-crying .neon-core,
+.neon-sign-group.state-pacing .neon-core {
+  stroke: #1b1716;
+  opacity: 0.25;
+}
+
+/* 5. STATE: CHEERING (Wild intense flicker returning to full power) */
+.neon-sign-group.state-cheering .neon-glow {
+  animation: neon-restored-cheer 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes neon-restored-cheer {
+  0% { opacity: 0; filter: blur(0.5px); }
+  5%, 15%, 25% { opacity: 0.1; filter: blur(1px); }
+  10%, 20% { opacity: 0.8; filter: blur(3px); }
+  30% { opacity: 0.3; filter: blur(1.5px); }
+  45%, 100% { opacity: 1; filter: blur(3px); }
+}
+
+
+/* E. SCREEN GRAPHICS ANIMATIONS */
+
+/* Playhead moving timeline */
+.playhead-anim {
+  animation: timeline-play 4s infinite linear;
+}
+.timeline-screen-graphics.active-suspicious .playhead-anim,
+.timeline-screen-graphics.active-annoyed .playhead-anim,
+.timeline-screen-graphics.active-crying .playhead-anim {
+  animation-play-state: paused;
+}
+
+@keyframes timeline-play {
+  0% { transform: translateX(-40px); }
+  100% { transform: translateX(90px); }
+}
+
+/* Audio waveform bounce */
+.wave-bar-anim {
+  transform-origin: center bottom;
+  animation: waveform-bounce 1s infinite ease-in-out alternate;
+}
+.waveform-screen-graphics.active-suspicious .wave-bar-anim,
+.waveform-screen-graphics.active-annoyed .wave-bar-anim,
+.waveform-screen-graphics.active-crying .wave-bar-anim {
+  animation: none;
+  transform: scaleY(0.15); /* screens freeze on failure */
+  opacity: 0.4;
+}
+
+@keyframes waveform-bounce {
+  0% { transform: scaleY(0.7); }
+  100% { transform: scaleY(1.3); }
+}
+
+
+/* F. CHARACTER SITTING ARMS TIMING */
+
+/* Typing rapid arm movements */
+.sitting-arm-left-typing {
+  animation: typing-arm-left 0.18s infinite ease-in-out alternate;
+}
+.sitting-arm-right-typing {
+  animation: typing-arm-right 0.16s infinite ease-in-out alternate;
+}
+
+@keyframes typing-arm-left {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-3px, 4px); }
+}
+@keyframes typing-arm-right {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(2px, -4px); }
+}
+
+/* Crying waterfall tear lines */
+.tear-stream {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: waterfall-tears 0.6s infinite linear;
+}
+
+@keyframes waterfall-tears {
+  0% { stroke-dashoffset: 80; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Tear droplets splashing left and right */
+.tear-droplet-left { animation: tear-droplet-float-left 0.4s infinite ease-out; }
+.tear-droplet-left-2 { animation: tear-droplet-float-left-2 0.5s infinite ease-out; }
+.tear-droplet-right { animation: tear-droplet-float-right 0.4s infinite ease-out; }
+.tear-droplet-right-2 { animation: tear-droplet-float-right-2 0.5s infinite ease-out; }
+
+@keyframes tear-droplet-float-left {
+  0% { transform: translate(0,0) scale(1); opacity: 0.9; }
+  100% { transform: translate(-25px, 20px) scale(0.3); opacity: 0; }
+}
+@keyframes tear-droplet-float-left-2 {
+  0% { transform: translate(0,0) scale(1); opacity: 0.8; }
+  100% { transform: translate(-35px, 35px) scale(0.2); opacity: 0; }
+}
+@keyframes tear-droplet-float-right {
+  0% { transform: translate(0,0) scale(1); opacity: 0.9; }
+  100% { transform: translate(25px, 20px) scale(0.3); opacity: 0; }
+}
+@keyframes tear-droplet-float-right-2 {
+  0% { transform: translate(0,0) scale(1); opacity: 0.8; }
+  100% { transform: translate(35px, 35px) scale(0.2); opacity: 0; }
+}
+
+/* Sparkle cheering rotation */
+.sparkle-anim {
+  transform-origin: center;
+  animation: rotate-sparkles 1.5s infinite linear;
+}
+
+@keyframes rotate-sparkles {
+  0% { transform: rotate(0deg) scale(0.7); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(0.7); }
+}
+
+
+/* G. SITTING HEAD TILT TIMINGS */
+
+/* Looking up when suspicious */
+.char-head-group.state-suspicious {
+  animation: suspicious-head-tilt 0.6s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes suspicious-head-tilt {
+  100% { transform: translateY(-5px) rotate(-8deg); }
+}
+
+/* Shaking head in anger */
+.char-head-group.state-annoyed {
+  animation: annoyed-head-shake 0.4s infinite alternate ease-in-out;
+}
+@keyframes annoyed-head-shake {
+  0% { transform: translate(-1.5px, 1px) rotate(-2deg); }
+  100% { transform: translate(1.5px, -1px) rotate(2deg); }
+}
+
+/* Sobbing head */
+.char-head-group.state-crying {
+  animation: crying-head-sob 0.35s infinite alternate ease-in-out;
+}
+@keyframes crying-head-sob {
+  0% { transform: translateY(4px) rotate(0deg); }
+  100% { transform: translateY(8px) rotate(-1.5deg); }
+}
+
+/* Jumping head when cheering */
+.char-head-group.state-cheering {
+  animation: cheering-head-jump 0.5s infinite alternate ease-in-out;
+}
+@keyframes cheering-head-jump {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-7px) scale(1.05); }
+}
+
+
+/* H. PACING (WALKING) TIMINGS */
+
+.char-pacing-group {
+  transition: transform 1.8s cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+.leg-walking-1 {
+  transform-origin: center top;
+  animation: walk-leg-1 0.45s infinite alternate ease-in-out;
+}
+.leg-walking-2 {
+  transform-origin: center top;
+  animation: walk-leg-2 0.45s infinite alternate ease-in-out;
+}
+
+@keyframes walk-leg-1 {
+  0% { transform: rotate(-18deg); }
+  100% { transform: rotate(18deg); }
+}
+@keyframes walk-leg-2 {
+  0% { transform: rotate(18deg); }
+  100% { transform: rotate(-18deg); }
+}
+
+.arm-left-pacing {
+  transform-origin: center top;
+  animation: swing-arm-left 0.45s infinite alternate ease-in-out;
+}
+
+@keyframes swing-arm-left {
+  0% { transform: rotate(-8deg); }
+  100% { transform: rotate(8deg); }
+}
+
+
+/* I. DESK NEON LOGO */
+.desk-logo-core {
+  stroke: var(--color-accent-gold);
+  stroke-width: 1.5px;
+  animation: desk-logo-core-pulse 2s infinite ease-in-out;
+}
+.desk-logo-glow {
+  stroke: var(--color-accent-gold);
+  stroke-width: 5px;
+  opacity: 0.65;
+  filter: blur(1.5px);
+  animation: desk-logo-glow-pulse 2s infinite ease-in-out;
+}
+
+@keyframes desk-logo-core-pulse {
+  0%, 100% { stroke: var(--color-accent-gold); opacity: 1; }
+  50% { stroke: #fff; opacity: 0.9; }
+}
+@keyframes desk-logo-glow-pulse {
+  0%, 100% { opacity: 0.65; filter: blur(1.5px); }
+  50% { opacity: 0.95; filter: blur(2.5px); }
+}
+
+
+/* 3. Holographic Timeline Controls */
+.cartoon-timeline-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.controls-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.control-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.95rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.control-btn.play-pause-btn.playing {
+  border-color: rgba(230, 173, 69, 0.3);
+  background: rgba(230, 173, 69, 0.05);
+  color: var(--color-accent-gold);
+}
+
+.control-btn.play-pause-btn.playing:hover {
+  border-color: rgba(230, 173, 69, 0.5);
+  background: rgba(230, 173, 69, 0.1);
+  color: #fff;
+}
+
+.control-btn.play-pause-btn.paused {
+  border-color: rgba(0, 242, 254, 0.3);
+  background: rgba(0, 242, 254, 0.05);
+  color: var(--color-accent-cyan);
+}
+
+.control-btn.play-pause-btn.paused:hover {
+  border-color: rgba(0, 242, 254, 0.5);
+  background: rgba(0, 242, 254, 0.1);
+  color: #fff;
+}
+
+.controls-right-states-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.state-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.7rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  color: var(--color-text-dimmed);
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.state-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text-muted);
+}
+
+.state-tab-btn.active {
+  background: rgba(230, 173, 69, 0.08);
+  border-color: rgba(230, 173, 69, 0.45);
+  color: var(--color-accent-gold);
+}
+
+.state-tab-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.state-tab-btn.active .state-tab-dot {
+  background: var(--color-accent-gold);
+  box-shadow: 0 0 8px var(--color-accent-gold);
+}
+
+
+/* RESPONSIVE LAYOUTS */
+
+@media (max-width: 680px) {
+  .cartoon-timeline-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .controls-left {
+    justify-content: space-between;
+  }
+  
+  .controls-right-states-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .cartoon-interactive-badge {
+    display: none; /* Hide on small mobiles to avoid overlay clutter */
+  }
+}
