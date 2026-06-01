@@ -8,6 +8,8 @@ import EquipeModal from './components/EquipeModal/EquipeModal';
 import SobreModal from './components/SobreModal/SobreModal';
 import PortfolioCategoryPage from './components/PortfolioCategoryPage/PortfolioCategoryPage';
 import AdminPanel from './components/AdminPanel/AdminPanel';
+import ReelsFeatured from './components/ReelsFeatured/ReelsFeatured';
+import Vitrine from './components/Vitrine/Vitrine';
 
 function App() {
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
@@ -94,6 +96,8 @@ function App() {
       
       <main>
         <Hero />
+        <ReelsFeatured dataUpdateTrigger={dataUpdateTrigger} />
+        <Vitrine dataUpdateTrigger={dataUpdateTrigger} />
         <Sobre onOpenManifesto={() => setIsSobreModalOpen(true)} />
       </main>
 
