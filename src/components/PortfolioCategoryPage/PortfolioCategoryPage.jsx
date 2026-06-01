@@ -1899,6 +1899,47 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         {lightboxMedia.description}
                       </p>
 
+                      {/* Contextual WhatsApp Conversion Button */}
+                      <div style={{ marginTop: '0.8rem', marginBottom: '0.5rem', width: '100%' }}>
+                        <a 
+                          href={`https://wa.me/5554991109159?text=${encodeURIComponent(`Olá Felipe! Gostei muito do projeto "${lightboxMedia.title}" no portfólio da Haja Luz Studio e gostaria de solicitar um orçamento para um projeto similar nesse estilo.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.6rem',
+                            background: 'linear-gradient(135deg, #e6ad45 0%, #b8862b 100%)',
+                            border: 'none',
+                            color: '#000',
+                            padding: '0.75rem 1.2rem',
+                            borderRadius: '8px',
+                            fontSize: '0.8rem',
+                            fontWeight: '700',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            width: '100%',
+                            textAlign: 'center',
+                            boxShadow: '0 4px 20px rgba(230, 173, 69, 0.3)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 6px 24px rgba(230, 173, 69, 0.5)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 20px rgba(230, 173, 69, 0.3)';
+                          }}
+                        >
+                          <MessageSquare size={14} style={{ fill: 'currentColor' }} />
+                          <span>Solicitar Projeto Similar</span>
+                        </a>
+                      </div>
+
                       {/* Comments section */}
                       <div className="event-comments-section" style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
                         <span style={{ fontSize: '0.7rem', color: 'var(--color-accent-gold)', fontWeight: 'bold', fontFamily: 'Space Grotesk, monospace', display: 'block', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -2160,6 +2201,47 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                     <p className="event-lightbox-desc" style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--color-text-muted)', lineHeight: '1.5', fontWeight: 300, margin: 0 }}>
                       {realProjects.find(p => p.title === lightboxMedia.title)?.description || 'Sinopse exclusiva em andamento pela Haja Luz Studio.'}
                     </p>
+
+                    {/* Contextual WhatsApp Conversion Button */}
+                    <div style={{ marginTop: '0.8rem', marginBottom: '0.5rem', width: '100%' }}>
+                      <a 
+                        href={`https://wa.me/5554991109159?text=${encodeURIComponent(`Olá Felipe! Gostei muito do projeto "${lightboxMedia.title}" no portfólio da Haja Luz Studio e gostaria de solicitar um orçamento para um projeto similar nesse estilo.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.6rem',
+                          background: 'linear-gradient(135deg, #e6ad45 0%, #b8862b 100%)',
+                          border: 'none',
+                          color: '#000',
+                          padding: '0.75rem 1.2rem',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          fontWeight: '700',
+                          textDecoration: 'none',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          width: '100%',
+                          textAlign: 'center',
+                          boxShadow: '0 4px 20px rgba(230, 173, 69, 0.3)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 6px 24px rgba(230, 173, 69, 0.5)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 4px 20px rgba(230, 173, 69, 0.3)';
+                        }}
+                      >
+                        <MessageSquare size={14} style={{ fill: 'currentColor' }} />
+                        <span>Solicitar Projeto Similar</span>
+                      </a>
+                    </div>
 
                     {/* Comments section */}
                     <div className="event-comments-section" style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>

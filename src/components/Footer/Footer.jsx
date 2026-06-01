@@ -10,6 +10,8 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
     email: '',
     mensagem: ''
   });
+  const [selectedServico, setSelectedServico] = useState('');
+  const [selectedObjetivo, setSelectedObjetivo] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -19,7 +21,12 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
   const handleWhatsAppSubmit = (e) => {
     e.preventDefault();
     const phone = "5554991109159";
-    const baseText = `Olá! Meu nome é ${formData.nome || 'visitante'}.\nE-mail de contato: ${formData.email || 'Não informado'}.\n\nDetalhes do meu projeto:\n${formData.mensagem || 'Gostaria de solicitar um posicionamento estratégico e conhecer o Método da Haja Luz Studio.'}`;
+    
+    // Build premium structured briefing message
+    const servicoText = selectedServico ? `\n- *Serviço Escolhido:* ${selectedServico}` : '';
+    const objetivoText = selectedObjetivo ? `\n- *Objetivo Foco:* ${selectedObjetivo}` : '';
+    
+    const baseText = `Olá Felipe! Montei meu briefing inicial no site da Haja Luz Studio:${servicoText}${objetivoText}\n\n- *Nome / Marca:* ${formData.nome || 'Visitante'}\n- *E-mail de Contato:* ${formData.email || 'Não informado'}\n\n*Mensagem / Briefing do Projeto:*\n${formData.mensagem || 'Gostaria de solicitar um posicionamento estratégico e conhecer o Método da Haja Luz Studio.'}`;
     const textEncoded = encodeURIComponent(baseText);
     window.open(`https://wa.me/${phone}?text=${textEncoded}`, '_blank');
   };
@@ -46,52 +53,153 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
           <div className="footer-form-col">
             <span className="footer-form-tag">Fazer a Luz Brilhar</span>
             <h2 className="footer-form-title">Inicie o seu Posicionamento</h2>
-            <p className="footer-form-desc">
-              Preencha os dados e clique no botão magnético para enviar o seu briefing diretamente para o nosso canal de atendimento exclusivo.
+            <p className="footer-form-desc" style={{ marginBottom: '1.5rem' }}>
+              Utilize o nosso **Briefing Inteligente** abaixo selecionando o serviço e foco principal antes de preencher seus dados.
             </p>
  
-            <form onSubmit={handleWhatsAppSubmit} className="footer-contact-form">
-              <div className="form-input-group">
-                <input 
-                  type="text" 
-                  name="nome"
-                  required
-                  placeholder="Seu Nome / Marca"
-                  value={formData.nome}
-                  onChange={handleInputChange}
-                  className="form-input-field"
-                />
+            <form onSubmit={handleWhatsAppSubmit} className="footer-contact-form" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              
+              {/* Passo 1: O que você precisa? */}
+              <div className="briefing-step-container">
+                <span className="briefing-step-label" style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.6rem' }}>
+                  // Passo 1: O que você precisa?
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
+                  {[
+                    { id: 'audiovisual', label: '🎬 Audiovisual Premium' },
+                    { id: 'reels', label: '📱 Reels Cinematográfico' },
+                    { id: 'design', label: '🎨 Design Estratégico' },
+                    { id: 'motion', label: '🌀 Motion Design' }
+                  ].map((item) => {
+                    const active = selectedServico === item.label;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setSelectedServico(active ? '' : item.label)}
+                        style={{
+                          background: active ? 'rgba(230, 173, 69, 0.12)' : 'rgba(255, 255, 255, 0.01)',
+                          border: active ? '1px solid var(--color-accent-gold)' : '1px solid rgba(255, 255, 255, 0.06)',
+                          color: active ? '#fff' : 'rgba(247, 244, 235, 0.7)',
+                          padding: '0.55rem 0.6rem',
+                          borderRadius: '6px',
+                          fontSize: '0.72rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          textAlign: 'left',
+                          fontWeight: active ? '600' : '400',
+                          fontFamily: 'var(--font-sans)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!active) e.currentTarget.style.border = '1px solid rgba(230, 173, 69, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!active) e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.06)';
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="form-input-group">
-                <input 
-                  type="email" 
-                  name="email"
-                  required
-                  placeholder="Seu Melhor E-mail"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="form-input-field"
-                />
+              {/* Passo 2: Qual o foco? */}
+              <div className="briefing-step-container">
+                <span className="briefing-step-label" style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.6rem' }}>
+                  // Passo 2: Qual o foco principal?
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                  {[
+                    { id: 'vendas', label: '📈 Vender Mais' },
+                    { id: 'autoridade', label: '🏆 Autoridade' },
+                    { id: 'exclusivo', label: '💎 Exclusividade' }
+                  ].map((item) => {
+                    const active = selectedObjetivo === item.label;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setSelectedObjetivo(active ? '' : item.label)}
+                        style={{
+                          background: active ? 'rgba(230, 173, 69, 0.12)' : 'rgba(255, 255, 255, 0.01)',
+                          border: active ? '1px solid var(--color-accent-gold)' : '1px solid rgba(255, 255, 255, 0.06)',
+                          color: active ? '#fff' : 'rgba(247, 244, 235, 0.7)',
+                          padding: '0.55rem 0.3rem',
+                          borderRadius: '6px',
+                          fontSize: '0.68rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          textAlign: 'center',
+                          fontWeight: active ? '600' : '400',
+                          fontFamily: 'var(--font-sans)',
+                          whiteSpace: 'nowrap'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!active) e.currentTarget.style.border = '1px solid rgba(230, 173, 69, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!active) e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.06)';
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="form-input-group">
-                <textarea 
-                  name="mensagem"
-                  rows="4"
-                  required
-                  placeholder="Descreva o seu projeto (audiovisual, reels, website, design)..."
-                  value={formData.mensagem}
-                  onChange={handleInputChange}
-                  className="form-input-field textarea-field"
-                ></textarea>
+              {/* Passo 3: Dados de Identificação */}
+              <div className="briefing-step-container" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <span className="briefing-step-label" style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>
+                  // Passo 3: Seus dados e Briefing
+                </span>
+                
+                <div className="form-input-group">
+                  <input 
+                    type="text" 
+                    name="nome"
+                    required
+                    placeholder="Seu Nome / Marca"
+                    value={formData.nome}
+                    onChange={handleInputChange}
+                    className="form-input-field"
+                  />
+                </div>
+
+                <div className="form-input-group">
+                  <input 
+                    type="email" 
+                    name="email"
+                    required
+                    placeholder="Seu Melhor E-mail"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="form-input-field"
+                  />
+                </div>
+
+                <div className="form-input-group">
+                  <textarea 
+                    name="mensagem"
+                    rows="4"
+                    required
+                    placeholder="Descreva o seu projeto (detalhes, ideias, referências)..."
+                    value={formData.mensagem}
+                    onChange={handleInputChange}
+                    className="form-input-field textarea-field"
+                  ></textarea>
+                </div>
               </div>
 
               <div className="form-submit-wrapper">
                 <MagneticButton onClick={handleWhatsAppSubmit} className="footer-cta-submit">
                   <span className="footer-cta-btn-content" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <MessageSquare size={16} />
-                    <span>Iniciar no WhatsApp</span>
+                    <span>Enviar Briefing no WhatsApp</span>
                   </span>
                 </MagneticButton>
               </div>
