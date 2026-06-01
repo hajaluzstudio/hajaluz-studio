@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, Film, Target, Compass, Sparkles, Video, Mic, M
 import { dataService } from '../../services/dataService';
 import { getYouTubeId, getYouTubeThumbnail, isGoogleDriveUrl, getGoogleDriveDirectLink, getGoogleDriveId, isInstagramUrl, getInstagramId } from '../../services/youtubeHelper';
 import { brandConfig } from '../../brandConfig';
+import { trackPixelEvent } from '../../services/pixelService';
 import './PortfolioCategoryPage.css';
 
 const formatViews = (views) => {
@@ -1905,6 +1906,15 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                           href={`https://wa.me/5554991109159?text=${encodeURIComponent(`Olá Felipe! Gostei muito do projeto "${lightboxMedia.title}" no portfólio da Haja Luz Studio e gostaria de solicitar um orçamento para um projeto similar nesse estilo.`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => {
+                            trackPixelEvent('Contact', {
+                              content_name: 'Solicitar Projeto Similar',
+                              content_category: 'Lightbox Event Layout',
+                              value: 0.00,
+                              currency: 'BRL',
+                              project_title: lightboxMedia.title
+                            });
+                          }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -2208,6 +2218,15 @@ const PortfolioCategoryPage = ({ category, onBackHome, onCategoryChange, dataUpd
                         href={`https://wa.me/5554991109159?text=${encodeURIComponent(`Olá Felipe! Gostei muito do projeto "${lightboxMedia.title}" no portfólio da Haja Luz Studio e gostaria de solicitar um orçamento para um projeto similar nesse estilo.`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => {
+                          trackPixelEvent('Contact', {
+                            content_name: 'Solicitar Projeto Similar',
+                            content_category: 'Lightbox Video Layout',
+                            value: 0.00,
+                            currency: 'BRL',
+                            project_title: lightboxMedia.title
+                          });
+                        }}
                         style={{
                           display: 'flex',
                           alignItems: 'center',

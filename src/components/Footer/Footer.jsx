@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { brandConfig } from '../../brandConfig';
 import { Phone, Mail, MapPin, ArrowUp, MessageSquare } from 'lucide-react';
 import MagneticButton from '../MagneticButton/MagneticButton';
+import { trackPixelEvent } from '../../services/pixelService';
 import './Footer.css';
 
 const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) => {
@@ -28,6 +29,17 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
     
     const baseText = `Olá Felipe! Montei meu briefing inicial no site da Haja Luz Studio:${servicoText}${objetivoText}\n\n- *Nome / Marca:* ${formData.nome || 'Visitante'}\n- *E-mail de Contato:* ${formData.email || 'Não informado'}\n\n*Mensagem / Briefing do Projeto:*\n${formData.mensagem || 'Gostaria de solicitar um posicionamento estratégico e conhecer o Método da Haja Luz Studio.'}`;
     const textEncoded = encodeURIComponent(baseText);
+    
+    // Disparar evento de conversão do Meta Pixel (Lead)
+    trackPixelEvent('Lead', {
+      content_name: 'Envio de Briefing Inteligente',
+      content_category: 'Contato Footer',
+      value: 0.00,
+      currency: 'BRL',
+      predicted_service: selectedServico,
+      predicted_goal: selectedObjetivo
+    });
+
     window.open(`https://wa.me/${phone}?text=${textEncoded}`, '_blank');
   };
 
