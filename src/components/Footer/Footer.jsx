@@ -221,6 +221,21 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
           {/* Right Side: Quick contacts and Navigation links */}
           <div className="footer-info-col">
             
+            {/* Nav links */}
+            <div className="footer-info-block">
+              <h4 className="footer-block-heading">Navegação</h4>
+              <ul className="footer-links-list">
+                <li><a href="#home" onClick={(e) => { e.preventDefault(); handleScroll('home'); }}>Início</a></li>
+                <li><a href="#sobre" onClick={(e) => { e.preventDefault(); onSobreClick && onSobreClick(); }}>Sobre</a></li>
+                <li><a href="#portfolio" onClick={(e) => { 
+                  e.preventDefault(); 
+                  window.history.pushState({ path: '/todos' }, '', '/todos');
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}>Portfólio</a></li>
+              </ul>
+            </div>
+
             {/* Quick Specs / Contacts */}
             <div className="footer-info-block">
               <h4 className="footer-block-heading">O Templo</h4>
@@ -238,21 +253,6 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
                   <span>Passo Fundo - RS</span>
                 </div>
               </div>
-            </div>
-
-            {/* Nav links */}
-            <div className="footer-info-block">
-              <h4 className="footer-block-heading">Navegação</h4>
-              <ul className="footer-links-list">
-                <li><a href="#home" onClick={(e) => { e.preventDefault(); handleScroll('home'); }}>Início</a></li>
-                <li><a href="#sobre" onClick={(e) => { e.preventDefault(); onSobreClick && onSobreClick(); }}>Sobre</a></li>
-                <li><a href="#portfolio" onClick={(e) => { 
-                  e.preventDefault(); 
-                  window.history.pushState({ path: '/todos' }, '', '/todos');
-                  window.dispatchEvent(new PopStateEvent('popstate'));
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}>Portfólio</a></li>
-              </ul>
             </div>
 
             {/* Social icons */}
