@@ -826,7 +826,16 @@
   }
   
   .sobre-modal-grid {
+    grid-template-columns: 1fr !important;
     gap: 3rem;
+  }
+
+  .sobre-modal-grid.reversed > :first-child {
+    order: 1 !important;
+  }
+
+  .sobre-modal-grid.reversed > :last-child {
+    order: 2 !important;
   }
 
   .proposito-pillars-grid {
@@ -925,13 +934,14 @@
 
 /* Page 1 Cover - Imposing full viewport height for CEO Felipe Costa profile */
 .book-page-first {
-  min-height: 74vh;
+  min-height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
   position: relative;
+  padding-top: 2.5rem;
   padding-bottom: 5rem;
   border-bottom: 1px dashed rgba(230, 173, 69, 0.12);
   z-index: 2;
