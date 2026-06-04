@@ -103,11 +103,7 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
             className={`nav-portfolio-trigger ${isMegaMenuOpen ? 'active' : ''}`}
             onClick={(e) => { 
               e.preventDefault(); 
-              if (onCategoryClick) {
-                onCategoryClick('todos');
-              } else {
-                window.location.search = '?category=todos';
-              }
+              window.open('/todos', '_blank');
             }}
           >
             Portfólio <ChevronDown size={14} className="chevron-icon" />
@@ -133,12 +129,24 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
                         variants={itemVariants}
                         whileHover={{ x: 6, transition: { duration: 0.2 } }}
                         onClick={() => {
-                          const slug = cat.name.toLowerCase().replace("'", "");
-                          if (onCategoryClick) {
-                            onCategoryClick(slug);
-                          } else {
-                            window.location.search = '?category=' + encodeURIComponent(slug);
-                          }
+                          const categoryKeyToSlug = {
+                            'reels': 'reels',
+                            'entrevistas': 'entrevistas',
+                            "podcast's": 'podcasts',
+                            'clipes': 'clipes',
+                            'aniversários': 'aniversarios',
+                            'sites': 'sites',
+                            'design gráfico': 'design-grafico',
+                            'motion design': 'motion-design',
+                            'logotipo': 'logotipo',
+                            'fotografia': 'fotografia',
+                            'documentário': 'documentario',
+                            'produção de show': 'producao-de-show',
+                            'todos': 'todos'
+                          };
+                          const key = cat.name.toLowerCase();
+                          const slug = categoryKeyToSlug[key] || key.replace("'", "").replace(/\s+/g, "-");
+                          window.open('/' + slug, '_blank');
                           setIsMegaMenuOpen(false);
                         }}
                       >
@@ -210,13 +218,13 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
                 <div className="mobile-portfolio-container">
                   <span className="mobile-nav-section-title">Portfólio</span>
                   <div className="mobile-portfolio-grid">
-                    <a 
+                     <a 
                       href="#portfolio" 
                       onClick={(e) => {
                         e.preventDefault();
                         setIsMobileMenuOpen(false);
                         if (onCategoryClick) onCategoryClick('todos');
-                        else window.location.search = '?category=todos';
+                        else window.open('/todos', '_blank');
                       }}
                       className="mobile-portfolio-all-link"
                     >
@@ -231,10 +239,26 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
                             key={cat.name}
                             className="mobile-category-tab"
                             onClick={() => {
-                              const slug = cat.name.toLowerCase().replace("'", "");
+                              const categoryKeyToSlug = {
+                                'reels': 'reels',
+                                'entrevistas': 'entrevistas',
+                                "podcast's": 'podcasts',
+                                'clipes': 'clipes',
+                                'aniversários': 'aniversarios',
+                                'sites': 'sites',
+                                'design gráfico': 'design-grafico',
+                                'motion design': 'motion-design',
+                                'logotipo': 'logotipo',
+                                'fotografia': 'fotografia',
+                                'documentário': 'documentario',
+                                'produção de show': 'producao-de-show',
+                                'todos': 'todos'
+                              };
+                              const key = cat.name.toLowerCase();
+                              const slug = categoryKeyToSlug[key] || key.replace("'", "").replace(/\s+/g, "-");
                               setIsMobileMenuOpen(false);
                               if (onCategoryClick) onCategoryClick(slug);
-                              else window.location.search = '?category=' + encodeURIComponent(slug);
+                              else window.open('/' + slug, '_blank');
                             }}
                           >
                             <Icon size={12} className="mobile-cat-tab-icon" />

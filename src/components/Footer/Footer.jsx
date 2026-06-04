@@ -248,11 +248,7 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
                 <li><a href="#sobre" onClick={(e) => { e.preventDefault(); onSobreClick && onSobreClick(); }}>Sobre</a></li>
                 <li><a href="#portfolio" onClick={(e) => { 
                   e.preventDefault(); 
-                  if (onCategoryClick) {
-                    onCategoryClick('todos');
-                  } else {
-                    window.location.search = '?category=todos';
-                  }
+                  window.open('/todos', '_blank');
                 }}>Portfólio</a></li>
               </ul>
             </div>

@@ -152,7 +152,26 @@ const Vitrine = ({ dataUpdateTrigger = 0 }) => {
   const repeatList = (arr) => [...arr, ...arr, ...arr, ...arr];
 
   const handleProductClick = (slug) => {
-    window.location.search = `?category=${encodeURIComponent(slug)}`;
+    const categoryKeyToSlug = {
+      'reels': 'reels',
+      'entrevistas': 'entrevistas',
+      "podcast's": 'podcasts',
+      'podcasts': 'podcasts',
+      'clipes': 'clipes',
+      'aniversários': 'aniversarios',
+      'sites': 'sites',
+      'design gráfico': 'design-grafico',
+      'motion design': 'motion-design',
+      'logotipo': 'logotipo',
+      'fotografia': 'fotografia',
+      'documentário': 'documentario',
+      'produção de show': 'producao-de-show',
+      'casamentos': 'casamentos',
+      'todos': 'todos'
+    };
+    const key = slug.toLowerCase();
+    const cleanSlug = categoryKeyToSlug[key] || key.replace(/\s+/g, "-");
+    window.open('/' + cleanSlug, '_blank');
   };
 
   const renderVitrineItem = (prod, idx, colId) => {

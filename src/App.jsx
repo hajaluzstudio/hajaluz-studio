@@ -18,13 +18,62 @@ function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [dataUpdateTrigger, setDataUpdateTrigger] = useState(0);
   
-  // Custom router based on URL query parameters
+  // Custom router based on clean URL pathnames
   const [currentCategory, setCurrentCategory] = useState(null);
+
+  // Helper to extract category from URL pathname
+  const getCategoryFromPath = () => {
+    const path = window.location.pathname.replace(/^\/+/, ''); // Remove leading slash
+    const decodedPath = decodeURIComponent(path).toLowerCase();
+    
+    // Check if it's homepage or empty
+    if (!decodedPath || decodedPath === 'inicio' || decodedPath === 'início') {
+      return null;
+    }
+    
+    // Map URL slug to internal category key
+    const slugToCategoryKey = {
+      'reels': 'reels',
+      'entrevistas': 'entrevistas',
+      'podcasts': "podcast's",
+      'clipes': 'clipes',
+      'aniversarios': 'aniversários',
+      'sites': 'sites',
+      'design-grafico': 'design gráfico',
+      'motion-design': 'motion design',
+      'logotipo': 'logotipo',
+      'fotografia': 'fotografia',
+      'documentario': 'documentário',
+      'producao-de-show': 'produção de show',
+      'todos': 'todos'
+    };
+
+    return slugToCategoryKey[decodedPath] || null;
+  };
+
+  // Helper to extract clean URL slug from internal category key
+  const getCategorySlug = (categoryKey) => {
+    const categoryKeyToSlug = {
+      'reels': 'reels',
+      'entrevistas': 'entrevistas',
+      "podcast's": 'podcasts',
+      'clipes': 'clipes',
+      'aniversários': 'aniversarios',
+      'sites': 'sites',
+      'design gráfico': 'design-grafico',
+      'motion design': 'motion-design',
+      'logotipo': 'logotipo',
+      'fotografia': 'fotografia',
+      'documentário': 'documentario',
+      'produção de show': 'producao-de-show',
+      'todos': 'todos'
+    };
+    return categoryKeyToSlug[categoryKey.toLowerCase()] || categoryKey.toLowerCase();
+  };
 
   useEffect(() => {
     const handleUrlChange = () => {
-      const params = new URLSearchParams(window.location.search);
-      const cat = params.get('category');
+      const cat = getCategoryFromPath();
       setCurrentCategory(cat);
     };
 
@@ -62,12 +111,15 @@ function App() {
           category={currentCategory} 
           dataUpdateTrigger={dataUpdateTrigger}
           onBackHome={() => {
-            // Strip params to return to homepage on the same window
-            window.location.search = '';
+            setCurrentCategory(null);
+            const newUrl = window.location.protocol + "//" + window.location.host + '/';
+            window.history.pushState({ path: newUrl }, '', newUrl);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          onCategoryChange={(newCategory) => {
-            setCurrentCategory(newCategory);
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?category=${newCategory}`;
+          onCategoryChange={(newCategoryKey) => {
+            const slug = getCategorySlug(newCategoryKey);
+            setCurrentCategory(newCategoryKey);
+            const newUrl = window.location.protocol + "//" + window.location.host + `/${slug}`;
             window.history.pushState({ path: newUrl }, '', newUrl);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}

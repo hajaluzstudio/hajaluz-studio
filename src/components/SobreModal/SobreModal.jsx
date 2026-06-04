@@ -207,7 +207,7 @@ const SobreModal = ({ isOpen, onClose }) => {
                   </p>
                   <button 
                     onClick={() => {
-                      window.location.search = '?category=todos';
+                      window.open('/todos', '_blank');
                     }} 
                     className="museum-portfolio-access-btn"
                   >
