@@ -58,24 +58,20 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
     <footer className="footer-section" id="contato">
       <div className="footer-container">
         
-        {/* Core Contact & Form Grid */}
-        <div className="footer-main-grid">
+        {/* Core Contact & Form Grid wrapped in form */}
+        <form onSubmit={handleWhatsAppSubmit} className="footer-main-grid">
           
-          {/* Left Side: Copy and Form */}
-          <div className="footer-form-col">
-            <span className="footer-form-tag">Fazer a Luz Brilhar</span>
-            <h2 className="footer-form-title">Inicie o seu Posicionamento</h2>
-            <p className="footer-form-desc" style={{ marginBottom: '1.5rem' }}>
-              Utilize o nosso **Briefing Inteligente** abaixo selecionando o serviço e foco principal antes de preencher seus dados.
-            </p>
- 
-            <form onSubmit={handleWhatsAppSubmit} className="footer-contact-form" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-              
-              {/* Passo 1: O que você precisa? */}
-              <div className="briefing-step-container">
-                <span className="briefing-step-label" style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.6rem' }}>
-                  // Passo 1: O que você precisa?
-                </span>
+          {/* Left Column: Title, Category buttons, Focus buttons, and bottom Contatos + Navegação */}
+          <div className="footer-form-col" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <span className="footer-form-tag">Fazer a Luz Brilhar</span>
+              <h2 className="footer-form-title" style={{ marginBottom: '1.2rem' }}>Inicie o seu Posicionamento</h2>
+              <p className="footer-form-desc" style={{ marginBottom: '2.5rem' }}>
+                Utilize o nosso <strong>Briefing Inteligente</strong> abaixo selecionando o serviço e foco principal antes de preencher seus dados.
+              </p>
+   
+              <div className="footer-contact-form" style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
+                {/* Step 1: Category buttons (Without label) */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
                   {[
                     { id: 'audiovisual', label: '🎬 Audiovisual Premium' },
@@ -117,13 +113,8 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
                     );
                   })}
                 </div>
-              </div>
 
-              {/* Passo 2: Qual o foco? */}
-              <div className="briefing-step-container">
-                <span className="briefing-step-label" style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.6rem' }}>
-                  // Passo 2: Qual o foco principal?
-                </span>
+                {/* Step 2: Focus buttons (Without label) */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
                   {[
                     { id: 'vendas', label: '📈 Vender Mais' },
@@ -163,48 +154,87 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
                   })}
                 </div>
               </div>
+            </div>
 
-              {/* Passo 3: Dados de Identificação */}
-              <div className="briefing-step-container" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                <span className="briefing-step-label" style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-accent-gold)', fontFamily: 'Space Grotesk, monospace', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>
-                  // Passo 3: Seus dados e Briefing
-                </span>
-                
-                <div className="form-input-group">
-                  <input 
-                    type="text" 
-                    name="nome"
-                    required
-                    placeholder="Seu Nome / Marca"
-                    value={formData.nome}
-                    onChange={handleInputChange}
-                    className="form-input-field"
-                  />
+            {/* Bottom-left: Contatos and Navegação side-by-side */}
+            <div className="footer-bottom-columns">
+              
+              {/* Quick Specs / Contacts */}
+              <div className="footer-info-block">
+                <h4 className="footer-block-heading">Contatos</h4>
+                <div className="footer-contact-items">
+                  <a href="tel:+5554991109159" className="footer-contact-item">
+                    <Phone size={16} className="footer-contact-icon" />
+                    <span>(54) 99110-9159</span>
+                  </a>
+                  <a href="mailto:contato@hajaluz.studio" className="footer-contact-item">
+                    <Mail size={16} className="footer-contact-icon" />
+                    <span>contato@hajaluz.studio</span>
+                  </a>
+                  <div className="footer-contact-item static">
+                    <MapPin size={16} className="footer-contact-icon" />
+                    <span>Passo Fundo - RS</span>
+                  </div>
                 </div>
+              </div>
 
-                <div className="form-input-group">
-                  <input 
-                    type="email" 
-                    name="email"
-                    required
-                    placeholder="Seu Melhor E-mail"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="form-input-field"
-                  />
-                </div>
+              {/* Nav links */}
+              <div className="footer-info-block">
+                <h4 className="footer-block-heading">Navegação</h4>
+                <ul className="footer-links-list">
+                  <li><a href="#home" onClick={(e) => { e.preventDefault(); handleScroll('home'); }}>Início</a></li>
+                  <li><a href="#sobre" onClick={(e) => { e.preventDefault(); onSobreClick && onSobreClick(); }}>Sobre</a></li>
+                  <li><a href="#portfolio" onClick={(e) => { 
+                    e.preventDefault(); 
+                    window.history.pushState({ path: '/todos' }, '', '/todos');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}>Portfólio</a></li>
+                </ul>
+              </div>
 
-                <div className="form-input-group">
-                  <textarea 
-                    name="mensagem"
-                    rows="4"
-                    required
-                    placeholder="Descreva o seu projeto (detalhes, ideias, referências)..."
-                    value={formData.mensagem}
-                    onChange={handleInputChange}
-                    className="form-input-field textarea-field"
-                  ></textarea>
-                </div>
+            </div>
+
+          </div>
+
+          {/* Right Column: Inputs, Submit, and Conectar (Socials) */}
+          <div className="footer-form-right-col">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%' }}>
+              
+              <div className="form-input-group">
+                <input 
+                  type="text" 
+                  name="nome"
+                  required
+                  placeholder="Seu Nome / Marca"
+                  value={formData.nome}
+                  onChange={handleInputChange}
+                  className="form-input-field"
+                />
+              </div>
+
+              <div className="form-input-group">
+                <input 
+                  type="email" 
+                  name="email"
+                  required
+                  placeholder="Seu Melhor E-mail"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="form-input-field"
+                />
+              </div>
+
+              <div className="form-input-group">
+                <textarea 
+                  name="mensagem"
+                  rows="4"
+                  required
+                  placeholder="Descreva o seu projeto (detalhes, ideias, referências)..."
+                  value={formData.mensagem}
+                  onChange={handleInputChange}
+                  className="form-input-field textarea-field"
+                ></textarea>
               </div>
 
               <div className="form-submit-wrapper">
@@ -215,48 +245,11 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
                   </span>
                 </MagneticButton>
               </div>
-            </form>
-          </div>
 
-          {/* Right Side: Quick contacts and Navigation links */}
-          <div className="footer-info-col">
-            
-            {/* Nav links */}
-            <div className="footer-info-block">
-              <h4 className="footer-block-heading">Navegação</h4>
-              <ul className="footer-links-list">
-                <li><a href="#home" onClick={(e) => { e.preventDefault(); handleScroll('home'); }}>Início</a></li>
-                <li><a href="#sobre" onClick={(e) => { e.preventDefault(); onSobreClick && onSobreClick(); }}>Sobre</a></li>
-                <li><a href="#portfolio" onClick={(e) => { 
-                  e.preventDefault(); 
-                  window.history.pushState({ path: '/todos' }, '', '/todos');
-                  window.dispatchEvent(new PopStateEvent('popstate'));
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}>Portfólio</a></li>
-              </ul>
             </div>
 
-            {/* Quick Specs / Contacts */}
-            <div className="footer-info-block">
-              <h4 className="footer-block-heading">O Templo</h4>
-              <div className="footer-contact-items">
-                <a href="tel:+5554991109159" className="footer-contact-item">
-                  <Phone size={16} className="footer-contact-icon" />
-                  <span>(54) 99110-9159</span>
-                </a>
-                <a href="mailto:contato@hajaluz.studio" className="footer-contact-item">
-                  <Mail size={16} className="footer-contact-icon" />
-                  <span>contato@hajaluz.studio</span>
-                </a>
-                <div className="footer-contact-item static">
-                  <MapPin size={16} className="footer-contact-icon" />
-                  <span>Passo Fundo - RS</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Social icons */}
-            <div className="footer-info-block">
+            {/* Social icons (Conectar) */}
+            <div className="footer-info-block" style={{ marginTop: 'auto' }}>
               <h4 className="footer-block-heading">Conectar</h4>
               <div className="footer-social-icons">
                 <a href="https://www.instagram.com/hajaluz.studio/" target="_blank" rel="noopener noreferrer" className="social-icon-wrapper" aria-label="Instagram">
@@ -276,7 +269,7 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
 
           </div>
 
-        </div>
+        </form>
 
         <hr className="footer-separator" />
 
