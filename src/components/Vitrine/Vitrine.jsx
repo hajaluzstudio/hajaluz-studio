@@ -171,7 +171,10 @@ const Vitrine = ({ dataUpdateTrigger = 0 }) => {
     };
     const key = slug.toLowerCase();
     const cleanSlug = categoryKeyToSlug[key] || key.replace(/\s+/g, "-");
-    window.open('/' + cleanSlug, '_blank');
+    const path = '/' + cleanSlug;
+    window.history.pushState({ path }, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const renderVitrineItem = (prod, idx, colId) => {

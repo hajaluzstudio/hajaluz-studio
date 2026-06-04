@@ -248,7 +248,9 @@ const Footer = ({ onEquipeClick, onSobreClick, onCategoryClick, onAdminClick }) 
                 <li><a href="#sobre" onClick={(e) => { e.preventDefault(); onSobreClick && onSobreClick(); }}>Sobre</a></li>
                 <li><a href="#portfolio" onClick={(e) => { 
                   e.preventDefault(); 
-                  window.open('/todos', '_blank');
+                  window.history.pushState({ path: '/todos' }, '', '/todos');
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}>Portfólio</a></li>
               </ul>
             </div>

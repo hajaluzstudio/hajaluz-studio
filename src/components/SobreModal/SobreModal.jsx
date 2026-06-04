@@ -207,7 +207,10 @@ const SobreModal = ({ isOpen, onClose }) => {
                   </p>
                   <button 
                     onClick={() => {
-                      window.open('/todos', '_blank');
+                      window.history.pushState({ path: '/todos' }, '', '/todos');
+                      window.dispatchEvent(new PopStateEvent('popstate'));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      onClose && onClose();
                     }} 
                     className="museum-portfolio-access-btn"
                   >

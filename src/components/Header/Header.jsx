@@ -103,7 +103,9 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
             className={`nav-portfolio-trigger ${isMegaMenuOpen ? 'active' : ''}`}
             onClick={(e) => { 
               e.preventDefault(); 
-              window.open('/todos', '_blank');
+              window.history.pushState({ path: '/todos' }, '', '/todos');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >
             Portfólio <ChevronDown size={14} className="chevron-icon" />
@@ -146,7 +148,10 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
                           };
                           const key = cat.name.toLowerCase();
                           const slug = categoryKeyToSlug[key] || key.replace("'", "").replace(/\s+/g, "-");
-                          window.open('/' + slug, '_blank');
+                          const path = '/' + slug;
+                          window.history.pushState({ path }, '', path);
+                          window.dispatchEvent(new PopStateEvent('popstate'));
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
                           setIsMegaMenuOpen(false);
                         }}
                       >
@@ -224,7 +229,11 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
                         e.preventDefault();
                         setIsMobileMenuOpen(false);
                         if (onCategoryClick) onCategoryClick('todos');
-                        else window.open('/todos', '_blank');
+                        else {
+                          window.history.pushState({ path: '/todos' }, '', '/todos');
+                          window.dispatchEvent(new PopStateEvent('popstate'));
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
                       }}
                       className="mobile-portfolio-all-link"
                     >
@@ -258,7 +267,12 @@ const Header = ({ onEquipeClick, onSobreClick, onCategoryClick }) => {
                               const slug = categoryKeyToSlug[key] || key.replace("'", "").replace(/\s+/g, "-");
                               setIsMobileMenuOpen(false);
                               if (onCategoryClick) onCategoryClick(slug);
-                              else window.open('/' + slug, '_blank');
+                              else {
+                                const path = '/' + slug;
+                                window.history.pushState({ path }, '', path);
+                                window.dispatchEvent(new PopStateEvent('popstate'));
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }
                             }}
                           >
                             <Icon size={12} className="mobile-cat-tab-icon" />
